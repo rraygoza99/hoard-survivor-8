@@ -1,0 +1,31 @@
+[gd_scene load_steps=7 format=3 uid="uid://d1k0xsj21ghfp"]
+
+[ext_resource type="Script" uid="uid://dt6y7aa3ouu2e" path="res://Scripts/CameraFollow.cs" id="1_1bvp3"]
+[ext_resource type="PackedScene" uid="uid://2s1ry0cd6jh0" path="res://player.tscn" id="1_ig7tw"]
+[ext_resource type="PackedScene" uid="uid://nrkusjqe8uyu" path="res://dummy_enemy.tscn" id="2_0xm2m"]
+[ext_resource type="PackedScene" uid="uid://3p7ywwnqo2av" path="res://magic_sphere.tscn" id="2_h2yge"]
+[ext_resource type="PackedScene" uid="uid://bltgmqf6ivcis" path="res://arcane_wave.tscn" id="4_lquwl"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_drvgu"]
+
+[node name="Node3D" type="Node3D"]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(41.145, 0, 0, 0, 0.2, 0, 0, 0, 28.01, 0, -0.123617, 0)
+mesh = SubResource("BoxMesh_drvgu")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.471705, 0.881757, 0, -0.881757, 0.471705, 0, 1.60195, 2.10283)
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.49555, 0.86858, 0, -0.86858, 0.49555, 0, 12.4766, 12.7395)
+script = ExtResource("1_1bvp3")
+TargetNodePath = NodePath("../player")
+
+[node name="player" parent="." instance=ExtResource("1_ig7tw")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4219, 0)
+_magicSphereScene = ExtResource("2_h2yge")
+_arcaneWaveScene = ExtResource("4_lquwl")
+
+[node name="DummyEnemy" parent="." instance=ExtResource("2_0xm2m")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.894646, -6.0409)

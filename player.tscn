@@ -1,0 +1,25 @@
+[gd_scene load_steps=4 format=3 uid="uid://2s1ry0cd6jh0"]
+
+[ext_resource type="Script" uid="uid://cbnrpoeub1s6x" path="res://Scripts/Player.cs" id="1_4flbx"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_sh265"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_4flbx"]
+
+[node name="player" type="CharacterBody3D"]
+script = ExtResource("1_4flbx")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("CapsuleShape3D_sh265")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("CapsuleMesh_4flbx")
+
+[node name="FireTimer" type="Timer" parent="."]
+autostart = true
+
+[node name="WaveTimer" type="Timer" parent="."]
+autostart = true
+
+[connection signal="timeout" from="FireTimer" to="." method="_on_fire_timer_timeout"]
+[connection signal="timeout" from="WaveTimer" to="." method="_on_wave_timer_timeout"]

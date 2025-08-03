@@ -1,0 +1,17 @@
+[gd_scene load_steps=4 format=3 uid="uid://nrkusjqe8uyu"]
+
+[ext_resource type="Script" uid="uid://celtt66i3b6dw" path="res://Scripts/DummyEnemy.cs" id="1_aho7k"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_cvh1w"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_aho7k"]
+
+[node name="DummyEnemy" type="StaticBody3D" groups=["enemies"]]
+script = ExtResource("1_aho7k")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1.15, 0, 0, 0, 1.15, 0, 0, 0, 1.15, 0, 0, 0)
+shape = SubResource("BoxShape3D_cvh1w")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("BoxMesh_aho7k")
