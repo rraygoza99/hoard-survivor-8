@@ -1,0 +1,33 @@
+[gd_scene load_steps=4 format=3 uid="uid://bbjgf2mgs0rc2"]
+
+[ext_resource type="Texture2D" uid="uid://cwy2duun031nh" path="res://Assets/button_round_depth_line.png" id="1_7vllg"]
+[ext_resource type="Texture2D" uid="uid://g63oqe0ghka5" path="res://Assets/button_round_depth_gradient.png" id="2_s2ko4"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ay1j7"]
+bg_color = Color(0.735275, 0.160431, 0.0120511, 1)
+
+[node name="PlayerUI" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HealthBar" type="ProgressBar" parent="."]
+layout_mode = 0
+offset_left = 14.0
+offset_top = 19.0
+offset_right = 172.0
+offset_bottom = 46.0
+theme_override_styles/fill = SubResource("StyleBoxFlat_ay1j7")
+
+[node name="XpCircle" type="TextureProgressBar" parent="."]
+layout_mode = 0
+offset_left = 18.0
+offset_top = 65.0
+offset_right = 81.0
+offset_bottom = 126.0
+fill_mode = 4
+texture_under = ExtResource("1_7vllg")
+texture_progress = ExtResource("2_s2ko4")

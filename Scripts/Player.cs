@@ -7,11 +7,11 @@ public partial class Player : CharacterBody3D
 	[ExportGroup("Player Stats")]
 	[Export] public int CurrentXp { get; private set; } = 0;
 	[Export] public int XpToNextLevel {get; private set;} =100;
+	[Export] public float MaxHealth { get; set; } = 100.0f;
+	public float CurrentHealth { get; private set; }
 	[Export] float MovementSpeed { get; set; } = 5.0f;
 	// XP Gain: A multiplier for experience points gained (e.g., 1.1 for +10%).
 	[Export] float XpGainMultiplier { get; set; } = 1.0f;
-	// Health: The player's maximum health points.
-	[Export] float MaxHealth { get; set; } = 100.0f;
 	// Health Regen: Health points regenerated per second.
 	[Export] float HealthRegen { get; set; } = 1.0f;
 	// Cooldown Reduction: A percentage to reduce ability cooldowns (e.g., 0.1 for 10%).
@@ -39,7 +39,8 @@ public partial class Player : CharacterBody3D
 	[Export] private float _mortarRange = 15.0f;
 	
 	[ExportGroup("UI")]
-	[Export] private Label _xpLabel;
+	[Export] private ProgressBar _healthBar;
+	[Export] private TextureProgressBar _xpCircle;
 	private Timer _fireTimer;
 	private Timer _waveTimer;
 	private Timer _mortarTimer;
@@ -59,7 +60,9 @@ public partial class Player : CharacterBody3D
 		
 		_animationTree = GetNode<AnimationTree>("AnimationTree");
 		_animationTree.Active = true;
-		UpdateXpLabel();
+		CurrentHealth = MaxHealth;
+		UpdateHealthBar();
+		UpdateXpCircle();
 	}
 	
 	private void UpdateFireCooldown(){
@@ -81,13 +84,20 @@ public partial class Player : CharacterBody3D
 			XpToNextLevel = (int)(XpToNextLevel * 1.5f);
 		}
 		
-		UpdateXpLabel();
+		UpdateXpCircle();
 	}
-	private void UpdateXpLabel()
+	private void UpdateHealthBar()
 	{
-		if (_xpLabel != null)
+		if (_healthBar != null)
 		{
-			_xpLabel.Text = $"XP: {CurrentXp} / {XpToNextLevel}";
+			_healthBar.Value = (CurrentHealth / MaxHealth) * 100;
+		}
+	}
+	private void UpdateXpCircle()
+	{
+		if (_xpCircle != null)
+		{
+			_xpCircle.Value = (float)CurrentXp / XpToNextLevel * 100;
 		}
 	}
 	private Node3D FindClosestEnemy(float range){
@@ -99,6 +109,18 @@ public partial class Player : CharacterBody3D
 			.OrderBy(e=> this.GlobalPosition.DistanceSquaredTo(e.GlobalPosition))
 			.FirstOrDefault();
 	}
+	public void TakeDamage(float damage)
+	{
+		CurrentHealth -= damage;
+		if (CurrentHealth < 0) CurrentHealth = 0;
+		UpdateHealthBar();
+
+		if (CurrentHealth <= 0)
+		{
+			GD.Print("Player has been defeated!");
+		}
+	}
+	
 	private Node3D FindRandomEnemyInRange()
 	{
 		// Get all enemies within the mortar's range.

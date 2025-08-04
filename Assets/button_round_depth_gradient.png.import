@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dyuwnjakxjc6x"
-path="res://.godot/imported/Preview.jpg-24a1d9a4f7c14ba6545471b786f18036.ctex"
+uid="uid://g63oqe0ghka5"
+path="res://.godot/imported/button_round_depth_gradient.png-59c2cda5f82d7071bcc373304b38233b.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/PlayerModel/Preview.jpg"
-dest_files=["res://.godot/imported/Preview.jpg-24a1d9a4f7c14ba6545471b786f18036.ctex"]
+source_file="res://Assets/button_round_depth_gradient.png"
+dest_files=["res://.godot/imported/button_round_depth_gradient.png-59c2cda5f82d7071bcc373304b38233b.ctex"]
 
 [params]
 
