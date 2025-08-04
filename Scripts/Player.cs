@@ -6,7 +6,7 @@ public partial class Player : CharacterBody3D
 {
 	[ExportGroup("Player Stats")]
 	[Export] public int CurrentXp { get; private set; } = 0;
-	[Export] public int XpToNextLevel {get; private set;} =100;
+	[Export] public int XpToNextLevel {get; private set;} =10;
 	[Export] public float MaxHealth { get; set; } = 100.0f;
 	public float CurrentHealth { get; private set; }
 	[Export] float MovementSpeed { get; set; } = 5.0f;
@@ -24,6 +24,7 @@ public partial class Player : CharacterBody3D
 	[Export] float Armor { get; set; } = 0.0f;
 	// Life Steal: The percentage of damage dealt that is returned as health (e.g., 0.05 for 5%).
 	[Export(PropertyHint.Range, "0,1")]	public float LifeSteal { get; set; } = 0.0f;
+	[Export] public float Lucky {get; set; } = 0.0f;
 	
 	[ExportGroup("Combat")]
 	[Export] PackedScene _magicSphereScene;
@@ -41,28 +42,31 @@ public partial class Player : CharacterBody3D
 	[ExportGroup("UI")]
 	[Export] private ProgressBar _healthBar;
 	[Export] private TextureProgressBar _xpCircle;
-	private Timer _fireTimer;
-	private Timer _waveTimer;
-	private Timer _mortarTimer;
-	private Marker3D _spellSpawnPoint;
+	[Export] private LevelUpScreen _levelUpScreen;
 	
+	private Timer _fireTimer, _waveTimer, _mortarTimer;
+	private Marker3D _spellSpawnPoint;
 	private AnimationTree _animationTree;
+	private UpgradeManager _upgradeManager;
 	
 	public override void _Ready(){
+		_upgradeManager = GetNode<UpgradeManager>("/root/Node3D/UpgradeManager");
+		_animationTree = GetNode<AnimationTree>("AnimationTree");
+		_spellSpawnPoint = GetNode<Marker3D>("SpellSpawnPoint");
 		_fireTimer = GetNode<Timer>("FireTimer");
 		_waveTimer = GetNode<Timer>("WaveTimer");
 		_mortarTimer = GetNode<Timer>("MortarTimer");
-		_spellSpawnPoint = GetNode<Marker3D>("SpellSpawnPoint");
 		
+		_levelUpScreen.UpgradeChosen += OnUpgradeChosen;
+		CurrentHealth = MaxHealth;
+		UpdateHealthBar();
+		UpdateXpCircle();
 		UpdateFireCooldown();
 		UpdateWaveCooldown();
 		UpdateMortarCooldown();
 		
-		_animationTree = GetNode<AnimationTree>("AnimationTree");
 		_animationTree.Active = true;
-		CurrentHealth = MaxHealth;
-		UpdateHealthBar();
-		UpdateXpCircle();
+		
 	}
 	
 	private void UpdateFireCooldown(){
@@ -80,8 +84,7 @@ public partial class Player : CharacterBody3D
 		CurrentXp += amount;
 		if(CurrentXp >= XpToNextLevel)
 		{
-			CurrentXp -= XpToNextLevel;
-			XpToNextLevel = (int)(XpToNextLevel * 1.5f);
+			LevelUp();
 		}
 		
 		UpdateXpCircle();
@@ -100,6 +103,16 @@ public partial class Player : CharacterBody3D
 			_xpCircle.Value = (float)CurrentXp / XpToNextLevel * 100;
 		}
 	}
+	
+	private void LevelUp(){
+		GD.Print("LevelUp function called!");
+		CurrentXp -= XpToNextLevel;
+		XpToNextLevel = (int)(XpToNextLevel *1.5f);
+		
+		var choices = _upgradeManager.GetUpgradeChoices(Lucky);
+		_levelUpScreen.DisplayUpgrades(choices);
+	}
+	
 	private Node3D FindClosestEnemy(float range){
 		var enemies = GetTree().GetNodesInGroup("enemies").Cast<Node3D>();
 		
@@ -169,12 +182,42 @@ public partial class Player : CharacterBody3D
 		wave.LookAt(target.GlobalPosition);
 	}
 	
+	private void OnUpgradeChosen(Upgrade chosenUpgrade)
+	{
+		ApplyUpgrade(chosenUpgrade);
+	}
+	
+	
 	private void _on_fire_timer_timeout(){
 		Node3D target = FindClosestEnemy(_sphereRange);
 		if(target!= null)
 			FireSpell(target);
 			
 		UpdateFireCooldown();
+	}
+	private void ApplyUpgrade(Upgrade upgrade)
+	{
+		switch (upgrade.StatToUpgrade)
+		{
+			case Stat.MaxHealth:
+				MaxHealth += upgrade.Value;
+				CurrentHealth += upgrade.Value; // Also heal the player
+				UpdateHealthBar();
+				break;
+			case Stat.MovementSpeed:
+				MovementSpeed += upgrade.Value;
+				break;
+			case Stat.XpGain:
+				XpGainMultiplier += upgrade.Value;
+				break;
+			case Stat.CooldownReduction:
+				CooldownReduction += upgrade.Value;
+				break;
+			case Stat.Lucky: // NEW
+				Lucky += upgrade.Value;
+				break;
+		}
+		GD.Print($"Applied upgrade: {upgrade.Name}");
 	}
 
 	private void _on_wave_timer_timeout()

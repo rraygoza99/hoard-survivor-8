@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://d1k0xsj21ghfp"]
+[gd_scene load_steps=18 format=3 uid="uid://d1k0xsj21ghfp"]
 
 [ext_resource type="Script" uid="uid://dt6y7aa3ouu2e" path="res://Scripts/CameraFollow.cs" id="1_1bvp3"]
 [ext_resource type="PackedScene" uid="uid://2s1ry0cd6jh0" path="res://player.tscn" id="1_ig7tw"]
@@ -9,6 +9,12 @@
 [ext_resource type="PackedScene" uid="uid://bbhjjysvr8tyr" path="res://Enemies/chaser_enemy.tscn" id="7_272bh"]
 [ext_resource type="Script" uid="uid://cukffo3h6usas" path="res://Scripts/EnemySpawner.cs" id="8_5vw27"]
 [ext_resource type="PackedScene" uid="uid://bbjgf2mgs0rc2" path="res://UtilityScenes/player_ui.tscn" id="9_kek77"]
+[ext_resource type="Script" uid="uid://b1mfb2qse5xew" path="res://Scripts/UpgradeManager.cs" id="10_4c57u"]
+[ext_resource type="PackedScene" uid="uid://de0c5bprdp1ps" path="res://UtilityScenes/level_up_screen.tscn" id="11_efxa6"]
+[ext_resource type="Resource" uid="uid://cj8n5heltg8pm" path="res://Upgrades/common_health.tres" id="11_ycdy4"]
+[ext_resource type="PackedScene" uid="uid://dck41ol2vfb2c" path="res://UtilityScenes/upgrade_card.tscn" id="12_dg77c"]
+[ext_resource type="Resource" uid="uid://bx01xld7hg5fw" path="res://Upgrades/rare_health.tres" id="12_vivmo"]
+[ext_resource type="Resource" uid="uid://dp0pj70l4crbj" path="res://Upgrades/legendary_health.tres" id="13_2cqfq"]
 
 [sub_resource type="NavigationMesh" id="NavigationMesh_7mycd"]
 vertices = PackedVector3Array(-74.5, 0.276383, -74.5, -74.5, 0.276383, 74.5, 74.5, 0.276383, 74.5, 74.5, 0.276383, -74.5)
@@ -26,13 +32,14 @@ transform = Transform3D(1, 0, 0, 0, 0.49555, 0.86858, 0, -0.86858, 0.49555, 0, 1
 script = ExtResource("1_1bvp3")
 TargetNodePath = NodePath("../player")
 
-[node name="player" parent="." node_paths=PackedStringArray("_healthBar", "_xpCircle") instance=ExtResource("1_ig7tw")]
+[node name="player" parent="." node_paths=PackedStringArray("_healthBar", "_xpCircle", "_levelUpScreen") instance=ExtResource("1_ig7tw")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.11185, 0)
 _magicSphereScene = ExtResource("2_h2yge")
 _arcaneWaveScene = ExtResource("4_lquwl")
 _mortarBoulderScene = ExtResource("5_7mycd")
 _healthBar = NodePath("../PlayerUI/HealthBar")
 _xpCircle = NodePath("../PlayerUI/XpCircle")
+_levelUpScreen = NodePath("../LevelUpScreen")
 
 [node name="DummyEnemy" parent="." instance=ExtResource("2_0xm2m")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.894646, -6.0409)
@@ -54,6 +61,14 @@ _chaserEnemyScene = ExtResource("7_272bh")
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
 [node name="PlayerUI" parent="." instance=ExtResource("9_kek77")]
+
+[node name="UpgradeManager" type="Node" parent="."]
+script = ExtResource("10_4c57u")
+_upgradePool = Array[Object]([ExtResource("11_ycdy4"), ExtResource("12_vivmo"), ExtResource("13_2cqfq")])
+
+[node name="LevelUpScreen" parent="." instance=ExtResource("11_efxa6")]
+visible = false
+_upgradeCardScene = ExtResource("12_dg77c")
 
 [connection signal="timeout" from="EnemySpawner/Timer" to="EnemySpawner" method="_on_timer_timeout"]
 

@@ -59,7 +59,6 @@ public partial class ChaserEnemy : CharacterBody3D
 		newOrb.GlobalPosition = this.GlobalPosition;
 	}
 	public void TakeDamage(float damage){
-		GD.Print("Taking damage");
 		Health -= damage;
 		if(Health <= 0){
 			DropXpOrb();
