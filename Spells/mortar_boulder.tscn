@@ -9,6 +9,7 @@
 [sub_resource type="SphereShape3D" id="SphereShape3D_trqld"]
 
 [node name="MortarBoulder" type="Area3D"]
+collision_mask = 5
 script = ExtResource("1_1dlfd")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]

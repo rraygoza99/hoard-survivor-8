@@ -7,6 +7,7 @@
 [sub_resource type="BoxMesh" id="BoxMesh_4tunn"]
 
 [node name="ArcaneWave" type="Area3D"]
+collision_mask = 5
 script = ExtResource("1_4tunn")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]

@@ -30,9 +30,9 @@ public partial class MagicSphere : Area3D
 		if (body.IsInGroup("enemies"))
 		{
 			// If it's an enemy, try to call its TakeDamage function.
-			if (body is DummyEnemy enemy) // More specific check
+			if (body.IsInGroup("enemies") && body.HasMethod("TakeDamage"))
 			{
-				enemy.TakeDamage(Damage);
+				body.Call("TakeDamage", Damage);
 			}
 			// The spell disappears on hit.
 			QueueFree();

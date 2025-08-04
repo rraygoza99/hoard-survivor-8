@@ -7,6 +7,7 @@
 [sub_resource type="SphereMesh" id="SphereMesh_scs70"]
 
 [node name="MagicSphere" type="Area3D"]
+collision_mask = 5
 script = ExtResource("1_scs70")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]

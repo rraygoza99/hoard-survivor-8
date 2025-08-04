@@ -41,8 +41,8 @@ public partial class MortarBoulder : Area3D
 		var bodies = explosionArea.GetOverlappingBodies();
 		
 		foreach(var body in bodies){
-			if(body.IsInGroup("enemies") && body is DummyEnemy enemy){
-				enemy.TakeDamage(Damage);
+			if (body.IsInGroup("enemies") && body.HasMethod("TakeDamage")){
+				body.Call("TakeDamage", Damage);
 			}
 		}
 		QueueFree();

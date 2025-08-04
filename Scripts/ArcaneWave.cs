@@ -26,8 +26,8 @@ public partial class ArcaneWave : Node3D
 		}
 		
 		if(body.IsInGroup("enemies")){
-			if(body is DummyEnemy enemy){
-				enemy.TakeDamage(Damage);
+			if(body.HasMethod("TakeDamage")){
+				body.Call("TakeDamage", Damage);
 				_hitEnemies.Add(body);
 				
 				PierceCount--;
