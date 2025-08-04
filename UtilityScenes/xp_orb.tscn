@@ -1,0 +1,18 @@
+[gd_scene load_steps=4 format=3 uid="uid://dbefrtiwqngk5"]
+
+[ext_resource type="Script" uid="uid://c4yypvfm4ltla" path="res://Scripts/XpOrb.cs" id="1_u4m3h"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_at6hp"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_4o45f"]
+
+[node name="XpOrb" type="Area3D" groups=["xp_orbs"]]
+script = ExtResource("1_u4m3h")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 0, 0, 0)
+shape = SubResource("SphereShape3D_at6hp")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 0, 0, 0)
+mesh = SubResource("SphereMesh_4o45f")

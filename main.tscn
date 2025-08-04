@@ -25,11 +25,12 @@ transform = Transform3D(1, 0, 0, 0, 0.49555, 0.86858, 0, -0.86858, 0.49555, 0, 1
 script = ExtResource("1_1bvp3")
 TargetNodePath = NodePath("../player")
 
-[node name="player" parent="." instance=ExtResource("1_ig7tw")]
+[node name="player" parent="." node_paths=PackedStringArray("_xpLabel") instance=ExtResource("1_ig7tw")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.11185, 0)
 _magicSphereScene = ExtResource("2_h2yge")
 _arcaneWaveScene = ExtResource("4_lquwl")
 _mortarBoulderScene = ExtResource("5_7mycd")
+_xpLabel = NodePath("../CanvasLayer/Label")
 
 [node name="DummyEnemy" parent="." instance=ExtResource("2_0xm2m")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.894646, -6.0409)
@@ -47,5 +48,13 @@ script = ExtResource("8_5vw27")
 _chaserEnemyScene = ExtResource("7_272bh")
 
 [node name="Timer" type="Timer" parent="EnemySpawner"]
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="Label" type="Label" parent="CanvasLayer"]
+offset_left = 48.0
+offset_top = 20.0
+offset_right = 88.0
+offset_bottom = 43.0
 
 [connection signal="timeout" from="EnemySpawner/Timer" to="EnemySpawner" method="_on_timer_timeout"]

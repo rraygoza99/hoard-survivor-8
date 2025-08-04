@@ -1,10 +1,15 @@
 using Godot;
 using System;
+using Godot.Collections;
 
 public partial class ChaserEnemy : CharacterBody3D
 {
 	[Export] public float Speed {get;set;} = 3.0f;
 	[Export] public float Health {get; set;} = 30.0f;
+	[ExportGroup("Loot")]
+	[Export] private PackedScene _xpOrbScene;
+	[Export] private int _xpAmount = 10;
+	[Export] private float _mergeRadius = 1.5f;
 	
 	private Node3D _player;
 	private NavigationAgent3D _navAgent;
@@ -28,11 +33,37 @@ public partial class ChaserEnemy : CharacterBody3D
 		Velocity = direction * Speed;
 		MoveAndSlide();
 	}
-	
+	private void DropXpOrb()
+	{
+		if (_xpOrbScene == null) return;
+
+		var spaceState = GetWorld3D().DirectSpaceState;
+		var query = new PhysicsShapeQueryParameters3D();
+		var sphereShape = new SphereShape3D { Radius = _mergeRadius };
+		
+		query.Transform = new Transform3D(Basis.Identity, GlobalPosition);
+		query.Shape = sphereShape;
+		query.CollideWithAreas = true;
+
+		var nearbyObjects = spaceState.IntersectShape(query);
+		foreach(Dictionary obj in nearbyObjects){
+			if(obj["collider"].As<Node>() is XpOrb existingOrb)
+			{
+				existingOrb.Combine(_xpAmount);
+				return;
+			}
+		}
+		XpOrb newOrb = _xpOrbScene.Instantiate<XpOrb>();
+		newOrb.SetInitialValue(_xpAmount);
+		GetParent().AddChild(newOrb); // Add to the main scene
+		newOrb.GlobalPosition = this.GlobalPosition;
+	}
 	public void TakeDamage(float damage){
 		GD.Print("Taking damage");
 		Health -= damage;
-		if(Health <= 0)
+		if(Health <= 0){
+			DropXpOrb();
 			QueueFree();
+		}
 	}
 }

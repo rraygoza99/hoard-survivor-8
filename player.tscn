@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://2s1ry0cd6jh0"]
+[gd_scene load_steps=12 format=3 uid="uid://2s1ry0cd6jh0"]
 
 [ext_resource type="Script" uid="uid://cbnrpoeub1s6x" path="res://Scripts/Player.cs" id="1_4flbx"]
 [ext_resource type="PackedScene" uid="uid://e1okd6arv35t" path="res://Models/WizardCharacter.tscn" id="2_onrkg"]
@@ -29,6 +29,10 @@ states/Run/node = SubResource("AnimationNodeAnimation_i3pqv")
 states/Run/position = Vector2(532, 125)
 states/Start/position = Vector2(193, 91)
 transitions = ["Idle", "Run", SubResource("AnimationNodeStateMachineTransition_hqtel"), "Run", "Idle", SubResource("AnimationNodeStateMachineTransition_onrkg"), "Start", "Idle", SubResource("AnimationNodeStateMachineTransition_i3pqv")]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_onrkg"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_i3pqv"]
 
 [node name="player" type="CharacterBody3D" groups=["player"]]
 collision_layer = 2
@@ -61,20 +65,20 @@ transform = Transform3D(-0.65, 0, -5.68248e-08, 0, 0.65, 0, 5.68248e-08, 0, -0.6
 
 [node name="Skeleton3D" parent="Wizard2/CharacterArmature" index="1"]
 bones/1/rotation = Quaternion(5.88988e-06, 0.702952, 0.711237, 5.91896e-06)
-bones/2/position = Vector3(0.00215302, 1.11563, 0.0752293)
+bones/2/position = Vector3(0.00215302, 1.10517, 0.0752293)
 bones/2/rotation = Quaternion(-3.55269e-15, 1.19209e-07, -8.47034e-22, 1)
 bones/4/rotation = Quaternion(0.231188, 3.10151e-07, 1.70243e-07, 0.972909)
 bones/5/rotation = Quaternion(-0.026251, -8.32046e-07, -5.85557e-09, 0.999655)
 bones/6/rotation = Quaternion(-0.0362502, 6.77571e-07, -2.51757e-09, 0.999343)
-bones/7/rotation = Quaternion(-0.00640762, -0.00027547, 1.76035e-06, 0.999979)
-bones/10/rotation = Quaternion(0.713261, 0.537389, 0.336612, -0.298602)
-bones/11/rotation = Quaternion(-0.248013, 0.20891, -0.191605, 0.926355)
+bones/7/rotation = Quaternion(-0.0211854, -0.000275413, 5.82023e-06, 0.999776)
+bones/10/rotation = Quaternion(0.703745, 0.551557, 0.327472, -0.305434)
+bones/11/rotation = Quaternion(-0.247889, 0.211866, -0.191533, 0.925732)
 bones/12/rotation = Quaternion(0.0198003, 0.0174427, -0.00852202, 0.999615)
 bones/13/rotation = Quaternion(-0.0626413, -0.0188104, -0.00118083, 0.997858)
 bones/14/rotation = Quaternion(-0.14578, 2.64441e-08, 4.35855e-08, 0.989317)
 bones/15/rotation = Quaternion(-0.171058, 0.0837446, -0.432979, 0.881054)
 bones/16/rotation = Quaternion(-0.0789317, -0.297914, 0.141663, 0.940717)
-bones/19/rotation = Quaternion(0.692873, -0.534895, -0.365643, -0.316417)
+bones/19/rotation = Quaternion(0.68587, -0.54571, -0.358823, -0.320982)
 bones/20/rotation = Quaternion(-0.243611, -0.217944, 0.190492, 0.925671)
 bones/21/rotation = Quaternion(0.0198003, -0.0174426, 0.00852203, 0.999615)
 bones/22/rotation = Quaternion(-0.0626414, 0.0188104, 0.00118082, 0.997858)
@@ -82,31 +86,44 @@ bones/23/rotation = Quaternion(-0.740597, -0.0326894, 0.0585091, 0.668599)
 bones/24/rotation = Quaternion(1.03377e-07, -5.02914e-08, -7.45059e-09, 1)
 bones/26/rotation = Quaternion(-0.171058, -0.0837446, 0.432979, 0.881054)
 bones/27/rotation = Quaternion(-0.0789317, 0.297914, -0.141663, 0.940717)
-bones/30/rotation = Quaternion(0.994384, 0.00852191, -0.00085478, 0.105482)
-bones/31/rotation = Quaternion(0.222435, 0.00225832, 0.00776886, 0.974914)
-bones/32/rotation = Quaternion(0.994385, -0.00852201, 0.000855484, 0.105481)
-bones/33/rotation = Quaternion(0.222419, -0.00225818, -0.0077689, 0.974918)
+bones/30/rotation = Quaternion(0.99219, 0.00844742, -0.000705014, 0.124448)
+bones/31/rotation = Quaternion(0.258437, 0.00254487, 0.00767976, 0.965994)
+bones/32/rotation = Quaternion(0.992192, -0.0084476, 0.000705841, 0.124432)
+bones/33/rotation = Quaternion(0.258437, -0.00254486, -0.00767977, 0.965994)
 bones/34/rotation = Quaternion(-3.55269e-15, 1.19209e-07, -8.47034e-22, 1)
 bones/35/rotation = Quaternion(-6.1438e-06, 0.702952, 0.711237, -5.58376e-06)
 bones/36/rotation = Quaternion(-3.55273e-15, -5.96046e-07, 3.38813e-21, 1)
 
 [node name="Face" parent="Wizard2/CharacterArmature/Skeleton3D" index="0"]
-transform = Transform3D(1, -8.14935e-13, 0, 1.81899e-11, 0.995053, -0.0993429, -1.74623e-10, 0.0993429, 0.995053, -3.43425e-09, 2.50432, 0.0713678)
+transform = Transform3D(1, -7.76049e-12, 5.82077e-11, 1.81899e-11, 0.997555, -0.0698913, -1.16415e-10, 0.0698913, 0.997555, -3.43425e-09, 2.4934, 0.0592572)
 
 [node name="ShoulderPad_L" parent="Wizard2/CharacterArmature/Skeleton3D" index="1"]
-transform = Transform3D(0.316675, 0.478351, 0.31611, -0.568503, 0.308879, 0.10211, -0.074496, -0.323732, 0.564514, 0.489223, 1.7324, -0.0599615)
+transform = Transform3D(0.339548, 0.464632, 0.312813, -0.554937, 0.328707, 0.114125, -0.0760267, -0.324186, 0.564049, 0.493203, 1.72913, -0.0604653)
 
 [node name="Wizard_Staff" parent="Wizard2/CharacterArmature/Skeleton3D" index="2"]
-transform = Transform3D(0.13143, -0.990652, 0.0365433, 0.920173, 0.135628, 0.36727, -0.368793, -0.0146442, 0.929396, -0.524679, 0.954214, 0.237328)
+transform = Transform3D(0.15997, -0.986033, 0.0463498, 0.915304, 0.165751, 0.367078, -0.369633, -0.0162973, 0.929035, -0.551822, 0.950645, 0.238016)
 
 [node name="ShoulderPad_R" parent="Wizard2/CharacterArmature/Skeleton3D" index="3"]
-transform = Transform3D(0.324417, -0.500123, -0.271401, 0.56568, 0.317259, 0.0915532, 0.0615519, -0.279736, 0.589057, -0.497162, 1.73518, -0.0487772)
+transform = Transform3D(0.341422, -0.489803, -0.269355, 0.555598, 0.33203, 0.100478, 0.0614037, -0.280851, 0.588541, -0.500083, 1.73007, -0.0489296)
 
 [node name="Pouch" parent="Wizard2/CharacterArmature/Skeleton3D" index="4"]
-transform = Transform3D(1, -1.5774e-11, -4.3201e-12, 1.57172e-11, 1, 1.49012e-08, 4.66116e-12, 2.98023e-08, 1, 0.33063, 1.25256, 0.0927313)
+transform = Transform3D(1, -1.5774e-11, -4.3201e-12, 1.57172e-11, 1, 1.49012e-08, 4.66116e-12, 2.98023e-08, 1, 0.33063, 1.24209, 0.0927313)
+
+[node name="PickupArea" type="Area3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="PickupArea"]
+transform = Transform3D(20, 0, 0, 0, 20, 0, 0, 0, 20, 0, 0, 0)
+shape = SubResource("SphereShape3D_onrkg")
+
+[node name="CollectionArea" type="Area3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="CollectionArea"]
+shape = SubResource("SphereShape3D_i3pqv")
 
 [connection signal="timeout" from="FireTimer" to="." method="_on_fire_timer_timeout"]
 [connection signal="timeout" from="WaveTimer" to="." method="_on_wave_timer_timeout"]
 [connection signal="timeout" from="MortarTimer" to="." method="_on_mortar_timer_timeout"]
+[connection signal="area_entered" from="PickupArea" to="." method="_on_pickup_area_area_entered"]
+[connection signal="area_entered" from="CollectionArea" to="." method="_on_collection_area_area_entered"]
 
 [editable path="Wizard2"]

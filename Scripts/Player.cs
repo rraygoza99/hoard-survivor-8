@@ -5,41 +5,25 @@ using System.Linq;
 public partial class Player : CharacterBody3D
 {
 	[ExportGroup("Player Stats")]
-	[Export]
-	public float MovementSpeed { get; set; } = 5.0f;
-
+	[Export] public int CurrentXp { get; private set; } = 0;
+	[Export] public int XpToNextLevel {get; private set;} =100;
+	[Export] float MovementSpeed { get; set; } = 5.0f;
 	// XP Gain: A multiplier for experience points gained (e.g., 1.1 for +10%).
-	[Export]
-	public float XpGainMultiplier { get; set; } = 1.0f;
-
+	[Export] float XpGainMultiplier { get; set; } = 1.0f;
 	// Health: The player's maximum health points.
-	[Export]
-	public float MaxHealth { get; set; } = 100.0f;
-
+	[Export] float MaxHealth { get; set; } = 100.0f;
 	// Health Regen: Health points regenerated per second.
-	[Export]
-	public float HealthRegen { get; set; } = 1.0f;
-
+	[Export] float HealthRegen { get; set; } = 1.0f;
 	// Cooldown Reduction: A percentage to reduce ability cooldowns (e.g., 0.1 for 10%).
-	[Export(PropertyHint.Range, "0,1")]
-	public float CooldownReduction { get; set; } = 0.0f;
-
+	[Export(PropertyHint.Range, "0,1")]	public float CooldownReduction { get; set; } = 0.0f;
 	// Critical Chance: The probability of landing a critical hit (e.g., 0.05 for 5%).
-	[Export(PropertyHint.Range, "0,1")]
-	public float CriticalChance { get; set; } = 0.05f;
-
+	[Export(PropertyHint.Range, "0,1")]	public float CriticalChance { get; set; } = 0.05f;
 	// Critical Damage: The damage multiplier for critical hits (e.g., 1.5 for 150% damage).
-	[Export]
-	public float CriticalDamageMultiplier { get; set; } = 1.5f;
-
+	[Export] float CriticalDamageMultiplier { get; set; } = 1.5f;
 	// Armor: Reduces incoming damage by a flat amount.
-	[Export]
-	public float Armor { get; set; } = 0.0f;
-
+	[Export] float Armor { get; set; } = 0.0f;
 	// Life Steal: The percentage of damage dealt that is returned as health (e.g., 0.05 for 5%).
-	[Export(PropertyHint.Range, "0,1")]
-	public float LifeSteal { get; set; } = 0.0f;
-	
+	[Export(PropertyHint.Range, "0,1")]	public float LifeSteal { get; set; } = 0.0f;
 	
 	[ExportGroup("Combat")]
 	[Export] PackedScene _magicSphereScene;
@@ -54,7 +38,8 @@ public partial class Player : CharacterBody3D
 	[Export] private float _baseMortarCooldown = 5.0f;
 	[Export] private float _mortarRange = 15.0f;
 	
-	
+	[ExportGroup("UI")]
+	[Export] private Label _xpLabel;
 	private Timer _fireTimer;
 	private Timer _waveTimer;
 	private Timer _mortarTimer;
@@ -74,6 +59,7 @@ public partial class Player : CharacterBody3D
 		
 		_animationTree = GetNode<AnimationTree>("AnimationTree");
 		_animationTree.Active = true;
+		UpdateXpLabel();
 	}
 	
 	private void UpdateFireCooldown(){
@@ -87,7 +73,23 @@ public partial class Player : CharacterBody3D
 	{
 		_mortarTimer.WaitTime = _baseMortarCooldown * (1.0f - CooldownReduction);
 	}
-	
+	public void GainXp(int amount){
+		CurrentXp += amount;
+		if(CurrentXp >= XpToNextLevel)
+		{
+			CurrentXp -= XpToNextLevel;
+			XpToNextLevel = (int)(XpToNextLevel * 1.5f);
+		}
+		
+		UpdateXpLabel();
+	}
+	private void UpdateXpLabel()
+	{
+		if (_xpLabel != null)
+		{
+			_xpLabel.Text = $"XP: {CurrentXp} / {XpToNextLevel}";
+		}
+	}
 	private Node3D FindClosestEnemy(float range){
 		var enemies = GetTree().GetNodesInGroup("enemies").Cast<Node3D>();
 		
@@ -169,6 +171,19 @@ public partial class Player : CharacterBody3D
 
 		LaunchMortar(targetPos);
 		UpdateMortarCooldown();
+	}
+	private void _on_pickup_area_area_entered(Area3D area){
+		if (area is XpOrb orb)
+		{
+			orb.StartSeeking(this);
+		}
+	}
+	private void _on_collection_area_area_entered(Area3D area)
+	{
+		if(area is XpOrb orb){
+			GainXp(orb.XpAmount);
+			orb.QueueFree();
+		}
 	}
 	
 	public override void _PhysicsProcess(double delta)

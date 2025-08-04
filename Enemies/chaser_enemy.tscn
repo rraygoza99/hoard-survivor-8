@@ -1,6 +1,7 @@
-[gd_scene load_steps=4 format=3 uid="uid://bbhjjysvr8tyr"]
+[gd_scene load_steps=5 format=3 uid="uid://bbhjjysvr8tyr"]
 
 [ext_resource type="Script" uid="uid://bpqc4suu1yprb" path="res://Enemies/ChaserEnemy.cs" id="1_week3"]
+[ext_resource type="PackedScene" uid="uid://dbefrtiwqngk5" path="res://UtilityScenes/xp_orb.tscn" id="2_51wim"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_ckchm"]
 
@@ -9,6 +10,7 @@
 [node name="ChaserEnemy" type="CharacterBody3D" groups=["enemies"]]
 collision_layer = 4
 script = ExtResource("1_week3")
+_xpOrbScene = ExtResource("2_51wim")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("CapsuleShape3D_ckchm")
