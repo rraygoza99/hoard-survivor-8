@@ -14,3 +14,7 @@ export_credentials.cfg
 .mono/
 data_*/
 mono_crash.*.json
+/Assets/PlayerModel/OBJ
+/Assets/PlayerModel/Humanoid Rig Versions/Blends
+/Assets/PlayerModel/FBX
+/Assets/PlayerModel/Blends

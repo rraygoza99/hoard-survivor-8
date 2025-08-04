@@ -58,6 +58,8 @@ public partial class Player : CharacterBody3D
 	private Timer _mortarTimer;
 	private Marker3D _spellSpawnPoint;
 	
+	private AnimationTree _animationTree;
+	
 	public override void _Ready(){
 		_fireTimer = GetNode<Timer>("FireTimer");
 		_waveTimer = GetNode<Timer>("WaveTimer");
@@ -67,6 +69,9 @@ public partial class Player : CharacterBody3D
 		UpdateFireCooldown();
 		UpdateWaveCooldown();
 		UpdateMortarCooldown();
+		
+		_animationTree = GetNode<AnimationTree>("AnimationTree");
+		_animationTree.Active = true;
 	}
 	
 	private void UpdateFireCooldown(){
@@ -172,10 +177,15 @@ public partial class Player : CharacterBody3D
 		{
 			Velocity = new Vector3(direction.X * MovementSpeed, Velocity.Y, direction.Z * MovementSpeed);
 			LookAt(Position + direction);
+			
+			_animationTree.Set("parameters/conditions/Run", true);
+			_animationTree.Set("parameters/conditions/Idle", false);
 		}
 		else
 		{
 			Velocity = new Vector3(Mathf.MoveToward(Velocity.X, 0, MovementSpeed), Velocity.Y, Mathf.MoveToward(Velocity.Z, 0, MovementSpeed));
+			_animationTree.Set("parameters/conditions/Run", false);
+			_animationTree.Set("parameters/conditions/Idle", true);
 		}
 		MoveAndSlide();
 	}

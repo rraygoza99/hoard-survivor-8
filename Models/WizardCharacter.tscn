@@ -1,0 +1,20 @@
+[gd_scene load_steps=2 format=3 uid="uid://e1okd6arv35t"]
+
+[ext_resource type="PackedScene" uid="uid://cdq4jj37lrt8b" path="res://Assets/PlayerModel/glTF/Wizard.gltf" id="1_gc3y4"]
+
+[node name="Wizard2" instance=ExtResource("1_gc3y4")]
+
+[node name="Face" parent="CharacterArmature/Skeleton3D" index="0"]
+transform = Transform3D(1, 1.2139e-12, -1.74623e-10, -1.45519e-11, 0.993699, -0.112086, 1.16415e-10, 0.112086, 0.993698, -3.37604e-09, 2.50958, 0.0766217)
+
+[node name="ShoulderPad_L" parent="CharacterArmature/Skeleton3D" index="1"]
+transform = Transform3D(0.3145, 0.479596, 0.316394, -0.569727, 0.30699, 0.100976, -0.0743538, -0.323686, 0.564559, 0.488834, 1.7369, -0.0599142)
+
+[node name="Wizard_Staff" parent="CharacterArmature/Skeleton3D" index="2"]
+transform = Transform3D(0.128674, -0.991048, 0.0355984, 0.920596, 0.132719, 0.367273, -0.368709, -0.0144865, 0.929432, -0.522054, 0.95876, 0.237259)
+
+[node name="ShoulderPad_R" parent="CharacterArmature/Skeleton3D" index="3"]
+transform = Transform3D(0.322763, -0.501093, -0.271584, 0.566623, 0.31582, 0.0906904, 0.0615682, -0.279628, 0.589106, -0.496872, 1.73983, -0.048763)
+
+[node name="Pouch" parent="CharacterArmature/Skeleton3D" index="4"]
+transform = Transform3D(1, -1.58025e-11, -4.3201e-12, 1.57456e-11, 1, 0, 4.66116e-12, 5.96046e-08, 1, 0.33063, 1.25772, 0.0927313)

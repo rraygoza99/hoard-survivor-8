@@ -12,7 +12,7 @@
 [node name="Node3D" type="Node3D"]
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
-transform = Transform3D(41.145, 0, 0, 0, 0.2, 0, 0, 0, 28.01, 0, -0.123617, 0)
+transform = Transform3D(150, 0, 0, 0, 0.2, 0, 0, 0, 150, 0, -0.123617, 0)
 mesh = SubResource("BoxMesh_drvgu")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
@@ -24,7 +24,7 @@ script = ExtResource("1_1bvp3")
 TargetNodePath = NodePath("../player")
 
 [node name="player" parent="." instance=ExtResource("1_ig7tw")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4219, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.18405, 0)
 _magicSphereScene = ExtResource("2_h2yge")
 _arcaneWaveScene = ExtResource("4_lquwl")
 _mortarBoulderScene = ExtResource("5_7mycd")
