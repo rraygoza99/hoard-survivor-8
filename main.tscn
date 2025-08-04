@@ -1,10 +1,11 @@
-[gd_scene load_steps=7 format=3 uid="uid://d1k0xsj21ghfp"]
+[gd_scene load_steps=8 format=3 uid="uid://d1k0xsj21ghfp"]
 
 [ext_resource type="Script" uid="uid://dt6y7aa3ouu2e" path="res://Scripts/CameraFollow.cs" id="1_1bvp3"]
 [ext_resource type="PackedScene" uid="uid://2s1ry0cd6jh0" path="res://player.tscn" id="1_ig7tw"]
 [ext_resource type="PackedScene" uid="uid://nrkusjqe8uyu" path="res://dummy_enemy.tscn" id="2_0xm2m"]
 [ext_resource type="PackedScene" uid="uid://3p7ywwnqo2av" path="res://magic_sphere.tscn" id="2_h2yge"]
 [ext_resource type="PackedScene" uid="uid://bltgmqf6ivcis" path="res://arcane_wave.tscn" id="4_lquwl"]
+[ext_resource type="PackedScene" uid="uid://5rwf71xwcg8h" path="res://Spells/mortar_boulder.tscn" id="5_7mycd"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_drvgu"]
 
@@ -26,6 +27,7 @@ TargetNodePath = NodePath("../player")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4219, 0)
 _magicSphereScene = ExtResource("2_h2yge")
 _arcaneWaveScene = ExtResource("4_lquwl")
+_mortarBoulderScene = ExtResource("5_7mycd")
 
 [node name="DummyEnemy" parent="." instance=ExtResource("2_0xm2m")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.894646, -6.0409)

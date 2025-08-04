@@ -1,0 +1,27 @@
+[gd_scene load_steps=5 format=3 uid="uid://5rwf71xwcg8h"]
+
+[ext_resource type="Script" uid="uid://dq5jwtcgja7ca" path="res://Scripts/MortarBoulder.cs" id="1_1dlfd"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_41qsh"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_1dlfd"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_trqld"]
+
+[node name="MortarBoulder" type="Area3D"]
+script = ExtResource("1_1dlfd")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)
+shape = SubResource("SphereShape3D_41qsh")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)
+mesh = SubResource("SphereMesh_1dlfd")
+
+[node name="ExplosionArea" type="Area3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="ExplosionArea"]
+shape = SubResource("SphereShape3D_trqld")
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]

@@ -43,19 +43,30 @@ public partial class Player : CharacterBody3D
 	
 	[ExportGroup("Combat")]
 	[Export]
-	private PackedScene _magicSphereScene; // Assign magic_sphere.tscn to this in the Inspector
+	private PackedScene _magicSphereScene;
 	[Export] private float _baseFireCooldown = 1.0f;
 	[Export] private PackedScene _arcaneWaveScene;
 	[Export] private float _baseWaveCooldown = 3.0f;
 	
+	[Export] private PackedScene _mortarBoulderScene;
+	[Export] private float _baseMortarCooldown = 5.0f;
+	[Export] private float _mortarRange = 15.0f;
+	
+	
 	private Timer _fireTimer;
 	private Timer _waveTimer;
+	private Timer _mortarTimer;
+	private Marker3D _spellSpawnPoint;
 	
 	public override void _Ready(){
 		_fireTimer = GetNode<Timer>("FireTimer");
 		_waveTimer = GetNode<Timer>("WaveTimer");
+		_mortarTimer = GetNode<Timer>("MortarTimer");
+		_spellSpawnPoint = GetNode<Marker3D>("SpellSpawnPoint");
+		
 		UpdateFireCooldown();
 		UpdateWaveCooldown();
+		UpdateMortarCooldown();
 	}
 	
 	private void UpdateFireCooldown(){
@@ -64,6 +75,10 @@ public partial class Player : CharacterBody3D
 	private void UpdateWaveCooldown()
 	{
 		_waveTimer.WaitTime = _baseWaveCooldown * (1.0f - CooldownReduction);
+	}
+	private void UpdateMortarCooldown()
+	{
+		_mortarTimer.WaitTime = _baseMortarCooldown * (1.0f - CooldownReduction);
 	}
 	
 	private Node3D FindClosestEnemy(){
@@ -74,19 +89,40 @@ public partial class Player : CharacterBody3D
 		
 		return closestEnemy;
 	}
+	private Node3D FindRandomEnemyInRange()
+	{
+		// Get all enemies within the mortar's range.
+		var enemiesInRange = GetTree().GetNodesInGroup("enemies")
+			.Cast<Node3D>()
+			.Where(e => this.GlobalPosition.DistanceTo(e.GlobalPosition) <= _mortarRange)
+			.ToList();
+
+		if (enemiesInRange.Count > 0)
+		{
+			var rng = new RandomNumberGenerator();
+			return enemiesInRange[rng.RandiRange(0, enemiesInRange.Count - 1)];
+		}
+
+		return null; // No enemies in range.
+	}
+	
+	private void LaunchMortar(Vector3 targetPos)
+	{
+		if (_mortarBoulderScene == null) return;
+		MortarBoulder boulder = _mortarBoulderScene.Instantiate<MortarBoulder>();
+		GetTree().Root.AddChild(boulder);
+		Vector3 spawnPos = _spellSpawnPoint.GlobalPosition;
+		boulder.Initialize(spawnPos, targetPos);
+	}
 	
 	private void FireSpell(Node3D target)
 	{
 		if (_magicSphereScene == null || target == null) return;
 
-		// Create a new instance of the sphere.
 		MagicSphere sphere = _magicSphereScene.Instantiate<MagicSphere>();
 
-		// We need to add it to the main scene tree.
 		GetTree().Root.AddChild(sphere);
 
-		// Position the spell to come from the player.
-		// We can add a Marker3D node to the player for a specific spawn point later.
 		sphere.GlobalTransform = this.GlobalTransform;
 		
 		sphere.LookAt(target.GlobalPosition);
@@ -118,20 +154,29 @@ public partial class Player : CharacterBody3D
 		}
 		UpdateWaveCooldown();
 	}
-	
-	public override void _PhysicsProcess(double delta){
-		Vector2 inputDir = Input.GetVector("move_left", "move_right", "move_forward", "move_backward");
-		
-		Vector3 direction = new Vector3(inputDir.X, 0, inputDir.Y).Normalized();
-		
-		if(direction != Vector3.Zero){
-			Velocity = new Vector3(direction.X * MovementSpeed, Velocity.Y, direction.Z * MovementSpeed);
-		} else {
-			Velocity = new Vector3(Mathf.MoveToward(Velocity.X, 0, MovementSpeed), Velocity.Y, Mathf.MoveToward(Velocity.Z, 0, MovementSpeed));
-		}
-		
-		MoveAndSlide();
+	 private void _on_mortar_timer_timeout()
+	{
+		Vector3 forwardDir = -GlobalTransform.Basis.Z;
+		Vector3 targetPos = GlobalPosition + forwardDir * _mortarRange;
+
+		LaunchMortar(targetPos);
+		UpdateMortarCooldown();
 	}
 	
-	
+	public override void _PhysicsProcess(double delta)
+	{
+		Vector2 inputDir = Input.GetVector("move_left", "move_right", "move_forward", "move_backward");
+		Vector3 direction = new Vector3(inputDir.X, 0, inputDir.Y).Normalized();
+
+		if (direction != Vector3.Zero)
+		{
+			Velocity = new Vector3(direction.X * MovementSpeed, Velocity.Y, direction.Z * MovementSpeed);
+			LookAt(Position + direction);
+		}
+		else
+		{
+			Velocity = new Vector3(Mathf.MoveToward(Velocity.X, 0, MovementSpeed), Velocity.Y, Mathf.MoveToward(Velocity.Z, 0, MovementSpeed));
+		}
+		MoveAndSlide();
+	}
 }
