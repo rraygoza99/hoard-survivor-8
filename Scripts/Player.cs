@@ -42,11 +42,13 @@ public partial class Player : CharacterBody3D
 	
 	
 	[ExportGroup("Combat")]
-	[Export]
-	private PackedScene _magicSphereScene;
+	[Export] PackedScene _magicSphereScene;
 	[Export] private float _baseFireCooldown = 1.0f;
+	[Export] private float _sphereRange = 20.0f;
+	
 	[Export] private PackedScene _arcaneWaveScene;
 	[Export] private float _baseWaveCooldown = 3.0f;
+	[Export] private float _waveRange = 15.0f;
 	
 	[Export] private PackedScene _mortarBoulderScene;
 	[Export] private float _baseMortarCooldown = 5.0f;
@@ -86,13 +88,14 @@ public partial class Player : CharacterBody3D
 		_mortarTimer.WaitTime = _baseMortarCooldown * (1.0f - CooldownReduction);
 	}
 	
-	private Node3D FindClosestEnemy(){
+	private Node3D FindClosestEnemy(float range){
 		var enemies = GetTree().GetNodesInGroup("enemies").Cast<Node3D>();
 		
-		Node3D closestEnemy = enemies.OrderBy(enemy=> this.GlobalPosition.DistanceSquaredTo(enemy.GlobalPosition))
+		return enemies
+			.Cast<Node3D>()
+			.Where(e=> this.GlobalPosition.DistanceTo(e.GlobalPosition) <= range)
+			.OrderBy(e=> this.GlobalPosition.DistanceSquaredTo(e.GlobalPosition))
 			.FirstOrDefault();
-		
-		return closestEnemy;
 	}
 	private Node3D FindRandomEnemyInRange()
 	{
@@ -143,7 +146,7 @@ public partial class Player : CharacterBody3D
 	}
 	
 	private void _on_fire_timer_timeout(){
-		Node3D target = FindClosestEnemy();
+		Node3D target = FindClosestEnemy(_sphereRange);
 		if(target!= null)
 			FireSpell(target);
 			
@@ -152,7 +155,7 @@ public partial class Player : CharacterBody3D
 
 	private void _on_wave_timer_timeout()
 	{
-		Node3D target = FindClosestEnemy();
+		Node3D target = FindClosestEnemy(_waveRange);
 		if (target != null)
 		{
 			FireWave(target);
