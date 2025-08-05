@@ -1,4 +1,4 @@
-[gd_scene load_steps=21 format=3 uid="uid://d1k0xsj21ghfp"]
+[gd_scene load_steps=42 format=3 uid="uid://d1k0xsj21ghfp"]
 
 [ext_resource type="Script" uid="uid://dt6y7aa3ouu2e" path="res://Scripts/CameraFollow.cs" id="1_1bvp3"]
 [ext_resource type="PackedScene" uid="uid://2s1ry0cd6jh0" path="res://player.tscn" id="1_ig7tw"]
@@ -16,7 +16,30 @@
 [ext_resource type="PackedScene" uid="uid://dck41ol2vfb2c" path="res://UtilityScenes/upgrade_card.tscn" id="12_dg77c"]
 [ext_resource type="Resource" uid="uid://bx01xld7hg5fw" path="res://Upgrades/rare_health.tres" id="12_vivmo"]
 [ext_resource type="Resource" uid="uid://dp0pj70l4crbj" path="res://Upgrades/legendary_health.tres" id="13_2cqfq"]
-[ext_resource type="MeshLibrary" uid="uid://dl6pmhmrk5a6" path="res://TerrainTiles/terrain_library.tres" id="17_yaehf"]
+[ext_resource type="Resource" uid="uid://dsf702m2rktg1" path="res://Upgrades/common_xp.tres" id="14_2cqfq"]
+[ext_resource type="Resource" uid="uid://dvkc2eympalqm" path="res://Upgrades/common_armor.tres" id="14_come4"]
+[ext_resource type="Resource" uid="uid://blo4ecxgphkyp" path="res://Upgrades/common_cooldown.tres" id="15_h8e4i"]
+[ext_resource type="Resource" uid="uid://tu6jkiitj6ee" path="res://Upgrades/common_critical_chance.tres" id="16_4lmeg"]
+[ext_resource type="Resource" uid="uid://dlnct4fwpet70" path="res://Upgrades/common_critical_dmg.tres" id="17_0cp0l"]
+[ext_resource type="Resource" uid="uid://cqjsjsf6buhrk" path="res://Upgrades/common_lifesteal.tres" id="18_d2t1y"]
+[ext_resource type="Resource" uid="uid://ynnvhpbb6bco" path="res://Upgrades/common_luck.tres" id="19_gngh3"]
+[ext_resource type="Resource" uid="uid://dcyma0hfpds5w" path="res://Upgrades/common_speed.tres" id="20_0n3wm"]
+[ext_resource type="Resource" uid="uid://d1jx4qg321omq" path="res://Upgrades/rare_armor.tres" id="22_qnost"]
+[ext_resource type="Resource" uid="uid://b3mn31wkan1ca" path="res://Upgrades/rare_cooldown.tres" id="23_wnkbs"]
+[ext_resource type="Resource" uid="uid://d06nhymqq23ti" path="res://Upgrades/rare_critical_chance.tres" id="24_f6a44"]
+[ext_resource type="Resource" uid="uid://bc6q2vpx677n7" path="res://Upgrades/rare_critical_dmg.tres" id="25_0cbny"]
+[ext_resource type="Resource" uid="uid://clpibinrab8nf" path="res://Upgrades/rare_luck.tres" id="26_hrvbo"]
+[ext_resource type="Resource" uid="uid://cu8ru2rhrn4mw" path="res://Upgrades/rare_lifesteal.tres" id="27_uypp3"]
+[ext_resource type="Resource" uid="uid://bx08naoc5qsk3" path="res://Upgrades/rare_speed.tres" id="28_blkrb"]
+[ext_resource type="Resource" uid="uid://dli4wtsm7jj7v" path="res://Upgrades/rare_xp.tres" id="29_abqjc"]
+[ext_resource type="Resource" uid="uid://cvhmay4qvwn5e" path="res://Upgrades/legendary_armor.tres" id="30_6iyjs"]
+[ext_resource type="Resource" uid="uid://c4scv6me2pbl6" path="res://Upgrades/legendary_cooldown.tres" id="31_4w656"]
+[ext_resource type="Resource" uid="uid://bcchlhrp2hpkm" path="res://Upgrades/legendary_critical_chance.tres" id="32_e71vb"]
+[ext_resource type="Resource" uid="uid://c8ggxovi10nh5" path="res://Upgrades/legendary_critical_dmg.tres" id="33_rnkwl"]
+[ext_resource type="Resource" uid="uid://usrxgyw4apyj" path="res://Upgrades/legendary_lifesteal.tres" id="34_vke2r"]
+[ext_resource type="Resource" uid="uid://ina8nx0kkx7q" path="res://Upgrades/legendary_luck.tres" id="35_uit24"]
+[ext_resource type="Resource" uid="uid://cyu1gj04iionf" path="res://Upgrades/legendary_speed.tres" id="36_ruth0"]
+[ext_resource type="Resource" uid="uid://bgkh0038xrb11" path="res://Upgrades/legendary_xp.tres" id="37_rm4vd"]
 
 [sub_resource type="NavigationMesh" id="NavigationMesh_7mycd"]
 vertices = PackedVector3Array(-74.5, 0.276383, -74.5, -74.5, 0.276383, 74.5, 74.5, 0.276383, 74.5, 74.5, 0.276383, -74.5)
@@ -71,7 +94,7 @@ _chaserEnemyScene = ExtResource("7_272bh")
 
 [node name="UpgradeManager" type="Node" parent="."]
 script = ExtResource("10_4c57u")
-_upgradePool = Array[Object]([ExtResource("11_ycdy4"), ExtResource("12_vivmo"), ExtResource("13_2cqfq")])
+_upgradePool = Array[Object]([ExtResource("11_ycdy4"), ExtResource("12_vivmo"), ExtResource("13_2cqfq"), ExtResource("14_come4"), ExtResource("15_h8e4i"), ExtResource("16_4lmeg"), ExtResource("17_0cp0l"), ExtResource("18_d2t1y"), ExtResource("19_gngh3"), ExtResource("20_0n3wm"), ExtResource("14_2cqfq"), ExtResource("22_qnost"), ExtResource("23_wnkbs"), ExtResource("24_f6a44"), ExtResource("25_0cbny"), ExtResource("26_hrvbo"), ExtResource("27_uypp3"), ExtResource("28_blkrb"), ExtResource("29_abqjc"), ExtResource("30_6iyjs"), ExtResource("31_4w656"), ExtResource("32_e71vb"), ExtResource("33_rnkwl"), ExtResource("34_vke2r"), ExtResource("35_uit24"), ExtResource("36_ruth0"), ExtResource("37_rm4vd")])
 
 [node name="LevelUpScreen" parent="." instance=ExtResource("11_efxa6")]
 visible = false
