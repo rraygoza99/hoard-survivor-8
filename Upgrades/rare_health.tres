@@ -5,7 +5,7 @@
 [resource]
 script = ExtResource("1_t5xqv")
 Name = "Vida media"
-Description = ""
+Description = "Increase Max Health by 40"
 Rarity = 1
 StatToUpgrade = 0
 Value = 40.0

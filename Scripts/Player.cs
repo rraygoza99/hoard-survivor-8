@@ -6,7 +6,7 @@ public partial class Player : CharacterBody3D
 {
 	[ExportGroup("Player Stats")]
 	[Export] public int CurrentXp { get; private set; } = 0;
-	[Export] public int XpToNextLevel {get; private set;} =10;
+	[Export] public int XpToNextLevel {get; private set;} =100;
 	[Export] public float MaxHealth { get; set; } = 100.0f;
 	public float CurrentHealth { get; private set; }
 	[Export] float MovementSpeed { get; set; } = 5.0f;
@@ -41,6 +41,7 @@ public partial class Player : CharacterBody3D
 	
 	[ExportGroup("UI")]
 	[Export] private ProgressBar _healthBar;
+	[Export] private Label _healthLabel;
 	[Export] private TextureProgressBar _xpCircle;
 	[Export] private LevelUpScreen _levelUpScreen;
 	
@@ -94,6 +95,11 @@ public partial class Player : CharacterBody3D
 		if (_healthBar != null)
 		{
 			_healthBar.Value = (CurrentHealth / MaxHealth) * 100;
+			if (_healthLabel != null)
+			{
+				// Update the text with the current and max health values
+				_healthLabel.Text = $"{Mathf.Round(CurrentHealth)} / {MaxHealth}";
+			}
 		}
 	}
 	private void UpdateXpCircle()

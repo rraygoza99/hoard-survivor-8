@@ -32,11 +32,15 @@ transform = Transform3D(1, 0, 0, 0, 0.49555, 0.86858, 0, -0.86858, 0.49555, 0, 1
 script = ExtResource("1_1bvp3")
 TargetNodePath = NodePath("../player")
 
-[node name="player" parent="." instance=ExtResource("1_ig7tw")]
+[node name="player" parent="." node_paths=PackedStringArray("_healthBar", "_healthLabel", "_xpCircle", "_levelUpScreen") instance=ExtResource("1_ig7tw")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.11185, 0)
 _magicSphereScene = ExtResource("2_h2yge")
 _arcaneWaveScene = ExtResource("4_lquwl")
 _mortarBoulderScene = ExtResource("5_7mycd")
+_healthBar = NodePath("../PlayerUI/HealthBar")
+_healthLabel = NodePath("../PlayerUI/HealthBar/HealthLabel")
+_xpCircle = NodePath("../PlayerUI/XpCircle")
+_levelUpScreen = NodePath("../LevelUpScreen")
 
 [node name="DummyEnemy" parent="." instance=ExtResource("2_0xm2m")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.894646, -6.0409)
