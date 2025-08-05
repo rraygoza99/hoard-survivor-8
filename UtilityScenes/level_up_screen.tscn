@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://cinrfn4r1obf7" path="res://Scripts/LevelUpScreen.cs" id="1_jp5ew"]
 
 [node name="LevelUpScreen" type="Control"]
+process_mode = 2
 layout_mode = 3
 anchors_preset = 0
 offset_right = 40.0
@@ -22,3 +23,4 @@ offset_bottom = 648.0
 
 [node name="HBoxContainer" type="HBoxContainer" parent="CenterContainer"]
 layout_mode = 2
+theme_override_constants/separation = 30

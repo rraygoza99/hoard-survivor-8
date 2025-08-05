@@ -12,17 +12,17 @@ public partial class UpgradeCard : PanelContainer
 	private Upgrade _upgrade;
 	
 	public override void _Ready(){
-		_nameLabel = GetNode<Label>("Button/VBoxContainer/NameLabel");
-		_descriptionLabel = GetNode<Label>("Button/VBoxContainer/DescriptionLabel");
+		
 		_button = GetNode<Button>("Button");
 		_button.Pressed += OnButtonPressed;
 	}
 	public void SetUpgrade(Upgrade upgrade)
 	{
+		_nameLabel = GetNode<Label>("Button/VBoxContainer/NameLabel");
+		_descriptionLabel = GetNode<Label>("Button/VBoxContainer/DescriptionLabel");
 		_upgrade = upgrade;
 		_nameLabel.Text = upgrade.Name;
 		_descriptionLabel.Text = upgrade.Description;
-
 		var styleBox = new StyleBoxFlat { BgColor = GetRarityColor(upgrade.Rarity) };
 		AddThemeStyleboxOverride("panel", styleBox);
 	}

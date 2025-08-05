@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://8n0htr0r68oq" path="res://Scripts/UpgradeCard.cs" id="1_5khew"]
 
 [node name="UpgradeCard" type="PanelContainer"]
+custom_minimum_size = Vector2(150, 0)
 offset_right = 40.0
 offset_bottom = 40.0
 script = ExtResource("1_5khew")

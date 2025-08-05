@@ -21,15 +21,15 @@ public partial class LevelUpScreen : Control
 		{
 			child.QueueFree();
 		}
-		
+		GD.Print(upgrades.Count);
 		foreach(var upgrade in upgrades)
 		{
-			GD.Print("Adding an upgradecard");
 			UpgradeCard card = _upgradeCardScene.Instantiate<UpgradeCard>();
 			card.SetUpgrade(upgrade);
 			card.UpgradeSelected += OnUpgradeSelected;
 			_cardContainer.AddChild(card);
 		}
+		GD.Print("Time to show");
 		Show();
 		GetTree().Paused= true;
 	}

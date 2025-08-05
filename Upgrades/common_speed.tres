@@ -5,7 +5,7 @@
 [resource]
 script = ExtResource("1_1ap83")
 Name = "Run run"
-Description = ""
+Description = "Increase Speed by 4"
 Rarity = 0
 StatToUpgrade = 1
 Value = 4.0

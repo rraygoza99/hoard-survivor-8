@@ -5,7 +5,7 @@
 [resource]
 script = ExtResource("1_ax02e")
 Name = "Vida legendaria"
-Description = ""
+Description = "Increase Max Health by 80"
 Rarity = 2
 StatToUpgrade = 0
 Value = 80.0
