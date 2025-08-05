@@ -1,0 +1,4 @@
+[gd_resource type="MeshLibrary" format=3 uid="uid://dl6pmhmrk5a6"]
+
+[resource]
+metadata/_editor_source_scene = "res://TerrainTiles/grass_tile.tscn"

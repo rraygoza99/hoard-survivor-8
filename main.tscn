@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3 uid="uid://d1k0xsj21ghfp"]
+[gd_scene load_steps=21 format=3 uid="uid://d1k0xsj21ghfp"]
 
 [ext_resource type="Script" uid="uid://dt6y7aa3ouu2e" path="res://Scripts/CameraFollow.cs" id="1_1bvp3"]
 [ext_resource type="PackedScene" uid="uid://2s1ry0cd6jh0" path="res://player.tscn" id="1_ig7tw"]
@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://3p7ywwnqo2av" path="res://magic_sphere.tscn" id="2_h2yge"]
 [ext_resource type="PackedScene" uid="uid://bltgmqf6ivcis" path="res://arcane_wave.tscn" id="4_lquwl"]
 [ext_resource type="PackedScene" uid="uid://5rwf71xwcg8h" path="res://Spells/mortar_boulder.tscn" id="5_7mycd"]
+[ext_resource type="Texture2D" uid="uid://bchjrspkuhsup" path="res://Assets/Terrain/Textures/Leaves_GiantPine_C.png" id="7_2cqfq"]
 [ext_resource type="PackedScene" uid="uid://bbhjjysvr8tyr" path="res://Enemies/chaser_enemy.tscn" id="7_272bh"]
 [ext_resource type="Script" uid="uid://cukffo3h6usas" path="res://Scripts/EnemySpawner.cs" id="8_5vw27"]
 [ext_resource type="PackedScene" uid="uid://bbjgf2mgs0rc2" path="res://UtilityScenes/player_ui.tscn" id="9_kek77"]
@@ -15,10 +16,14 @@
 [ext_resource type="PackedScene" uid="uid://dck41ol2vfb2c" path="res://UtilityScenes/upgrade_card.tscn" id="12_dg77c"]
 [ext_resource type="Resource" uid="uid://bx01xld7hg5fw" path="res://Upgrades/rare_health.tres" id="12_vivmo"]
 [ext_resource type="Resource" uid="uid://dp0pj70l4crbj" path="res://Upgrades/legendary_health.tres" id="13_2cqfq"]
+[ext_resource type="MeshLibrary" uid="uid://dl6pmhmrk5a6" path="res://TerrainTiles/terrain_library.tres" id="17_yaehf"]
 
 [sub_resource type="NavigationMesh" id="NavigationMesh_7mycd"]
 vertices = PackedVector3Array(-74.5, 0.276383, -74.5, -74.5, 0.276383, 74.5, 74.5, 0.276383, 74.5, 74.5, 0.276383, -74.5)
 polygons = [PackedInt32Array(3, 2, 0), PackedInt32Array(0, 2, 1)]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_yaehf"]
+albedo_texture = ExtResource("7_2cqfq")
 
 [sub_resource type="BoxMesh" id="BoxMesh_drvgu"]
 
@@ -50,6 +55,7 @@ navigation_mesh = SubResource("NavigationMesh_7mycd")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D"]
 transform = Transform3D(150, 0, 0, 0, 0.2, 0, 0, 0, 150, 0, -0.123617, 0)
+material_override = SubResource("StandardMaterial3D_yaehf")
 mesh = SubResource("BoxMesh_drvgu")
 skeleton = NodePath("../..")
 
@@ -70,6 +76,9 @@ _upgradePool = Array[Object]([ExtResource("11_ycdy4"), ExtResource("12_vivmo"), 
 [node name="LevelUpScreen" parent="." instance=ExtResource("11_efxa6")]
 visible = false
 _upgradeCardScene = ExtResource("12_dg77c")
+
+[node name="GridMap" type="GridMap" parent="."]
+mesh_library = ExtResource("17_yaehf")
 
 [connection signal="timeout" from="EnemySpawner/Timer" to="EnemySpawner" method="_on_timer_timeout"]
 

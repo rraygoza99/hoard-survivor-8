@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://ds6qj6ymkog55"
+path="res://.godot/imported/Grass_Common_Short.obj-79b21e0b002de69a3d0f252b7f5dea6b.mesh"
+
+[deps]
+
+files=["res://.godot/imported/Grass_Common_Short.obj-79b21e0b002de69a3d0f252b7f5dea6b.mesh"]
+
+source_file="res://Assets/Terrain/OBJ/Grass_Common_Short.obj"
+dest_files=["res://.godot/imported/Grass_Common_Short.obj-79b21e0b002de69a3d0f252b7f5dea6b.mesh", "res://.godot/imported/Grass_Common_Short.obj-79b21e0b002de69a3d0f252b7f5dea6b.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false
