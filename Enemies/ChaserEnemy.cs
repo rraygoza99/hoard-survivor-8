@@ -13,10 +13,12 @@ public partial class ChaserEnemy : CharacterBody3D
 	
 	private Node3D _player;
 	private NavigationAgent3D _navAgent;
+	private AnimationTree _animationTree;
 	
 	public override void _Ready(){
 		_player = GetTree().GetFirstNodeInGroup("player") as Node3D;
 		_navAgent = GetNode<NavigationAgent3D>("NavigationAgent3D");
+		_animationTree = GetNode<AnimationTree>("AnimationTree");
 	}
 	
 	public override void _PhysicsProcess(double delta){
@@ -31,6 +33,10 @@ public partial class ChaserEnemy : CharacterBody3D
 		Vector3 direction = (nextPathPosition - GlobalPosition).Normalized();
 		
 		Velocity = direction * Speed;
+		if(direction != Vector3.Zero)
+		{
+			LookAt(GlobalPosition + direction);
+		}
 		MoveAndSlide();
 	}
 	private void DropXpOrb()
