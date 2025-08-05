@@ -9,7 +9,7 @@
 [ext_resource type="PackedScene" uid="uid://bbhjjysvr8tyr" path="res://Enemies/chaser_enemy.tscn" id="7_272bh"]
 [ext_resource type="Script" uid="uid://cukffo3h6usas" path="res://Scripts/EnemySpawner.cs" id="8_5vw27"]
 [ext_resource type="PackedScene" uid="uid://bbjgf2mgs0rc2" path="res://UtilityScenes/player_ui.tscn" id="9_kek77"]
-[ext_resource type="Script" uid="uid://b1mfb2qse5xew" path="res://Scripts/UpgradeManager.cs" id="10_4c57u"]
+[ext_resource type="Script" path="res://Scripts/UpgradeManager.cs" id="10_4c57u"]
 [ext_resource type="PackedScene" uid="uid://de0c5bprdp1ps" path="res://UtilityScenes/level_up_screen.tscn" id="11_efxa6"]
 [ext_resource type="Resource" uid="uid://cj8n5heltg8pm" path="res://Upgrades/common_health.tres" id="11_ycdy4"]
 [ext_resource type="PackedScene" uid="uid://dck41ol2vfb2c" path="res://UtilityScenes/upgrade_card.tscn" id="12_dg77c"]
@@ -32,14 +32,11 @@ transform = Transform3D(1, 0, 0, 0, 0.49555, 0.86858, 0, -0.86858, 0.49555, 0, 1
 script = ExtResource("1_1bvp3")
 TargetNodePath = NodePath("../player")
 
-[node name="player" parent="." node_paths=PackedStringArray("_healthBar", "_xpCircle", "_levelUpScreen") instance=ExtResource("1_ig7tw")]
+[node name="player" parent="." instance=ExtResource("1_ig7tw")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.11185, 0)
 _magicSphereScene = ExtResource("2_h2yge")
 _arcaneWaveScene = ExtResource("4_lquwl")
 _mortarBoulderScene = ExtResource("5_7mycd")
-_healthBar = NodePath("../PlayerUI/HealthBar")
-_xpCircle = NodePath("../PlayerUI/XpCircle")
-_levelUpScreen = NodePath("../LevelUpScreen")
 
 [node name="DummyEnemy" parent="." instance=ExtResource("2_0xm2m")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.894646, -6.0409)

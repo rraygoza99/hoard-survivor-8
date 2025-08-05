@@ -1,6 +1,6 @@
-[gd_resource type="Resource" script_class="Upgrade" load_steps=2 format=3 uid="uid://cj8n5heltg8pm"]
+[gd_resource type="Resource" load_steps=2 format=3 uid="uid://cj8n5heltg8pm"]
 
-[ext_resource type="Script" uid="uid://bujpibpep1yxw" path="res://Scripts/Upgrade.cs" id="1_qd2gc"]
+[ext_resource type="Script" path="res://Scripts/Upgrade.cs" id="1_qd2gc"]
 
 [resource]
 script = ExtResource("1_qd2gc")
@@ -9,4 +9,3 @@ Description = "Increases maximum health by 20"
 Rarity = 0
 StatToUpgrade = 0
 Value = 20.0
-metadata/_custom_type_script = "uid://bujpibpep1yxw"
