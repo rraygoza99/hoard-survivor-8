@@ -1,6 +1,7 @@
-[gd_scene load_steps=4 format=3 uid="uid://bbjgf2mgs0rc2"]
+[gd_scene load_steps=5 format=3 uid="uid://bbjgf2mgs0rc2"]
 
 [ext_resource type="Texture2D" uid="uid://cwy2duun031nh" path="res://Assets/button_round_depth_line.png" id="1_7vllg"]
+[ext_resource type="Script" uid="uid://25psu3cbq7mb" path="res://Scripts/PlayerUi.cs" id="1_s2ko4"]
 [ext_resource type="Texture2D" uid="uid://g63oqe0ghka5" path="res://Assets/button_round_depth_gradient.png" id="2_s2ko4"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ay1j7"]
@@ -13,6 +14,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1_s2ko4")
 
 [node name="HealthBar" type="ProgressBar" parent="."]
 layout_mode = 0
@@ -41,3 +43,21 @@ offset_bottom = 126.0
 fill_mode = 4
 texture_under = ExtResource("1_7vllg")
 texture_progress = ExtResource("2_s2ko4")
+
+[node name="HostButton" type="Button" parent="."]
+layout_mode = 0
+offset_left = 409.0
+offset_top = 33.0
+offset_right = 453.0
+offset_bottom = 64.0
+text = "Host"
+
+[node name="JoinButton" type="Button" parent="."]
+layout_mode = 0
+offset_left = 626.0
+offset_top = 37.0
+offset_right = 664.0
+offset_bottom = 68.0
+text = "Join"
+
+[connection signal="pressed" from="HostButton" to="." method="_on_host_button_pressed"]

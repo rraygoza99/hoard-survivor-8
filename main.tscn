@@ -1,4 +1,4 @@
-[gd_scene load_steps=42 format=3 uid="uid://d1k0xsj21ghfp"]
+[gd_scene load_steps=44 format=3 uid="uid://d1k0xsj21ghfp"]
 
 [ext_resource type="Script" uid="uid://dt6y7aa3ouu2e" path="res://Scripts/CameraFollow.cs" id="1_1bvp3"]
 [ext_resource type="PackedScene" uid="uid://2s1ry0cd6jh0" path="res://player.tscn" id="1_ig7tw"]
@@ -101,7 +101,6 @@ visible = false
 _upgradeCardScene = ExtResource("12_dg77c")
 
 [node name="GridMap" type="GridMap" parent="."]
-mesh_library = ExtResource("17_yaehf")
 
 [connection signal="timeout" from="EnemySpawner/Timer" to="EnemySpawner" method="_on_timer_timeout"]
 

@@ -18,3 +18,4 @@ mono_crash.*.json
 /Assets/PlayerModel/Humanoid Rig Versions/Blends
 /Assets/PlayerModel/FBX
 /Assets/PlayerModel/Blends
+/addons/godotsteam_csharpbindings
