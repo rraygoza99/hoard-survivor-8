@@ -46,24 +46,33 @@ texture_progress = ExtResource("2_s2ko4")
 
 [node name="HostButton" type="Button" parent="."]
 layout_mode = 0
-offset_left = 409.0
-offset_top = 33.0
-offset_right = 453.0
-offset_bottom = 64.0
+offset_left = 168.0
+offset_top = 144.0
+offset_right = 212.0
+offset_bottom = 175.0
 text = "Host"
 
 [node name="JoinButton" type="Button" parent="."]
 layout_mode = 0
-offset_left = 626.0
-offset_top = 37.0
-offset_right = 664.0
-offset_bottom = 68.0
+offset_left = 175.0
+offset_top = 200.0
+offset_right = 213.0
+offset_bottom = 231.0
 text = "Join"
 
 [node name="LobbyIdInput" type="LineEdit" parent="."]
 layout_mode = 0
-offset_right = 68.5625
-offset_bottom = 31.0
+offset_left = 47.0
+offset_top = 141.0
+offset_right = 115.563
+offset_bottom = 172.0
+
+[node name="MemberCountLabel" type="Label" parent="."]
+layout_mode = 0
+offset_left = 282.0
+offset_top = 20.0
+offset_right = 322.0
+offset_bottom = 43.0
 
 [connection signal="pressed" from="HostButton" to="." method="_on_host_button_pressed"]
 [connection signal="pressed" from="JoinButton" to="." method="_on_join_button_pressed"]

@@ -4,4 +4,9 @@
     <EnableDynamicLoading>true</EnableDynamicLoading>
     <RootNamespace>HoardSurvivor8</RootNamespace>
   </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Facepunch.SteamWorks.Win64">
+      <HintPath>./DLL/Facepunch.SteamWorks.Win64.dll</HintPath>
+    </Reference>
+  </ItemGroup>
 </Project>

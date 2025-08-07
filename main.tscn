@@ -1,11 +1,7 @@
-[gd_scene load_steps=44 format=3 uid="uid://d1k0xsj21ghfp"]
+[gd_scene load_steps=42 format=3 uid="uid://d1k0xsj21ghfp"]
 
 [ext_resource type="Script" uid="uid://dt6y7aa3ouu2e" path="res://Scripts/CameraFollow.cs" id="1_1bvp3"]
-[ext_resource type="PackedScene" uid="uid://2s1ry0cd6jh0" path="res://player.tscn" id="1_ig7tw"]
 [ext_resource type="PackedScene" uid="uid://nrkusjqe8uyu" path="res://dummy_enemy.tscn" id="2_0xm2m"]
-[ext_resource type="PackedScene" uid="uid://3p7ywwnqo2av" path="res://magic_sphere.tscn" id="2_h2yge"]
-[ext_resource type="PackedScene" uid="uid://bltgmqf6ivcis" path="res://arcane_wave.tscn" id="4_lquwl"]
-[ext_resource type="PackedScene" uid="uid://5rwf71xwcg8h" path="res://Spells/mortar_boulder.tscn" id="5_7mycd"]
 [ext_resource type="Texture2D" uid="uid://bchjrspkuhsup" path="res://Assets/Terrain/Textures/Leaves_GiantPine_C.png" id="7_2cqfq"]
 [ext_resource type="PackedScene" uid="uid://bbhjjysvr8tyr" path="res://Enemies/chaser_enemy.tscn" id="7_272bh"]
 [ext_resource type="Script" uid="uid://cukffo3h6usas" path="res://Scripts/EnemySpawner.cs" id="8_5vw27"]
@@ -39,7 +35,9 @@
 [ext_resource type="Resource" uid="uid://usrxgyw4apyj" path="res://Upgrades/legendary_lifesteal.tres" id="34_vke2r"]
 [ext_resource type="Resource" uid="uid://ina8nx0kkx7q" path="res://Upgrades/legendary_luck.tres" id="35_uit24"]
 [ext_resource type="Resource" uid="uid://cyu1gj04iionf" path="res://Upgrades/legendary_speed.tres" id="36_ruth0"]
+[ext_resource type="Script" uid="uid://bxrg7l4ivgkum" path="res://Scripts/SceneManager.cs" id="37_facbu"]
 [ext_resource type="Resource" uid="uid://bgkh0038xrb11" path="res://Upgrades/legendary_xp.tres" id="37_rm4vd"]
+[ext_resource type="PackedScene" uid="uid://blxjv10700mxq" path="res://UtilityScenes/lobby_item.tscn" id="38_b1qrp"]
 
 [sub_resource type="NavigationMesh" id="NavigationMesh_7mycd"]
 vertices = PackedVector3Array(-74.5, 0.276383, -74.5, -74.5, 0.276383, 74.5, 74.5, 0.276383, 74.5, 74.5, 0.276383, -74.5)
@@ -58,17 +56,7 @@ transform = Transform3D(1, 0, 0, 0, 0.471705, 0.881757, 0, -0.881757, 0.471705, 
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.49555, 0.86858, 0, -0.86858, 0.49555, 0, 12.4766, 12.7395)
 script = ExtResource("1_1bvp3")
-TargetNodePath = NodePath("../player")
-
-[node name="player" parent="." node_paths=PackedStringArray("_healthBar", "_healthLabel", "_xpCircle", "_levelUpScreen") instance=ExtResource("1_ig7tw")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.11185, 0)
-_magicSphereScene = ExtResource("2_h2yge")
-_arcaneWaveScene = ExtResource("4_lquwl")
-_mortarBoulderScene = ExtResource("5_7mycd")
-_healthBar = NodePath("../PlayerUI/HealthBar")
-_healthLabel = NodePath("../PlayerUI/HealthBar/HealthLabel")
-_xpCircle = NodePath("../PlayerUI/XpCircle")
-_levelUpScreen = NodePath("../LevelUpScreen")
+TargetNodePath = NodePath("")
 
 [node name="DummyEnemy" parent="." instance=ExtResource("2_0xm2m")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.894646, -6.0409)
@@ -102,6 +90,46 @@ _upgradeCardScene = ExtResource("12_dg77c")
 
 [node name="GridMap" type="GridMap" parent="."]
 
+[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("uid://2s1ry0cd6jh0")
+spawn_path = NodePath("..")
+spawn_limit = 4
+
+[node name="Control" type="Control" parent="."]
+visible = false
+layout_mode = 3
+anchors_preset = 0
+offset_right = 1146.0
+offset_bottom = 639.0
+script = ExtResource("37_facbu")
+LobbyElementScene = ExtResource("38_b1qrp")
+
+[node name="CreateLobby" type="Button" parent="Control"]
+layout_mode = 0
+offset_left = 50.0
+offset_top = 89.0
+offset_right = 161.0
+offset_bottom = 120.0
+text = "Create Lobby"
+
+[node name="GetLobbies" type="Button" parent="Control"]
+layout_mode = 0
+offset_left = 50.0
+offset_top = 155.0
+offset_right = 150.0
+offset_bottom = 186.0
+text = "Get Lobbies
+"
+
+[node name="LobbyContainer" type="VBoxContainer" parent="Control"]
+layout_mode = 0
+offset_left = 261.0
+offset_top = 103.0
+offset_right = 570.0
+offset_bottom = 320.0
+
 [connection signal="timeout" from="EnemySpawner/Timer" to="EnemySpawner" method="_on_timer_timeout"]
+[connection signal="pressed" from="Control/CreateLobby" to="Control" method="_on_create_lobby_pressed"]
+[connection signal="pressed" from="Control/GetLobbies" to="Control" method="_on_get_lobbies_pressed"]
 
 [editable path="PlayerUI"]
