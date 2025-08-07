@@ -195,11 +195,14 @@ public partial class Player : CharacterBody3D
 	
 	
 	private void _on_fire_timer_timeout(){
-		Node3D target = FindClosestEnemy(_sphereRange);
-		if(target!= null)
-			FireSpell(target);
+		
+		if(IsMultiplayerAuthority()){
+			Node3D target = FindClosestEnemy(_sphereRange);
+			if(target!= null)
+				FireSpell(target);
 			
-		UpdateFireCooldown();
+			UpdateFireCooldown();
+		}
 	}
 	private void ApplyUpgrade(Upgrade upgrade)
 	{
@@ -228,20 +231,24 @@ public partial class Player : CharacterBody3D
 
 	private void _on_wave_timer_timeout()
 	{
-		Node3D target = FindClosestEnemy(_waveRange);
-		if (target != null)
-		{
-			FireWave(target);
+		if(IsMultiplayerAuthority()){
+			Node3D target = FindClosestEnemy(_waveRange);
+			if (target != null)
+			{
+				FireWave(target);
+			}
+			UpdateWaveCooldown();
 		}
-		UpdateWaveCooldown();
 	}
 	 private void _on_mortar_timer_timeout()
 	{
-		Vector3 forwardDir = -GlobalTransform.Basis.Z;
-		Vector3 targetPos = GlobalPosition + forwardDir * _mortarRange;
+		if(IsMultiplayerAuthority()){
+			Vector3 forwardDir = -GlobalTransform.Basis.Z;
+			Vector3 targetPos = GlobalPosition + forwardDir * _mortarRange;
 
-		LaunchMortar(targetPos);
-		UpdateMortarCooldown();
+			LaunchMortar(targetPos);
+			UpdateMortarCooldown();
+		}
 	}
 	private void _on_pickup_area_area_entered(Area3D area){
 		if (area is XpOrb orb)
@@ -259,23 +266,25 @@ public partial class Player : CharacterBody3D
 	
 	public override void _PhysicsProcess(double delta)
 	{
-		Vector2 inputDir = Input.GetVector("move_left", "move_right", "move_forward", "move_backward");
-		Vector3 direction = new Vector3(inputDir.X, 0, inputDir.Y).Normalized();
+		if(IsMultiplayerAuthority()){
+			Vector2 inputDir = Input.GetVector("move_left", "move_right", "move_forward", "move_backward");
+			Vector3 direction = new Vector3(inputDir.X, 0, inputDir.Y).Normalized();
 
-		if (direction != Vector3.Zero)
-		{
-			Velocity = new Vector3(direction.X * MovementSpeed, Velocity.Y, direction.Z * MovementSpeed);
-			LookAt(Position + direction);
+			if (direction != Vector3.Zero)
+			{
+				Velocity = new Vector3(direction.X * MovementSpeed, Velocity.Y, direction.Z * MovementSpeed);
+				LookAt(Position + direction);
 			
-			_animationTree.Set("parameters/conditions/Run", true);
-			_animationTree.Set("parameters/conditions/Idle", false);
+				_animationTree.Set("parameters/conditions/Run", true);
+				_animationTree.Set("parameters/conditions/Idle", false);
+			}
+			else
+			{
+				Velocity = new Vector3(Mathf.MoveToward(Velocity.X, 0, MovementSpeed), Velocity.Y, Mathf.MoveToward(Velocity.Z, 0, MovementSpeed));
+				_animationTree.Set("parameters/conditions/Run", false);
+				_animationTree.Set("parameters/conditions/Idle", true);
+			}
+			MoveAndSlide();
 		}
-		else
-		{
-			Velocity = new Vector3(Mathf.MoveToward(Velocity.X, 0, MovementSpeed), Velocity.Y, Mathf.MoveToward(Velocity.Z, 0, MovementSpeed));
-			_animationTree.Set("parameters/conditions/Run", false);
-			_animationTree.Set("parameters/conditions/Idle", true);
-		}
-		MoveAndSlide();
 	}
 }

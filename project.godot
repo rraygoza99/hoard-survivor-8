@@ -18,6 +18,7 @@ config/icon="res://icon.svg"
 [autoload]
 
 SimpleGrass="*res://addons/simplegrasstextured/singleton.tscn"
+SteamManager="*res://autoloads/SteamManager.cs"
 
 [dotnet]
 
