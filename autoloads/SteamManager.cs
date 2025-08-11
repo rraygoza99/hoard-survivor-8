@@ -13,11 +13,19 @@ public partial class SteamManager : Node
 	private Lobby hostedLobby {get; set;}
 	private List<Lobby> availableLobbies {get;set;} = new List<Lobby>();
 	public bool IsSteamInitialized { get; private set; } = false;
+	private SceneManager _sceneManager;
 	
 	// For testing: allows multiple instances with same Steam account
 	private static bool enableTestMode = true;
 	public static event Action<List<Lobby>> OnLobbiesRefreshCompleted;
 	public static event Action<int> OnLobbyMemberCountChanged;
+	public static event Action<Dictionary<string, bool>> OnPlayerReadyStatusChanged;
+	public static event Action OnAllPlayersReady;
+	public static event Action OnNotAllPlayersReady;
+	
+	// Ready system
+	private Dictionary<string, bool> playerReadyStatus = new Dictionary<string, bool>();
+	public bool IsLocalPlayerReady { get; private set; } = false;
 	
 	// Property to get current lobby member count
 	public int CurrentLobbyMemberCount 
@@ -73,6 +81,7 @@ public partial class SteamManager : Node
 	}
 	public override void _Ready()
 	{
+		_sceneManager = GetNode<SceneManager>("/root/SceneManager");
 		if (!IsSteamInitialized)
 		{
 			GD.PrintErr("Steam is not initialized, skipping lobby callbacks setup");
@@ -101,10 +110,14 @@ public partial class SteamManager : Node
 		GD.Print("Firing callback for lobby game created");
 	}
 	private void OnLobbyCreatedCallback(Result result, Lobby lobby){
-		if(result != Result.OK){
+		if (result != Result.OK)
+		{
 			GD.Print("lobby was not created");
-		}else{
+		}
+		else
+		{
 			GD.Print("Lobby was created " + lobby.Id);
+			_sceneManager.GoToScene("res://UtilityScenes/lobby.tscn");
 		}
 	}
 	private void OnLobbyMemberJoinedCallback(Lobby lobby, Friend friend){
@@ -118,6 +131,7 @@ public partial class SteamManager : Node
 			GD.Print($"You joined {lobby.Owner.Name}'s lobby");
 			GD.Print($"Current lobby members: {lobby.MemberCount}");
 			OnLobbyMemberCountChanged?.Invoke(lobby.MemberCount);
+			_sceneManager.GoToScene("res://UtilityScenes/lobby.tscn");
 		}
 	}
 	public override void _Process(double delta){
@@ -259,6 +273,69 @@ public partial class SteamManager : Node
 			GD.PrintErr($"Error joining lobby: {e.Message}");
 			return false;
 		}
+	}
+	
+	// Ready system methods
+	public void SetPlayerReady(bool ready)
+	{
+		if (!IsSteamInitialized || hostedLobby.Id == 0)
+		{
+			GD.PrintErr("Cannot set ready status - not in a lobby");
+			return;
+		}
+		
+		IsLocalPlayerReady = ready;
+		string readyData = ready ? "1" : "0";
+		
+		// Set player ready status in lobby data
+		hostedLobby.SetMemberData("ready", readyData);
+		GD.Print($"Set local player ready status to: {ready}");
+		
+		// Refresh ready status for all players
+		RefreshAllPlayerReadyStatus();
+	}
+	
+	public void RefreshAllPlayerReadyStatus()
+	{
+		if (hostedLobby.Id == 0) return;
+		
+		playerReadyStatus.Clear();
+		int readyCount = 0;
+		int totalPlayers = 0;
+		
+		foreach (Friend member in hostedLobby.Members)
+		{
+			totalPlayers++;
+			string readyData = hostedLobby.GetMemberData(member, "ready");
+			bool isReady = readyData == "1";
+			playerReadyStatus[member.Name] = isReady;
+			
+			if (isReady) readyCount++;
+			
+			GD.Print($"Player {member.Name} ready status: {isReady}");
+		}
+		
+		GD.Print($"Ready players: {readyCount}/{totalPlayers}");
+		
+		// Notify UI of ready status changes
+		OnPlayerReadyStatusChanged?.Invoke(new Dictionary<string, bool>(playerReadyStatus));
+		
+		// Check if all players are ready
+		if (totalPlayers > 0 && readyCount == totalPlayers)
+		{
+			GD.Print("All players are ready!");
+			OnAllPlayersReady?.Invoke();
+		}
+		else if (totalPlayers > 0)
+		{
+			GD.Print($"Not all players ready ({readyCount}/{totalPlayers})");
+			OnNotAllPlayersReady?.Invoke();
+		}
+	}
+	
+	public Dictionary<string, bool> GetPlayerReadyStatus()
+	{
+		return new Dictionary<string, bool>(playerReadyStatus);
 	}
 	
 	public override void _Notification(int what){

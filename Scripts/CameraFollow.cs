@@ -21,4 +21,18 @@ public partial class CameraFollow : Camera3D
 			GlobalTransform = new Transform3D(GlobalTransform.Basis, _target.GlobalTransform.Origin + _offset);
 		}
 	}
+	
+	public void SetTarget(Node3D target)
+	{
+		_target = target;
+		if (_target != null)
+		{
+			_offset = GlobalTransform.Origin - _target.GlobalTransform.Origin;
+			GD.Print($"Camera target set to: {_target.Name}");
+		}
+		else
+		{
+			GD.Print("Camera target set to null");
+		}
+	}
 }

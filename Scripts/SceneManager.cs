@@ -3,9 +3,9 @@ using Steamworks.Data;
 using System;
 using System.Collections.Generic;
 
-public partial class SceneManager : Control
+public partial class SceneManager : Node
 {
-	[Export]public PackedScene LobbyElementScene { get; set; }
+	[Export] public PackedScene LobbyElementScene { get; set; }
 	public override void _Ready()
 	{
 		SteamManager.OnLobbiesRefreshCompleted += OnLobbiesRefreshCompletedCallback;
@@ -24,7 +24,12 @@ public partial class SceneManager : Control
 	{
 		SteamManager.Manager.CreateLobby();
 	}
-	private void _on_get_lobbies_pressed(){
+	private void _on_get_lobbies_pressed()
+	{
 		var lobbies = SteamManager.Manager.GetMultiplayerLobbies();
+	}
+	public void GoToScene(string path)
+	{
+		GetTree().ChangeSceneToFile(path);
 	}
 }
