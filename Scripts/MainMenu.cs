@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 
 public partial class MainMenu : Control
 {
+    [Export] public PackedScene JoinLobbyPopupScene { get; set; }
+    
     public override void _Ready()
     {
         // Add debug info to see what's happening
@@ -13,6 +15,7 @@ public partial class MainMenu : Control
         
         // Check if buttons exist before connecting
         var hostButton = GetNodeOrNull<Button>("VBoxContainer/HostButton");
+        var joinButton = GetNodeOrNull<Button>("VBoxContainer/JoinButton");
         var quitButton = GetNodeOrNull<Button>("VBoxContainer/QuitButton");
         
         if (hostButton != null)
@@ -25,6 +28,16 @@ public partial class MainMenu : Control
             GD.PrintErr("Host button not found at path: VBoxContainer/HostButton");
             // Try to find all buttons in the scene
             PrintAllButtons();
+        }
+        
+        if (joinButton != null)
+        {
+            GD.Print("Join button found, connecting signal");
+            joinButton.Pressed += OnJoinButtonPressed;
+        }
+        else
+        {
+            GD.PrintErr("Join button not found at path: VBoxContainer/JoinButton");
         }
         
         if (quitButton != null)
@@ -105,7 +118,32 @@ public partial class MainMenu : Control
     }
     private void OnJoinButtonPressed()
     {
-        GD.Print("Join button pressed");
+        GD.Print("Join button pressed - showing join lobby popup");
+        
+        // Load and show the join lobby popup
+        PackedScene popupScene = null;
+        
+        if (JoinLobbyPopupScene != null)
+        {
+            popupScene = JoinLobbyPopupScene;
+        }
+        else
+        {
+            // Try to load the popup scene directly
+            popupScene = GD.Load<PackedScene>("res://UtilityScenes/join_lobby_popup.tscn");
+        }
+        
+        if (popupScene != null)
+        {
+            var popup = popupScene.Instantiate<AcceptDialog>();
+            GetTree().CurrentScene.AddChild(popup);
+            popup.PopupCentered();
+            GD.Print("Join lobby popup shown");
+        }
+        else
+        {
+            GD.PrintErr("Could not load join lobby popup scene");
+        }
     }
     private void on_quit_button_pressed()
     {
