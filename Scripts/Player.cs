@@ -10,6 +10,11 @@ public partial class Player : CharacterBody3D
 	[Export] public float MaxHealth { get; set; } = 100.0f;
 	public float CurrentHealth { get; private set; }
 	[Export] float MovementSpeed { get; set; } = 5.0f;
+	
+	// Multiplayer properties
+	private bool _isLocalPlayer = false;
+	private string _playerName = "";
+	
 	// XP Gain: A multiplier for experience points gained (e.g., 1.1 for +10%).
 	[Export] float XpGainMultiplier { get; set; } = 1.0f;
 	// Health Regen: Health points regenerated per second.
@@ -266,7 +271,8 @@ public partial class Player : CharacterBody3D
 	
 	public override void _PhysicsProcess(double delta)
 	{
-		if(IsMultiplayerAuthority()){
+		// Only allow input if this is the local player
+		if(_isLocalPlayer && IsMultiplayerAuthority()){
 			Vector2 inputDir = Input.GetVector("move_left", "move_right", "move_forward", "move_backward");
 			Vector3 direction = new Vector3(inputDir.X, 0, inputDir.Y).Normalized();
 
@@ -286,5 +292,25 @@ public partial class Player : CharacterBody3D
 			}
 			MoveAndSlide();
 		}
+	}
+	
+	// Methods called by GameManager to set player properties
+	public void SetIsLocalPlayer(bool isLocal)
+	{
+		_isLocalPlayer = isLocal;
+		GD.Print($"Player {Name} set as local: {isLocal}");
+		
+		// You could add visual indicators here for debugging
+		if (isLocal)
+		{
+			// Maybe change player color or add a nameplate
+			GD.Print($"This is the LOCAL player: {_playerName}");
+		}
+	}
+	
+	public void SetPlayerName(string playerName)
+	{
+		_playerName = playerName;
+		GD.Print($"Player name set to: {playerName}");
 	}
 }

@@ -43,6 +43,7 @@ public partial class LobbyUI : Control
         SteamManager.OnPlayerReadyStatusChanged += OnPlayerReadyStatusChanged;
         SteamManager.OnAllPlayersReady += OnAllPlayersReady;
         SteamManager.OnNotAllPlayersReady += OnNotAllPlayersReady;
+        SteamManager.OnGameStartSignaled += OnGameStartSignaled;
         GD.Print("Subscribed to Steam events");
         
         // Initial refresh
@@ -66,6 +67,7 @@ public partial class LobbyUI : Control
         SteamManager.OnPlayerReadyStatusChanged -= OnPlayerReadyStatusChanged;
         SteamManager.OnAllPlayersReady -= OnAllPlayersReady;
         SteamManager.OnNotAllPlayersReady -= OnNotAllPlayersReady;
+        SteamManager.OnGameStartSignaled -= OnGameStartSignaled;
         
         if (_countdownTimer != null)
         {
@@ -214,12 +216,42 @@ public partial class LobbyUI : Control
             _countdownLabel.Text = "Starting now!";
             _countdownTimer.Stop();
             
-            // Hide countdown after a moment and start the game
+            // Only the host should signal game start to all players
+            if (SteamManager.Manager != null && SteamManager.Manager.IsLobbyOwner())
+            {
+                GD.Print("Host triggering game start for all players");
+                SteamManager.Manager.StartGameForAllPlayers();
+            }
+            
+            // Hide countdown after a moment and start the game (for host)
             GetTree().CreateTimer(1.0).Timeout += () => {
                 _countdownLabel.Visible = false;
-                StartGame();
+                if (SteamManager.Manager != null && SteamManager.Manager.IsLobbyOwner())
+                {
+                    StartGame();
+                }
             };
         }
+    }
+    
+    private void OnGameStartSignaled()
+    {
+        GD.Print("Received game start signal from host!");
+        
+        // Stop countdown if running
+        if (_countdownTimer != null)
+        {
+            _countdownTimer.Stop();
+        }
+        
+        // Hide countdown label
+        if (_countdownLabel != null)
+        {
+            _countdownLabel.Visible = false;
+        }
+        
+        // Start the game for this client
+        StartGame();
     }
     
     private void StartGame()

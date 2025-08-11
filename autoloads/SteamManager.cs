@@ -22,6 +22,7 @@ public partial class SteamManager : Node
 	public static event Action<Dictionary<string, bool>> OnPlayerReadyStatusChanged;
 	public static event Action OnAllPlayersReady;
 	public static event Action OnNotAllPlayersReady;
+	public static event Action OnGameStartSignaled;
 	
 	// Ready system
 	private Dictionary<string, bool> playerReadyStatus = new Dictionary<string, bool>();
@@ -94,6 +95,7 @@ public partial class SteamManager : Node
 		SteamMatchmaking.OnLobbyMemberDisconnected += OnLobbyMemberDisconnectedCallback;
 		SteamMatchmaking.OnLobbyMemberLeave += OnLobbyMemberLeaveCallback;
 		SteamMatchmaking.OnLobbyEntered += OnLobbyEnteredCallback;
+		SteamMatchmaking.OnLobbyDataChanged += OnLobbyDataChangedCallback;
 	}
 	
 	private void OnLobbyMemberLeaveCallback(Lobby lobby, Friend friend){
@@ -134,6 +136,22 @@ public partial class SteamManager : Node
 			_sceneManager.GoToScene("res://UtilityScenes/lobby.tscn");
 		}
 	}
+	
+	private void OnLobbyDataChangedCallback(Lobby lobby)
+	{
+		GD.Print("Lobby data changed");
+		
+		// Check if game start signal was set
+		if (lobby.GetData("game_start") == "true")
+		{
+			GD.Print("Game start signal received from host!");
+			OnGameStartSignaled?.Invoke();
+		}
+		
+		// Also refresh ready status when lobby data changes
+		RefreshAllPlayerReadyStatus();
+	}
+	
 	public override void _Process(double delta){
 		try{
 			if(IsSteamInitialized && SteamClient.IsValid){
@@ -336,6 +354,24 @@ public partial class SteamManager : Node
 	public Dictionary<string, bool> GetPlayerReadyStatus()
 	{
 		return new Dictionary<string, bool>(playerReadyStatus);
+	}
+	
+	public bool IsLobbyOwner()
+	{
+		if (hostedLobby.Id != 0)
+		{
+			return hostedLobby.Owner.Name == PlayerName;
+		}
+		return false;
+	}
+	
+	public void StartGameForAllPlayers()
+	{
+		if (hostedLobby.Id != 0 && IsLobbyOwner())
+		{
+			GD.Print("Host starting game for all players");
+			hostedLobby.SetData("game_start", "true");
+		}
 	}
 	
 	public override void _Notification(int what){

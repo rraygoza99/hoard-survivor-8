@@ -49,11 +49,17 @@ public partial class GameManager : Node
 	private void SpawnLobbyPlayers()
 	{
 		var playerNames = GameData.LobbyPlayerNames;
+		var localPlayerName = SteamManager.Manager?.PlayerName ?? "Player";
+		
 		GD.Print($"Spawning {playerNames.Count} players: {string.Join(", ", playerNames)}");
+		GD.Print($"Local player name: {localPlayerName}");
 		
 		for (int i = 0; i < playerNames.Count && i < spawnPositions.Length; i++)
 		{
-			SpawnPlayer(playerNames[i], spawnPositions[i], i == 0); // First player is the local player
+			// Check if this player is the local player by comparing names
+			bool isLocalPlayer = playerNames[i] == localPlayerName;
+			GD.Print($"Player {i}: {playerNames[i]} - Local: {isLocalPlayer}");
+			SpawnPlayer(playerNames[i], spawnPositions[i], isLocalPlayer);
 		}
 	}
 	
