@@ -374,6 +374,61 @@ public partial class SteamManager : Node
 		}
 	}
 	
+	// Position synchronization methods
+	public void UpdatePlayerPosition(string playerName, Vector3 position, Vector3 rotation, bool isMoving)
+	{
+		if (hostedLobby.Id != 0)
+		{
+			var posData = $"{position.X},{position.Y},{position.Z}";
+			var rotData = $"{rotation.X},{rotation.Y},{rotation.Z}";
+			var movingData = isMoving ? "1" : "0";
+			
+			hostedLobby.SetData($"pos_{playerName}", posData);
+			hostedLobby.SetData($"rot_{playerName}", rotData);
+			hostedLobby.SetData($"mov_{playerName}", movingData);
+		}
+	}
+	
+	public (Vector3 position, Vector3 rotation, bool isMoving)? GetPlayerPosition(string playerName)
+	{
+		if (hostedLobby.Id != 0)
+		{
+			var posData = hostedLobby.GetData($"pos_{playerName}");
+			var rotData = hostedLobby.GetData($"rot_{playerName}");
+			var movData = hostedLobby.GetData($"mov_{playerName}");
+			
+			if (!string.IsNullOrEmpty(posData) && !string.IsNullOrEmpty(rotData))
+			{
+				try
+				{
+					var posParts = posData.Split(',');
+					var rotParts = rotData.Split(',');
+					
+					var position = new Vector3(
+						float.Parse(posParts[0]),
+						float.Parse(posParts[1]),
+						float.Parse(posParts[2])
+					);
+					
+					var rotation = new Vector3(
+						float.Parse(rotParts[0]),
+						float.Parse(rotParts[1]),
+						float.Parse(rotParts[2])
+					);
+					
+					var isMoving = movData == "1";
+					
+					return (position, rotation, isMoving);
+				}
+				catch (Exception e)
+				{
+					GD.PrintErr($"Error parsing player position data: {e.Message}");
+				}
+			}
+		}
+		return null;
+	}
+	
 	public override void _Notification(int what){
 		base._Notification(what);
 		if(what == NotificationWMCloseRequest){

@@ -15,6 +15,13 @@ public partial class Player : CharacterBody3D
 	private bool _isLocalPlayer = false;
 	private string _playerName = "";
 	
+	// Network synchronization
+	private Vector3 _networkPosition = Vector3.Zero;
+	private Vector3 _networkRotation = Vector3.Zero;
+	private bool _networkIsMoving = false;
+	private float _lastPositionUpdate = 0.0f;
+	private const float POSITION_UPDATE_INTERVAL = 0.1f; // Update every 100ms
+	
 	// XP Gain: A multiplier for experience points gained (e.g., 1.1 for +10%).
 	[Export] float XpGainMultiplier { get; set; } = 1.0f;
 	// Health Regen: Health points regenerated per second.
@@ -272,11 +279,13 @@ public partial class Player : CharacterBody3D
 	public override void _PhysicsProcess(double delta)
 	{
 		// Only allow input if this is the local player
-		if(_isLocalPlayer && IsMultiplayerAuthority()){
+		if(_isLocalPlayer){
 			Vector2 inputDir = Input.GetVector("move_left", "move_right", "move_forward", "move_backward");
 			Vector3 direction = new Vector3(inputDir.X, 0, inputDir.Y).Normalized();
 
-			if (direction != Vector3.Zero)
+			bool isMoving = direction != Vector3.Zero;
+			
+			if (isMoving)
 			{
 				Velocity = new Vector3(direction.X * MovementSpeed, Velocity.Y, direction.Z * MovementSpeed);
 				LookAt(Position + direction);
@@ -290,7 +299,36 @@ public partial class Player : CharacterBody3D
 				_animationTree.Set("parameters/conditions/Run", false);
 				_animationTree.Set("parameters/conditions/Idle", true);
 			}
+			
 			MoveAndSlide();
+			
+			// Update position via Steam lobby data (throttled)
+			_lastPositionUpdate += (float)delta;
+			if (_lastPositionUpdate >= POSITION_UPDATE_INTERVAL && SteamManager.Manager != null)
+			{
+				SteamManager.Manager.UpdatePlayerPosition(_playerName, Position, Rotation, isMoving);
+				_lastPositionUpdate = 0.0f;
+			}
+		}
+		else if (!_isLocalPlayer)
+		{
+			// For remote players, get position from Steam lobby data
+			if (SteamManager.Manager != null)
+			{
+				var playerData = SteamManager.Manager.GetPlayerPosition(_playerName);
+				if (playerData.HasValue)
+				{
+					var (pos, rot, moving) = playerData.Value;
+					
+					// Smoothly interpolate to network position
+					Position = Position.MoveToward(pos, MovementSpeed * (float)delta);
+					Rotation = Rotation.MoveToward(rot, 5.0f * (float)delta);
+					
+					// Update animations based on network state
+					_animationTree.Set("parameters/conditions/Run", moving);
+					_animationTree.Set("parameters/conditions/Idle", !moving);
+				}
+			}
 		}
 	}
 	
