@@ -78,9 +78,7 @@ public partial class Player : CharacterBody3D
 			_levelUpScreen.UpgradeChosen += OnUpgradeChosen;
 		}
 		
-		GD.Print($"Before setting CurrentHealth - MaxHealth: {MaxHealth}");
 		CurrentHealth = MaxHealth;
-		GD.Print($"After setting CurrentHealth - CurrentHealth: {CurrentHealth}, MaxHealth: {MaxHealth}");
 		
 		UpdateHealthBar();
 		UpdateXpCircle();
@@ -178,7 +176,6 @@ public partial class Player : CharacterBody3D
 	{
 		// Apply armor reduction
 		float reducedDamage = Mathf.Max(0, damage - Armor);
-		GD.Print($"Player {_playerName} taking {damage} damage (reduced to {reducedDamage} after {Armor} armor, current health: {CurrentHealth})");
 		CurrentHealth -= reducedDamage;
 		if (CurrentHealth < 0) CurrentHealth = 0;
 		UpdateHealthBar();
@@ -242,7 +239,6 @@ public partial class Player : CharacterBody3D
 		if (_levelUpScreen != null)
 		{
 			_levelUpScreen.UpgradeChosen += OnUpgradeChosen;
-			GD.Print("Level up screen event connected");
 		}
 		else
 		{
@@ -264,12 +260,7 @@ public partial class Player : CharacterBody3D
 			Node3D target = FindClosestEnemy(_sphereRange);
 			if(target!= null)
 			{
-				GD.Print($"Local player {_playerName} casting spell at target: {target.Name}");
 				FireSpell(target);
-			}
-			else
-			{
-				GD.Print($"Local player {_playerName} - no target found for spell casting");
 			}
 			
 			UpdateFireCooldown();
@@ -319,7 +310,6 @@ public partial class Player : CharacterBody3D
 			Node3D target = FindClosestEnemy(_waveRange);
 			if (target != null)
 			{
-				GD.Print($"Local player {_playerName} casting wave at target: {target.Name}");
 				FireWave(target);
 			}
 			UpdateWaveCooldown();
@@ -332,7 +322,6 @@ public partial class Player : CharacterBody3D
 			Vector3 forwardDir = -GlobalTransform.Basis.Z;
 			Vector3 targetPos = GlobalPosition + forwardDir * _mortarRange;
 
-			GD.Print($"Local player {_playerName} launching mortar at position: {targetPos}");
 			LaunchMortar(targetPos);
 			UpdateMortarCooldown();
 		}
