@@ -21,6 +21,7 @@ transitions = ["Start", "run", SubResource("AnimationNodeStateMachineTransition_
 
 [node name="LittleShroomEnemy" groups=["enemies"] instance=ExtResource("1_6mtej")]
 script = ExtResource("2_wgdxg")
+Health = 25.0
 _xpOrbScene = ExtResource("3_352gk")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." index="0"]
@@ -30,15 +31,15 @@ shape = SubResource("SphereShape3D_6mtej")
 [node name="NavigationAgent3D" type="NavigationAgent3D" parent="." index="1"]
 
 [node name="Skeleton3D" parent="Armature" index="0"]
-bones/0/position = Vector3(0, -0.119148, 0)
-bones/1/rotation = Quaternion(-0.15262, 3.5384e-16, -3.87634e-08, 0.988285)
-bones/2/rotation = Quaternion(0.024881, -9.85007e-16, -6.21487e-16, 0.99969)
-bones/3/position = Vector3(0, -0.119148, 0)
-bones/4/rotation = Quaternion(-0.609753, -0.358053, -0.358053, 0.609753)
-bones/5/rotation = Quaternion(0.021867, -0.0503951, 0.444964, 0.893862)
-bones/6/position = Vector3(0, -0.119148, 0)
-bones/7/rotation = Quaternion(-0.699393, -0.104159, -0.104159, 0.699393)
-bones/8/rotation = Quaternion(1.11845e-08, -9.30299e-09, -0.183657, 0.98299)
+bones/0/position = Vector3(0, -0.113126, 0)
+bones/1/rotation = Quaternion(-0.0802972, 1.33569e-16, -3.84885e-08, 0.996771)
+bones/2/rotation = Quaternion(0.101681, -2.94919e-15, 3.28186e-10, 0.994817)
+bones/3/position = Vector3(0, -0.113126, 0)
+bones/4/rotation = Quaternion(-0.680135, -0.193432, -0.193432, 0.680135)
+bones/5/rotation = Quaternion(0.0159588, -0.0528616, 0.319514, 0.945971)
+bones/6/position = Vector3(0, -0.113126, 0)
+bones/7/rotation = Quaternion(-0.706989, -0.0129302, -0.0129303, 0.706989)
+bones/8/rotation = Quaternion(1.11845e-08, -9.303e-09, -0.183657, 0.98299)
 
 [node name="Plane" parent="Armature/Skeleton3D" index="0"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.424789, 0)

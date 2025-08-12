@@ -1,0 +1,44 @@
+[gd_scene load_steps=8 format=3 uid="uid://jn0gdhj261hd"]
+
+[ext_resource type="PackedScene" uid="uid://dkmwx5wx5yv4m" path="res://Assets/Monsters/tiki/tikiBaseEnemy.glb" id="1_d0dcx"]
+[ext_resource type="Script" uid="uid://cm7f2gkomuvo" path="res://Enemies/Chasers/CocoChaser.cs" id="1_xfv6d"]
+[ext_resource type="PackedScene" uid="uid://dbefrtiwqngk5" path="res://UtilityScenes/xp_orb.tscn" id="2_kjqso"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_xfv6d"]
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_xfv6d"]
+animation = &"run"
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_kjqso"]
+advance_mode = 2
+
+[sub_resource type="AnimationNodeStateMachine" id="AnimationNodeStateMachine_kjqso"]
+states/run/node = SubResource("AnimationNodeAnimation_xfv6d")
+states/run/position = Vector2(356, 139)
+transitions = ["Start", "run", SubResource("AnimationNodeStateMachineTransition_kjqso")]
+
+[node name="CocoChaser" type="CharacterBody3D" groups=["enemies"]]
+script = ExtResource("1_xfv6d")
+_xpOrbScene = ExtResource("2_kjqso")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("SphereShape3D_xfv6d")
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]
+
+[node name="tikiBaseEnemy" parent="." instance=ExtResource("1_d0dcx")]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, -0.610524, 0)
+
+[node name="Skeleton3D" parent="tikiBaseEnemy/Armature" index="0"]
+bones/6/rotation = Quaternion(2.66925e-08, 2.66925e-08, 0.707107, 0.707107)
+bones/14/rotation = Quaternion(2.66925e-08, -2.66925e-08, -0.707107, 0.707107)
+bones/19/rotation = Quaternion(-0.707107, -2.66925e-08, 2.66925e-08, 0.707107)
+bones/22/rotation = Quaternion(-0.707107, 2.66925e-08, -2.66925e-08, 0.707107)
+bones/24/position = Vector3(0, 0.598912, 0.482709)
+
+[node name="AnimationTree" type="AnimationTree" parent="."]
+root_node = NodePath("../tikiBaseEnemy")
+tree_root = SubResource("AnimationNodeStateMachine_kjqso")
+anim_player = NodePath("../tikiBaseEnemy/AnimationPlayer")
+
+[editable path="tikiBaseEnemy"]

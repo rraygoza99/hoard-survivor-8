@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://dt6y7aa3ouu2e" path="res://Scripts/CameraFollow.cs" id="1_1bvp3"]
 [ext_resource type="PackedScene" uid="uid://2s1ry0cd6jh0" path="res://player.tscn" id="2_player"]
 [ext_resource type="Script" uid="uid://dvdx4vkk1lski" path="res://Scripts/GameManager.cs" id="3_gamemanager"]
-[ext_resource type="PackedScene" uid="uid://08sn2q2gsdmf" path="res://Enemies/LittleShroomEnemy.tscn" id="6_b1qrp"]
+[ext_resource type="PackedScene" uid="uid://jn0gdhj261hd" path="res://Enemies/Chasers/CocoChaser.tscn" id="6_b1qrp"]
 [ext_resource type="Texture2D" uid="uid://bchjrspkuhsup" path="res://Assets/Terrain/Textures/Leaves_GiantPine_C.png" id="7_2cqfq"]
 [ext_resource type="Script" uid="uid://cukffo3h6usas" path="res://Scripts/EnemySpawner.cs" id="8_5vw27"]
 [ext_resource type="PackedScene" uid="uid://bbjgf2mgs0rc2" path="res://UtilityScenes/player_ui.tscn" id="9_kek77"]
