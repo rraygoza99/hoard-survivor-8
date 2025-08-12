@@ -18,14 +18,27 @@ states/run/node = SubResource("AnimationNodeAnimation_7v8mc")
 states/run/position = Vector2(312, 90)
 transitions = ["Start", "run", SubResource("AnimationNodeStateMachineTransition_cte1p")]
 
-[node name="littleshroom" instance=ExtResource("1_6mtej")]
+[node name="littleshroom" groups=["enemies"] instance=ExtResource("1_6mtej")]
 script = ExtResource("2_7v8mc")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." index="0"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.000194192, 0.542708, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.000194192, 0.117919, 0)
 shape = SubResource("SphereShape3D_6mtej")
 
 [node name="NavigationAgent3D" type="NavigationAgent3D" parent="." index="1"]
+
+[node name="Skeleton3D" parent="Armature" index="0"]
+bones/0/position = Vector3(0, -0.119696, 0)
+bones/1/rotation = Quaternion(-0.162509, 0, -3.87452e-08, 0.986707)
+bones/3/position = Vector3(0, -0.119696, 0)
+bones/4/rotation = Quaternion(-0.446961, -0.547928, -0.547928, 0.446961)
+bones/5/rotation = Quaternion(0.00382884, -0.0549506, 0.0692753, 0.996076)
+bones/6/position = Vector3(0, -0.119696, 0)
+bones/7/rotation = Quaternion(-0.648122, -0.282733, -0.282733, 0.648122)
+bones/8/rotation = Quaternion(1.11845e-08, -9.303e-09, -0.183657, 0.98299)
+
+[node name="Plane" parent="Armature/Skeleton3D" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.424789, 0)
 
 [node name="AnimationTree" type="AnimationTree" parent="." index="4"]
 tree_root = SubResource("AnimationNodeStateMachine_8vkft")
