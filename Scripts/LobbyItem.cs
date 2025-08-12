@@ -1,23 +1,43 @@
 using Godot;
-using Steamworks.Data;
 using System;
+using Steamworks.Data;
 
 public partial class LobbyItem : Control
 {
-    public Lobby lobby { get; set; }
-    public override void _Ready()
-    {
-        GD.Print("LobbyItem is ready");
-    }
-    public void SetLabels(string id, string name, Lobby lobby)
-    {
-        this.lobby = lobby;
-        GetNode<RichTextLabel>("ID").Text = id;
-        GetNode<RichTextLabel>("LobbyName").Text = name;
-        this.lobby = lobby;
-    }
-    public void _on_join_button_pressed()
-    {
-        lobby.Join();
-    }
+	private Label _lobbyIdLabel;
+	private Label _lobbyNameLabel;
+	private Button _joinButton;
+	private Lobby _lobby;
+
+	public override void _Ready()
+	{
+		_lobbyIdLabel = GetNodeOrNull<Label>("LobbyIdLabel");
+		_lobbyNameLabel = GetNodeOrNull<Label>("LobbyNameLabel");
+		_joinButton = GetNodeOrNull<Button>("JoinButton");
+		
+		if (_joinButton != null)
+		{
+			_joinButton.Pressed += OnJoinButtonPressed;
+		}
+	}
+
+	public void SetLabels(string lobbyId, string lobbyName, Lobby lobby)
+	{
+		_lobby = lobby;
+		
+		if (_lobbyIdLabel != null)
+			_lobbyIdLabel.Text = lobbyId;
+			
+		if (_lobbyNameLabel != null)
+			_lobbyNameLabel.Text = lobbyName;
+	}
+
+	private async void OnJoinButtonPressed()
+	{
+		if (SteamManager.Manager != null)
+		{
+			string lobbyIdString = _lobby.Id.ToString();
+			await SteamManager.Manager.JoinLobby(lobbyIdString);
+		}
+	}
 }

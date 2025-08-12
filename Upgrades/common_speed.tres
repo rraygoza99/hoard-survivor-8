@@ -8,5 +8,5 @@ Name = "Run run"
 Description = "Increase Speed by 4"
 Rarity = 0
 StatToUpgrade = 1
-Value = 4.0
+Value = 0.04
 metadata/_custom_type_script = "uid://bujpibpep1yxw"

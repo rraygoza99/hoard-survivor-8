@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="Upgrade" load_steps=2 format=3 uid="uid://dlnct4fwpet70"]
 
-[ext_resource type="Script" path="res://Scripts/Upgrade.cs" id="1_herx6"]
+[ext_resource type="Script" uid="uid://bujpibpep1yxw" path="res://Scripts/Upgrade.cs" id="1_herx6"]
 
 [resource]
 script = ExtResource("1_herx6")
@@ -8,5 +8,5 @@ Name = "Crit Dmg (Common)"
 Description = "Increase critical damage by 15%"
 Rarity = 0
 StatToUpgrade = 6
-Value = 15.0
+Value = 0.15
 metadata/_custom_type_script = "uid://bujpibpep1yxw"

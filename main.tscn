@@ -1,13 +1,16 @@
-[gd_scene load_steps=42 format=3 uid="uid://d1k0xsj21ghfp"]
+[gd_scene load_steps=43 format=3 uid="uid://d1k0xsj21ghfp"]
 
 [ext_resource type="Script" uid="uid://dt6y7aa3ouu2e" path="res://Scripts/CameraFollow.cs" id="1_1bvp3"]
 [ext_resource type="PackedScene" uid="uid://nrkusjqe8uyu" path="res://dummy_enemy.tscn" id="2_0xm2m"]
+[ext_resource type="PackedScene" uid="uid://2s1ry0cd6jh0" path="res://player.tscn" id="2_player"]
+[ext_resource type="Script" uid="uid://dvdx4vkk1lski" path="res://Scripts/GameManager.cs" id="3_gamemanager"]
 [ext_resource type="Texture2D" uid="uid://bchjrspkuhsup" path="res://Assets/Terrain/Textures/Leaves_GiantPine_C.png" id="7_2cqfq"]
 [ext_resource type="PackedScene" uid="uid://bbhjjysvr8tyr" path="res://Enemies/chaser_enemy.tscn" id="7_272bh"]
 [ext_resource type="Script" uid="uid://cukffo3h6usas" path="res://Scripts/EnemySpawner.cs" id="8_5vw27"]
 [ext_resource type="PackedScene" uid="uid://bbjgf2mgs0rc2" path="res://UtilityScenes/player_ui.tscn" id="9_kek77"]
 [ext_resource type="Script" uid="uid://b1mfb2qse5xew" path="res://Scripts/UpgradeManager.cs" id="10_4c57u"]
 [ext_resource type="PackedScene" uid="uid://de0c5bprdp1ps" path="res://UtilityScenes/level_up_screen.tscn" id="11_efxa6"]
+[ext_resource type="PackedScene" uid="uid://bs08fa8askebq" path="res://UtilityScenes/stats_overlay.tscn" id="11_stats"]
 [ext_resource type="Resource" uid="uid://cj8n5heltg8pm" path="res://Upgrades/common_health.tres" id="11_ycdy4"]
 [ext_resource type="PackedScene" uid="uid://dck41ol2vfb2c" path="res://UtilityScenes/upgrade_card.tscn" id="12_dg77c"]
 [ext_resource type="Resource" uid="uid://bx01xld7hg5fw" path="res://Upgrades/rare_health.tres" id="12_vivmo"]
@@ -35,9 +38,7 @@
 [ext_resource type="Resource" uid="uid://usrxgyw4apyj" path="res://Upgrades/legendary_lifesteal.tres" id="34_vke2r"]
 [ext_resource type="Resource" uid="uid://ina8nx0kkx7q" path="res://Upgrades/legendary_luck.tres" id="35_uit24"]
 [ext_resource type="Resource" uid="uid://cyu1gj04iionf" path="res://Upgrades/legendary_speed.tres" id="36_ruth0"]
-[ext_resource type="Script" uid="uid://bxrg7l4ivgkum" path="res://Scripts/SceneManager.cs" id="37_facbu"]
 [ext_resource type="Resource" uid="uid://bgkh0038xrb11" path="res://Upgrades/legendary_xp.tres" id="37_rm4vd"]
-[ext_resource type="PackedScene" uid="uid://blxjv10700mxq" path="res://UtilityScenes/lobby_item.tscn" id="38_b1qrp"]
 
 [sub_resource type="NavigationMesh" id="NavigationMesh_7mycd"]
 vertices = PackedVector3Array(-74.5, 0.276383, -74.5, -74.5, 0.276383, 74.5, 74.5, 0.276383, 74.5, 74.5, 0.276383, -74.5)
@@ -49,6 +50,8 @@ albedo_texture = ExtResource("7_2cqfq")
 [sub_resource type="BoxMesh" id="BoxMesh_drvgu"]
 
 [node name="Node3D" type="Node3D"]
+script = ExtResource("3_gamemanager")
+PlayerScene = ExtResource("2_player")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.471705, 0.881757, 0, -0.881757, 0.471705, 0, 1.60195, 2.10283)
@@ -88,6 +91,8 @@ _upgradePool = Array[Object]([ExtResource("11_ycdy4"), ExtResource("12_vivmo"), 
 visible = false
 _upgradeCardScene = ExtResource("12_dg77c")
 
+[node name="StatsOverlay" parent="." instance=ExtResource("11_stats")]
+
 [node name="GridMap" type="GridMap" parent="."]
 
 [node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
@@ -95,41 +100,6 @@ _spawnable_scenes = PackedStringArray("uid://2s1ry0cd6jh0")
 spawn_path = NodePath("..")
 spawn_limit = 4
 
-[node name="Control" type="Control" parent="."]
-visible = false
-layout_mode = 3
-anchors_preset = 0
-offset_right = 1146.0
-offset_bottom = 639.0
-script = ExtResource("37_facbu")
-LobbyElementScene = ExtResource("38_b1qrp")
-
-[node name="CreateLobby" type="Button" parent="Control"]
-layout_mode = 0
-offset_left = 50.0
-offset_top = 89.0
-offset_right = 161.0
-offset_bottom = 120.0
-text = "Create Lobby"
-
-[node name="GetLobbies" type="Button" parent="Control"]
-layout_mode = 0
-offset_left = 50.0
-offset_top = 155.0
-offset_right = 150.0
-offset_bottom = 186.0
-text = "Get Lobbies
-"
-
-[node name="LobbyContainer" type="VBoxContainer" parent="Control"]
-layout_mode = 0
-offset_left = 261.0
-offset_top = 103.0
-offset_right = 570.0
-offset_bottom = 320.0
-
 [connection signal="timeout" from="EnemySpawner/Timer" to="EnemySpawner" method="_on_timer_timeout"]
-[connection signal="pressed" from="Control/CreateLobby" to="Control" method="_on_create_lobby_pressed"]
-[connection signal="pressed" from="Control/GetLobbies" to="Control" method="_on_get_lobbies_pressed"]
 
 [editable path="PlayerUI"]

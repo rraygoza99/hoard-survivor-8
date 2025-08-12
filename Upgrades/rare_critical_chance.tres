@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="Upgrade" load_steps=2 format=3 uid="uid://d06nhymqq23ti"]
 
-[ext_resource type="Script" path="res://Scripts/Upgrade.cs" id="1_7p8wb"]
+[ext_resource type="Script" uid="uid://bujpibpep1yxw" path="res://Scripts/Upgrade.cs" id="1_7p8wb"]
 
 [resource]
 script = ExtResource("1_7p8wb")
@@ -8,5 +8,5 @@ Name = "Critical Chance (Rare)"
 Description = "Increase Critical Chance by 6%"
 Rarity = 1
 StatToUpgrade = 5
-Value = 6.0
+Value = 0.06
 metadata/_custom_type_script = "uid://bujpibpep1yxw"

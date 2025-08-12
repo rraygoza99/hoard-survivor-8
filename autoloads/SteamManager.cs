@@ -13,11 +13,25 @@ public partial class SteamManager : Node
 	private Lobby hostedLobby {get; set;}
 	private List<Lobby> availableLobbies {get;set;} = new List<Lobby>();
 	public bool IsSteamInitialized { get; private set; } = false;
+	private SceneManager _sceneManager;
 	
 	// For testing: allows multiple instances with same Steam account
 	private static bool enableTestMode = true;
 	public static event Action<List<Lobby>> OnLobbiesRefreshCompleted;
 	public static event Action<int> OnLobbyMemberCountChanged;
+	public static event Action<Dictionary<string, bool>> OnPlayerReadyStatusChanged;
+	public static event Action OnAllPlayersReady;
+	public static event Action OnNotAllPlayersReady;
+	public static event Action OnGameStartSignaled;
+	
+	// Ready system
+	private Dictionary<string, bool> playerReadyStatus = new Dictionary<string, bool>();
+	public bool IsLocalPlayerReady { get; private set; } = false;
+	
+	// State tracking to prevent repeated messages
+	private bool gameStartProcessed = false;
+	private bool lastAllPlayersReadyState = false;
+	private float lastLobbyDataChangeTime = 0.0f;
 	
 	// Property to get current lobby member count
 	public int CurrentLobbyMemberCount 
@@ -73,6 +87,7 @@ public partial class SteamManager : Node
 	}
 	public override void _Ready()
 	{
+		_sceneManager = GetNode<SceneManager>("/root/SceneManager");
 		if (!IsSteamInitialized)
 		{
 			GD.PrintErr("Steam is not initialized, skipping lobby callbacks setup");
@@ -85,6 +100,7 @@ public partial class SteamManager : Node
 		SteamMatchmaking.OnLobbyMemberDisconnected += OnLobbyMemberDisconnectedCallback;
 		SteamMatchmaking.OnLobbyMemberLeave += OnLobbyMemberLeaveCallback;
 		SteamMatchmaking.OnLobbyEntered += OnLobbyEnteredCallback;
+		SteamMatchmaking.OnLobbyDataChanged += OnLobbyDataChangedCallback;
 	}
 	
 	private void OnLobbyMemberLeaveCallback(Lobby lobby, Friend friend){
@@ -101,10 +117,14 @@ public partial class SteamManager : Node
 		GD.Print("Firing callback for lobby game created");
 	}
 	private void OnLobbyCreatedCallback(Result result, Lobby lobby){
-		if(result != Result.OK){
+		if (result != Result.OK)
+		{
 			GD.Print("lobby was not created");
-		}else{
+		}
+		else
+		{
 			GD.Print("Lobby was created " + lobby.Id);
+			_sceneManager.GoToScene("res://UtilityScenes/lobby.tscn");
 		}
 	}
 	private void OnLobbyMemberJoinedCallback(Lobby lobby, Friend friend){
@@ -118,8 +138,32 @@ public partial class SteamManager : Node
 			GD.Print($"You joined {lobby.Owner.Name}'s lobby");
 			GD.Print($"Current lobby members: {lobby.MemberCount}");
 			OnLobbyMemberCountChanged?.Invoke(lobby.MemberCount);
+			_sceneManager.GoToScene("res://UtilityScenes/lobby.tscn");
 		}
 	}
+	
+	private void OnLobbyDataChangedCallback(Lobby lobby)
+	{
+		// Only print lobby data change message occasionally to reduce spam
+		float currentTime = Time.GetTicksMsec() / 1000.0f;
+		if (currentTime - lastLobbyDataChangeTime > 2.0f) // Print at most every 2 seconds
+		{
+			GD.Print("Lobby data changed");
+			lastLobbyDataChangeTime = currentTime;
+		}
+		
+		// Check if game start signal was set (only process once)
+		if (lobby.GetData("game_start") == "true" && !gameStartProcessed)
+		{
+			GD.Print("Game start signal received from host!");
+			gameStartProcessed = true;
+			OnGameStartSignaled?.Invoke();
+		}
+		
+		// Also refresh ready status when lobby data changes
+		RefreshAllPlayerReadyStatus();
+	}
+	
 	public override void _Process(double delta){
 		try{
 			if(IsSteamInitialized && SteamClient.IsValid){
@@ -259,6 +303,154 @@ public partial class SteamManager : Node
 			GD.PrintErr($"Error joining lobby: {e.Message}");
 			return false;
 		}
+	}
+	
+	// Ready system methods
+	public void SetPlayerReady(bool ready)
+	{
+		if (!IsSteamInitialized || hostedLobby.Id == 0)
+		{
+			GD.PrintErr("Cannot set ready status - not in a lobby");
+			return;
+		}
+		
+		IsLocalPlayerReady = ready;
+		string readyData = ready ? "1" : "0";
+		
+		// Set player ready status in lobby data
+		hostedLobby.SetMemberData("ready", readyData);
+		GD.Print($"Set local player ready status to: {ready}");
+		
+		// Refresh ready status for all players
+		RefreshAllPlayerReadyStatus();
+	}
+	
+	public void RefreshAllPlayerReadyStatus()
+	{
+		if (hostedLobby.Id == 0) return;
+		
+		playerReadyStatus.Clear();
+		int readyCount = 0;
+		int totalPlayers = 0;
+		
+		foreach (Friend member in hostedLobby.Members)
+		{
+			totalPlayers++;
+			string readyData = hostedLobby.GetMemberData(member, "ready");
+			bool isReady = readyData == "1";
+			playerReadyStatus[member.Name] = isReady;
+			
+			if (isReady) readyCount++;
+			
+		}
+		
+		
+		// Notify UI of ready status changes
+		OnPlayerReadyStatusChanged?.Invoke(new Dictionary<string, bool>(playerReadyStatus));
+		
+		// Check if all players are ready
+		bool allPlayersReady = (totalPlayers > 0 && readyCount == totalPlayers);
+		
+		// Only print and trigger events if the state changed
+		if (allPlayersReady != lastAllPlayersReadyState)
+		{
+			lastAllPlayersReadyState = allPlayersReady;
+			
+			if (allPlayersReady)
+			{
+				GD.Print("All players are ready!");
+				OnAllPlayersReady?.Invoke();
+			}
+			else if (totalPlayers > 0)
+			{
+				GD.Print($"Not all players ready ({readyCount}/{totalPlayers})");
+				OnNotAllPlayersReady?.Invoke();
+			}
+		}
+	}
+	
+	public Dictionary<string, bool> GetPlayerReadyStatus()
+	{
+		return new Dictionary<string, bool>(playerReadyStatus);
+	}
+	
+	public bool IsLobbyOwner()
+	{
+		if (hostedLobby.Id != 0)
+		{
+			return hostedLobby.Owner.Name == PlayerName;
+		}
+		return false;
+	}
+	
+	public void StartGameForAllPlayers()
+	{
+		if (hostedLobby.Id != 0 && IsLobbyOwner())
+		{
+			GD.Print("Host starting game for all players");
+			hostedLobby.SetData("game_start", "true");
+		}
+	}
+	
+	// Position synchronization methods
+	public void UpdatePlayerPosition(string playerName, Vector3 position, Vector3 rotation, bool isMoving)
+	{
+		if (hostedLobby.Id != 0)
+		{
+			var posData = $"{position.X},{position.Y},{position.Z}";
+			var rotData = $"{rotation.X},{rotation.Y},{rotation.Z}";
+			var movingData = isMoving ? "1" : "0";
+			
+			hostedLobby.SetData($"pos_{playerName}", posData);
+			hostedLobby.SetData($"rot_{playerName}", rotData);
+			hostedLobby.SetData($"mov_{playerName}", movingData);
+		}
+	}
+	
+	public (Vector3 position, Vector3 rotation, bool isMoving)? GetPlayerPosition(string playerName)
+	{
+		if (hostedLobby.Id != 0)
+		{
+			var posData = hostedLobby.GetData($"pos_{playerName}");
+			var rotData = hostedLobby.GetData($"rot_{playerName}");
+			var movData = hostedLobby.GetData($"mov_{playerName}");
+			
+			// Debug: Print what data we're getting
+			if (Engine.GetProcessFrames() % 60 == 0) // Print roughly once per second
+			{
+				GD.Print($"Getting position for {playerName}: pos={posData}, rot={rotData}, mov={movData}");
+			}
+			
+			if (!string.IsNullOrEmpty(posData) && !string.IsNullOrEmpty(rotData))
+			{
+				try
+				{
+					var posParts = posData.Split(',');
+					var rotParts = rotData.Split(',');
+					
+					var position = new Vector3(
+						float.Parse(posParts[0]),
+						float.Parse(posParts[1]),
+						float.Parse(posParts[2])
+					);
+					
+					var rotation = new Vector3(
+						float.Parse(rotParts[0]),
+						float.Parse(rotParts[1]),
+						float.Parse(rotParts[2])
+					);
+					
+					var isMoving = movData == "1";
+					
+					return (position, rotation, isMoving);
+				}
+				catch (Exception e)
+				{
+					GD.PrintErr($"Error parsing player position data: {e.Message}");
+				}
+			}
+		}
+		return null;
 	}
 	
 	public override void _Notification(int what){
