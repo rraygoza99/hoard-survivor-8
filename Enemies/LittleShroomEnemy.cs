@@ -2,7 +2,7 @@ using Godot;
 using System;
 using Godot.Collections;
 
-public partial class littleshroom : CharacterBody3D
+public partial class LittleShroomEnemy : CharacterBody3D
 {
 	[Export] public float Speed {get;set;} = 2.0f;
 	[Export] public float Health {get; set;} = 5.0f;
