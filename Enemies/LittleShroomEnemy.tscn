@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://jvvr7x0f56a4"]
+[gd_scene load_steps=8 format=3 uid="uid://08sn2q2gsdmf"]
 
 [ext_resource type="PackedScene" uid="uid://b1ojwdmaawfeu" path="res://Assets/Monsters/shrooms/littleShroom/littleshroom.glb" id="1_6mtej"]
 [ext_resource type="Script" uid="uid://dcmvfpwjw2ruc" path="res://Enemies/LittleShroomEnemy.cs" id="2_wgdxg"]
@@ -30,17 +30,15 @@ shape = SubResource("SphereShape3D_6mtej")
 [node name="NavigationAgent3D" type="NavigationAgent3D" parent="." index="1"]
 
 [node name="Skeleton3D" parent="Armature" index="0"]
-bones/0/position = Vector3(0, -0.104292, 0)
-bones/1/rotation = Quaternion(-0.162509, 0, -3.87452e-08, 0.986707)
-bones/2/rotation = Quaternion(-0.0306533, 1.34999e-15, 1.32836e-15, 0.99953)
-bones/3/position = Vector3(0, -0.104292, 0)
-bones/3/rotation = Quaternion(0.519513, 0.567013, 0.473297, -0.429643)
-bones/4/rotation = Quaternion(-0.454253, -0.534854, -0.493168, 0.51417)
-bones/5/rotation = Quaternion(0.052617, -0.0116976, 0.0119453, 0.998475)
-bones/6/position = Vector3(0, -0.104292, 0)
-bones/6/rotation = Quaternion(0.529438, -0.468717, -0.468717, -0.529438)
-bones/7/rotation = Quaternion(-0.623066, -0.305573, -0.323861, 0.643061)
-bones/8/rotation = Quaternion(0.00882878, 0.0139764, -0.225984, 0.973991)
+bones/0/position = Vector3(0, -0.119148, 0)
+bones/1/rotation = Quaternion(-0.15262, 3.5384e-16, -3.87634e-08, 0.988285)
+bones/2/rotation = Quaternion(0.024881, -9.85007e-16, -6.21487e-16, 0.99969)
+bones/3/position = Vector3(0, -0.119148, 0)
+bones/4/rotation = Quaternion(-0.609753, -0.358053, -0.358053, 0.609753)
+bones/5/rotation = Quaternion(0.021867, -0.0503951, 0.444964, 0.893862)
+bones/6/position = Vector3(0, -0.119148, 0)
+bones/7/rotation = Quaternion(-0.699393, -0.104159, -0.104159, 0.699393)
+bones/8/rotation = Quaternion(1.11845e-08, -9.30299e-09, -0.183657, 0.98299)
 
 [node name="Plane" parent="Armature/Skeleton3D" index="0"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.424789, 0)

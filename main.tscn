@@ -1,11 +1,10 @@
-[gd_scene load_steps=43 format=3 uid="uid://d1k0xsj21ghfp"]
+[gd_scene load_steps=42 format=3 uid="uid://d1k0xsj21ghfp"]
 
 [ext_resource type="Script" uid="uid://dt6y7aa3ouu2e" path="res://Scripts/CameraFollow.cs" id="1_1bvp3"]
-[ext_resource type="PackedScene" uid="uid://nrkusjqe8uyu" path="res://dummy_enemy.tscn" id="2_0xm2m"]
 [ext_resource type="PackedScene" uid="uid://2s1ry0cd6jh0" path="res://player.tscn" id="2_player"]
 [ext_resource type="Script" uid="uid://dvdx4vkk1lski" path="res://Scripts/GameManager.cs" id="3_gamemanager"]
+[ext_resource type="PackedScene" uid="uid://08sn2q2gsdmf" path="res://Enemies/LittleShroomEnemy.tscn" id="6_b1qrp"]
 [ext_resource type="Texture2D" uid="uid://bchjrspkuhsup" path="res://Assets/Terrain/Textures/Leaves_GiantPine_C.png" id="7_2cqfq"]
-[ext_resource type="PackedScene" uid="uid://bbhjjysvr8tyr" path="res://Enemies/chaser_enemy.tscn" id="7_272bh"]
 [ext_resource type="Script" uid="uid://cukffo3h6usas" path="res://Scripts/EnemySpawner.cs" id="8_5vw27"]
 [ext_resource type="PackedScene" uid="uid://bbjgf2mgs0rc2" path="res://UtilityScenes/player_ui.tscn" id="9_kek77"]
 [ext_resource type="Script" uid="uid://b1mfb2qse5xew" path="res://Scripts/UpgradeManager.cs" id="10_4c57u"]
@@ -61,9 +60,6 @@ transform = Transform3D(1, 0, 0, 0, 0.49555, 0.86858, 0, -0.86858, 0.49555, 0, 1
 script = ExtResource("1_1bvp3")
 TargetNodePath = NodePath("")
 
-[node name="DummyEnemy" parent="." instance=ExtResource("2_0xm2m")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.894646, -6.0409)
-
 [node name="NavigationRegion3D" type="NavigationRegion3D" parent="."]
 navigation_mesh = SubResource("NavigationMesh_7mycd")
 
@@ -75,7 +71,7 @@ skeleton = NodePath("../..")
 
 [node name="EnemySpawner" type="Node3D" parent="."]
 script = ExtResource("8_5vw27")
-_chaserEnemyScene = ExtResource("7_272bh")
+_chaserEnemyScene = ExtResource("6_b1qrp")
 
 [node name="Timer" type="Timer" parent="EnemySpawner"]
 
