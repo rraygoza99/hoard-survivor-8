@@ -8,7 +8,7 @@ public partial class Player : CharacterBody3D
 	[Export] public int CurrentXp { get; private set; } = 0;
 	[Export] public int XpToNextLevel {get; private set;} =100;
 	[Export] public float MaxHealth { get; set; } = 100.0f;
-	public float CurrentHealth { get; private set; }
+	public float CurrentHealth { get; set; }
 	[Export] float MovementSpeed { get; set; } = 5.0f;
 	
 	// Multiplayer properties
@@ -63,6 +63,8 @@ public partial class Player : CharacterBody3D
 	private UpgradeManager _upgradeManager;
 	
 	public override void _Ready(){
+		GD.Print($"Player _Ready() called - MaxHealth: {MaxHealth}");
+		
 		_upgradeManager = GetNode<UpgradeManager>("/root/Node3D/UpgradeManager");
 		_animationTree = GetNode<AnimationTree>("AnimationTree");
 		_spellSpawnPoint = GetNode<Marker3D>("SpellSpawnPoint");
@@ -70,8 +72,16 @@ public partial class Player : CharacterBody3D
 		_waveTimer = GetNode<Timer>("WaveTimer");
 		_mortarTimer = GetNode<Timer>("MortarTimer");
 		
-		_levelUpScreen.UpgradeChosen += OnUpgradeChosen;
+		// Only connect if _levelUpScreen is already set (for players spawned in editor)
+		if (_levelUpScreen != null)
+		{
+			_levelUpScreen.UpgradeChosen += OnUpgradeChosen;
+		}
+		
+		GD.Print($"Before setting CurrentHealth - MaxHealth: {MaxHealth}");
 		CurrentHealth = MaxHealth;
+		GD.Print($"After setting CurrentHealth - CurrentHealth: {CurrentHealth}, MaxHealth: {MaxHealth}");
+		
 		UpdateHealthBar();
 		UpdateXpCircle();
 		UpdateFireCooldown();
@@ -79,7 +89,6 @@ public partial class Player : CharacterBody3D
 		UpdateMortarCooldown();
 		
 		_animationTree.Active = true;
-		
 	}
 	
 	private void UpdateFireCooldown(){
@@ -94,6 +103,7 @@ public partial class Player : CharacterBody3D
 		_mortarTimer.WaitTime = _baseMortarCooldown * (1.0f - CooldownReduction);
 	}
 	public void GainXp(int amount){
+		GD.Print($"Player {_playerName} gaining {amount} XP (current: {CurrentXp}, to next level: {XpToNextLevel})");
 		CurrentXp += amount;
 		if(CurrentXp >= XpToNextLevel)
 		{
@@ -104,18 +114,32 @@ public partial class Player : CharacterBody3D
 	}
 	private void UpdateHealthBar()
 	{
+		// Only update UI for local player
+		if (!_isLocalPlayer) return;
+		
+		GD.Print($"UpdateHealthBar called - CurrentHealth: {CurrentHealth}, MaxHealth: {MaxHealth}, _healthBar: {(_healthBar != null ? "Connected" : "NULL")}");
+		
 		if (_healthBar != null)
 		{
 			_healthBar.Value = (CurrentHealth / MaxHealth) * 100;
+			GD.Print($"Health bar updated to: {_healthBar.Value}%");
 			if (_healthLabel != null)
 			{
 				// Update the text with the current and max health values
 				_healthLabel.Text = $"{Mathf.Round(CurrentHealth)} / {MaxHealth}";
+				GD.Print($"Health label updated to: {_healthLabel.Text}");
 			}
+		}
+		else
+		{
+			GD.Print("Health bar is NULL - cannot update UI");
 		}
 	}
 	private void UpdateXpCircle()
 	{
+		// Only update UI for local player
+		if (!_isLocalPlayer) return;
+		
 		if (_xpCircle != null)
 		{
 			_xpCircle.Value = (float)CurrentXp / XpToNextLevel * 100;
@@ -128,7 +152,17 @@ public partial class Player : CharacterBody3D
 		XpToNextLevel = (int)(XpToNextLevel *1.5f);
 		
 		var choices = _upgradeManager.GetUpgradeChoices(Lucky);
-		_levelUpScreen.DisplayUpgrades(choices);
+		
+		GD.Print($"Level up screen reference: {(_levelUpScreen != null ? "Connected" : "NULL")}");
+		if (_levelUpScreen != null)
+		{
+			GD.Print($"Displaying {choices.Count} upgrade choices");
+			_levelUpScreen.DisplayUpgrades(choices);
+		}
+		else
+		{
+			GD.PrintErr("Level up screen is NULL - cannot display upgrades!");
+		}
 	}
 	
 	private Node3D FindClosestEnemy(float range){
@@ -142,13 +176,16 @@ public partial class Player : CharacterBody3D
 	}
 	public void TakeDamage(float damage)
 	{
-		CurrentHealth -= damage;
+		// Apply armor reduction
+		float reducedDamage = Mathf.Max(0, damage - Armor);
+		GD.Print($"Player {_playerName} taking {damage} damage (reduced to {reducedDamage} after {Armor} armor, current health: {CurrentHealth})");
+		CurrentHealth -= reducedDamage;
 		if (CurrentHealth < 0) CurrentHealth = 0;
 		UpdateHealthBar();
 
 		if (CurrentHealth <= 0)
 		{
-			GD.Print("Player has been defeated!");
+			GD.Print($"Player {_playerName} has been defeated!");
 		}
 	}
 	
@@ -200,18 +237,40 @@ public partial class Player : CharacterBody3D
 		wave.LookAt(target.GlobalPosition);
 	}
 	
+	public void ConnectLevelUpScreen()
+	{
+		if (_levelUpScreen != null)
+		{
+			_levelUpScreen.UpgradeChosen += OnUpgradeChosen;
+			GD.Print("Level up screen event connected");
+		}
+		else
+		{
+			GD.PrintErr("Cannot connect level up screen - it's null");
+		}
+	}
+	
 	private void OnUpgradeChosen(Upgrade chosenUpgrade)
 	{
+		GD.Print($"OnUpgradeChosen called for player {_playerName} with upgrade: {chosenUpgrade.Name}");
 		ApplyUpgrade(chosenUpgrade);
 	}
 	
 	
 	private void _on_fire_timer_timeout(){
 		
-		if(IsMultiplayerAuthority()){
+		// Only allow local players to cast spells (instead of using Godot's multiplayer authority)
+		if(_isLocalPlayer){
 			Node3D target = FindClosestEnemy(_sphereRange);
 			if(target!= null)
+			{
+				GD.Print($"Local player {_playerName} casting spell at target: {target.Name}");
 				FireSpell(target);
+			}
+			else
+			{
+				GD.Print($"Local player {_playerName} - no target found for spell casting");
+			}
 			
 			UpdateFireCooldown();
 		}
@@ -237,16 +296,30 @@ public partial class Player : CharacterBody3D
 			case Stat.Lucky: // NEW
 				Lucky += upgrade.Value;
 				break;
+			case Stat.LifeSteal:
+				LifeSteal += upgrade.Value;
+				break;
+			case Stat.CriticalChance:
+				CriticalChance += upgrade.Value;
+				break;
+			case Stat.CriticalDamage:
+				CriticalDamageMultiplier += upgrade.Value;
+				break;
+			case Stat.Armor:
+				Armor += upgrade.Value;
+				break;
 		}
-		GD.Print($"Applied upgrade: {upgrade.Name}");
+		GD.Print($"Applied upgrade: {upgrade.Name} - {upgrade.StatToUpgrade}: +{upgrade.Value}");
 	}
 
 	private void _on_wave_timer_timeout()
 	{
-		if(IsMultiplayerAuthority()){
+		// Only allow local players to cast spells (instead of using Godot's multiplayer authority)
+		if(_isLocalPlayer){
 			Node3D target = FindClosestEnemy(_waveRange);
 			if (target != null)
 			{
+				GD.Print($"Local player {_playerName} casting wave at target: {target.Name}");
 				FireWave(target);
 			}
 			UpdateWaveCooldown();
@@ -254,15 +327,20 @@ public partial class Player : CharacterBody3D
 	}
 	 private void _on_mortar_timer_timeout()
 	{
-		if(IsMultiplayerAuthority()){
+		// Only allow local players to cast spells (instead of using Godot's multiplayer authority)
+		if(_isLocalPlayer){
 			Vector3 forwardDir = -GlobalTransform.Basis.Z;
 			Vector3 targetPos = GlobalPosition + forwardDir * _mortarRange;
 
+			GD.Print($"Local player {_playerName} launching mortar at position: {targetPos}");
 			LaunchMortar(targetPos);
 			UpdateMortarCooldown();
 		}
 	}
 	private void _on_pickup_area_area_entered(Area3D area){
+		// Only local player should interact with pickups
+		if (!_isLocalPlayer) return;
+		
 		if (area is XpOrb orb)
 		{
 			orb.StartSeeking(this);
@@ -270,7 +348,11 @@ public partial class Player : CharacterBody3D
 	}
 	private void _on_collection_area_area_entered(Area3D area)
 	{
+		// Only local player should collect XP
+		if (!_isLocalPlayer) return;
+		
 		if(area is XpOrb orb){
+			GD.Print($"Local player {_playerName} collecting {orb.XpAmount} XP");
 			GainXp(orb.XpAmount);
 			orb.QueueFree();
 		}
@@ -308,6 +390,7 @@ public partial class Player : CharacterBody3D
 			{
 				SteamManager.Manager.UpdatePlayerPosition(_playerName, Position, Rotation, isMoving);
 				_lastPositionUpdate = 0.0f;
+				
 			}
 		}
 		else if (!_isLocalPlayer)
@@ -320,6 +403,12 @@ public partial class Player : CharacterBody3D
 				{
 					var (pos, rot, moving) = playerData.Value;
 					
+					// Debug: Print position updates for remote players
+					if (Position.DistanceTo(pos) > 0.1f) // Only print if there's a significant change
+					{
+						GD.Print($"Remote player {_playerName} updating position from {Position} to {pos}");
+					}
+					
 					// Smoothly interpolate to network position
 					Position = Position.MoveToward(pos, MovementSpeed * (float)delta);
 					Rotation = Rotation.MoveToward(rot, 5.0f * (float)delta);
@@ -327,6 +416,14 @@ public partial class Player : CharacterBody3D
 					// Update animations based on network state
 					_animationTree.Set("parameters/conditions/Run", moving);
 					_animationTree.Set("parameters/conditions/Idle", !moving);
+				}
+				else
+				{
+					// Debug: Print when no position data is available
+					if (Engine.GetProcessFrames() % 60 == 0) // Print once per second
+					{
+						GD.Print($"Remote player {_playerName} - no position data available for this player");
+					}
 				}
 			}
 		}
@@ -350,5 +447,22 @@ public partial class Player : CharacterBody3D
 	{
 		_playerName = playerName;
 		GD.Print($"Player name set to: {playerName}");
+	}
+	
+	// Public method to force UI update (called by GameManager after UI connection)
+	public void ForceUIUpdate()
+	{
+		GD.Print($"ForceUIUpdate called - CurrentHealth: {CurrentHealth}, MaxHealth: {MaxHealth}");
+		UpdateHealthBar();
+		UpdateXpCircle();
+	}
+	
+	// Public method to initialize health properly (called by GameManager)
+	public void InitializeHealth()
+	{
+		GD.Print($"InitializeHealth called - MaxHealth: {MaxHealth}");
+		CurrentHealth = MaxHealth;
+		GD.Print($"CurrentHealth set to: {CurrentHealth}");
+		UpdateHealthBar();
 	}
 }

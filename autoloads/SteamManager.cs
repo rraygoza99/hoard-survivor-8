@@ -28,6 +28,11 @@ public partial class SteamManager : Node
 	private Dictionary<string, bool> playerReadyStatus = new Dictionary<string, bool>();
 	public bool IsLocalPlayerReady { get; private set; } = false;
 	
+	// State tracking to prevent repeated messages
+	private bool gameStartProcessed = false;
+	private bool lastAllPlayersReadyState = false;
+	private float lastLobbyDataChangeTime = 0.0f;
+	
 	// Property to get current lobby member count
 	public int CurrentLobbyMemberCount 
 	{ 
@@ -139,12 +144,19 @@ public partial class SteamManager : Node
 	
 	private void OnLobbyDataChangedCallback(Lobby lobby)
 	{
-		GD.Print("Lobby data changed");
+		// Only print lobby data change message occasionally to reduce spam
+		float currentTime = Time.GetTicksMsec() / 1000.0f;
+		if (currentTime - lastLobbyDataChangeTime > 2.0f) // Print at most every 2 seconds
+		{
+			GD.Print("Lobby data changed");
+			lastLobbyDataChangeTime = currentTime;
+		}
 		
-		// Check if game start signal was set
-		if (lobby.GetData("game_start") == "true")
+		// Check if game start signal was set (only process once)
+		if (lobby.GetData("game_start") == "true" && !gameStartProcessed)
 		{
 			GD.Print("Game start signal received from host!");
+			gameStartProcessed = true;
 			OnGameStartSignaled?.Invoke();
 		}
 		
@@ -330,24 +342,30 @@ public partial class SteamManager : Node
 			
 			if (isReady) readyCount++;
 			
-			GD.Print($"Player {member.Name} ready status: {isReady}");
 		}
 		
-		GD.Print($"Ready players: {readyCount}/{totalPlayers}");
 		
 		// Notify UI of ready status changes
 		OnPlayerReadyStatusChanged?.Invoke(new Dictionary<string, bool>(playerReadyStatus));
 		
 		// Check if all players are ready
-		if (totalPlayers > 0 && readyCount == totalPlayers)
+		bool allPlayersReady = (totalPlayers > 0 && readyCount == totalPlayers);
+		
+		// Only print and trigger events if the state changed
+		if (allPlayersReady != lastAllPlayersReadyState)
 		{
-			GD.Print("All players are ready!");
-			OnAllPlayersReady?.Invoke();
-		}
-		else if (totalPlayers > 0)
-		{
-			GD.Print($"Not all players ready ({readyCount}/{totalPlayers})");
-			OnNotAllPlayersReady?.Invoke();
+			lastAllPlayersReadyState = allPlayersReady;
+			
+			if (allPlayersReady)
+			{
+				GD.Print("All players are ready!");
+				OnAllPlayersReady?.Invoke();
+			}
+			else if (totalPlayers > 0)
+			{
+				GD.Print($"Not all players ready ({readyCount}/{totalPlayers})");
+				OnNotAllPlayersReady?.Invoke();
+			}
 		}
 	}
 	
@@ -396,6 +414,12 @@ public partial class SteamManager : Node
 			var posData = hostedLobby.GetData($"pos_{playerName}");
 			var rotData = hostedLobby.GetData($"rot_{playerName}");
 			var movData = hostedLobby.GetData($"mov_{playerName}");
+			
+			// Debug: Print what data we're getting
+			if (Engine.GetProcessFrames() % 60 == 0) // Print roughly once per second
+			{
+				GD.Print($"Getting position for {playerName}: pos={posData}, rot={rotData}, mov={movData}");
+			}
 			
 			if (!string.IsNullOrEmpty(posData) && !string.IsNullOrEmpty(rotData))
 			{

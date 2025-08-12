@@ -114,6 +114,23 @@ public partial class GameManager : Node
 			player.Call("SetIsLocalPlayer", isLocalPlayer);
 		}
 		
+		// Set up spell scenes for the player
+		SetupPlayerSpells(player);
+		
+		// Initialize health properly
+		if (player.HasMethod("InitializeHealth"))
+		{
+			player.Call("InitializeHealth");
+			GD.Print("Called InitializeHealth on player");
+		}
+		else
+		{
+			// Fallback: Ensure health is properly initialized
+			var maxHealth = player.Get("MaxHealth");
+			player.Set("CurrentHealth", maxHealth);
+			GD.Print($"Manually set CurrentHealth to {maxHealth}");
+		}
+		
 		// Add to scene
 		var parent = GetParent();
 		GD.Print($"Adding player to parent: {parent.Name} (Type: {parent.GetType().Name})");
@@ -130,6 +147,7 @@ public partial class GameManager : Node
 		if (isLocalPlayer)
 		{
 			SetupCameraForPlayer(player);
+			SetupUIForPlayer(player);
 		}
 	}
 	
@@ -154,6 +172,149 @@ public partial class GameManager : Node
 		else
 		{
 			GD.Print("Camera3D not found as child of root node");
+		}
+	}
+	
+	private void SetupPlayerSpells(Node3D player)
+	{
+		GD.Print($"Setting up spells for player: {player.Name}");
+		
+		// Load the spell scenes
+		var magicSphereScene = GD.Load<PackedScene>("res://magic_sphere.tscn");
+		var arcaneWaveScene = GD.Load<PackedScene>("res://arcane_wave.tscn");
+		var mortarBoulderScene = GD.Load<PackedScene>("res://Spells/mortar_boulder.tscn");
+		
+		// Set the exported properties on the player
+		if (magicSphereScene != null)
+		{
+			player.Set("_magicSphereScene", magicSphereScene);
+			GD.Print("Magic sphere scene assigned");
+		}
+		else
+		{
+			GD.PrintErr("Could not load magic sphere scene");
+		}
+		
+		if (arcaneWaveScene != null)
+		{
+			player.Set("_arcaneWaveScene", arcaneWaveScene);
+			GD.Print("Arcane wave scene assigned");
+		}
+		else
+		{
+			GD.PrintErr("Could not load arcane wave scene");
+		}
+		
+		if (mortarBoulderScene != null)
+		{
+			player.Set("_mortarBoulderScene", mortarBoulderScene);
+			GD.Print("Mortar boulder scene assigned");
+		}
+		else
+		{
+			GD.PrintErr("Could not load mortar boulder scene");
+		}
+	}
+	
+	private void SetupUIForPlayer(Node3D player)
+	{
+		GD.Print($"Setting up UI for local player: {player.Name}");
+		
+		// Find the PlayerUI in the scene
+		var playerUI = GetNode<Control>("PlayerUI");
+		if (playerUI != null)
+		{
+			// Get the UI components
+			var healthBar = playerUI.GetNode<ProgressBar>("HealthBar");
+			var healthLabel = playerUI.GetNode<Label>("HealthBar/HealthLabel");
+			var xpCircle = playerUI.GetNode<TextureProgressBar>("XpCircle");
+			
+			// Set these UI elements on the player
+			if (healthBar != null)
+			{
+				player.Set("_healthBar", healthBar);
+				GD.Print("Health bar connected to local player");
+			}
+			else
+			{
+				GD.PrintErr("Could not find HealthBar in PlayerUI");
+			}
+			
+			if (healthLabel != null)
+			{
+				player.Set("_healthLabel", healthLabel);
+				GD.Print("Health label connected to local player");
+			}
+			else
+			{
+				GD.PrintErr("Could not find HealthLabel in PlayerUI");
+			}
+			
+			if (xpCircle != null)
+			{
+				player.Set("_xpCircle", xpCircle);
+				GD.Print("XP circle connected to local player");
+			}
+			else
+			{
+				GD.PrintErr("Could not find XpCircle in PlayerUI");
+			}
+			
+			// Trigger initial UI update
+			if (player.HasMethod("UpdateHealthBar"))
+			{
+				player.Call("UpdateHealthBar");
+				GD.Print("Triggered health bar update");
+			}
+			if (player.HasMethod("UpdateXpCircle"))
+			{
+				player.Call("UpdateXpCircle");
+				GD.Print("Triggered XP circle update");
+			}
+			
+			// Also call the new ForceUIUpdate method
+			if (player.HasMethod("ForceUIUpdate"))
+			{
+				player.Call("ForceUIUpdate");
+				GD.Print("Called ForceUIUpdate");
+			}
+			
+			// Also schedule a delayed update to make sure everything is connected
+			GetTree().CreateTimer(0.1f).Timeout += () => {
+				GD.Print("Delayed UI update triggered");
+				if (player.HasMethod("ForceUIUpdate"))
+				{
+					player.Call("ForceUIUpdate");
+				}
+			};
+			
+			// Also print current player stats for debugging
+			var currentHealth = player.Get("CurrentHealth");
+			var maxHealth = player.Get("MaxHealth");
+			var currentXp = player.Get("CurrentXp");
+			GD.Print($"Player stats - Health: {currentHealth}/{maxHealth}, XP: {currentXp}");
+		}
+		else
+		{
+			GD.PrintErr("Could not find PlayerUI in scene");
+		}
+		
+		// Find and connect the LevelUpScreen for local player
+		var levelUpScreen = GetNode<Control>("LevelUpScreen");
+		if (levelUpScreen != null)
+		{
+			player.Set("_levelUpScreen", levelUpScreen);
+			GD.Print("Level up screen connected to local player");
+			
+			// Connect the level up screen event
+			if (player.HasMethod("ConnectLevelUpScreen"))
+			{
+				player.Call("ConnectLevelUpScreen");
+			}
+		}
+		else
+		{
+			GD.PrintErr("Could not find LevelUpScreen in scene");
 		}
 	}
 	
