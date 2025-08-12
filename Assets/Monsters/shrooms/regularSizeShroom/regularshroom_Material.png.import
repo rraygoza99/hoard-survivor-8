@@ -1,0 +1,38 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://b2xuk5ghm7qyd"
+path.s3tc="res://.godot/imported/regularshroom_Material.png-151704d43681f7b3e065212290dc247c.s3tc.ctex"
+metadata={
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
+}
+generator_parameters={
+"md5": "3b84aadedc2dc4bbc5d1f737bd1005c5"
+}
+
+[deps]
+
+source_file="res://Assets/Monsters/shrooms/regularSizeShroom/regularshroom_Material.png"
+dest_files=["res://.godot/imported/regularshroom_Material.png-151704d43681f7b3e065212290dc247c.s3tc.ctex"]
+
+[params]
+
+compress/mode=2
+compress/high_quality=false
+compress/lossy_quality=0.7
+compress/hdr_compression=1
+compress/normal_map=0
+compress/channel_pack=0
+mipmaps/generate=true
+mipmaps/limit=-1
+roughness/mode=0
+roughness/src_normal=""
+process/fix_alpha_border=true
+process/premult_alpha=false
+process/normal_map_invert_y=false
+process/hdr_as_srgb=false
+process/hdr_clamp_exposure=false
+process/size_limit=0
+detect_3d/compress_to=0
