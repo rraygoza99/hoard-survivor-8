@@ -7,6 +7,8 @@ public partial class GameManager : Node
 	[Export] public PackedScene PlayerScene { get; set; }
 	
 	private List<Node3D> spawnedPlayers = new List<Node3D>();
+	private Node3D localPlayer = null;
+	private StatsOverlay statsOverlay = null;
 	private Vector3[] spawnPositions = {
 		new Vector3(0, 1, 0),      // Center
 		new Vector3(-2, 1, 0),     // Left
@@ -20,6 +22,9 @@ public partial class GameManager : Node
 	
 	public override void _Ready()
 	{
+		// Find and initialize the stats overlay
+		statsOverlay = GetNode<StatsOverlay>("StatsOverlay");
+		
 		if (GameData.IsMultiplayerGame())
 		{
 			SpawnLobbyPlayers();
@@ -32,10 +37,26 @@ public partial class GameManager : Node
 	
 	public override void _Input(InputEvent @event)
 	{
-		// Test key T to spawn test players
-		if (@event is InputEventKey keyEvent && keyEvent.Pressed && keyEvent.Keycode == Key.T)
+		// Handle TAB key for stats overlay
+		if (@event is InputEventKey keyEvent && keyEvent.Keycode == Key.Tab)
 		{
-			TestSpawnPlayers();
+			if (keyEvent.Pressed && !keyEvent.Echo)
+			{
+				// Show stats overlay when TAB is pressed
+				if (statsOverlay != null && localPlayer != null)
+				{
+					statsOverlay.UpdateStats(localPlayer);
+					statsOverlay.ShowOverlay();
+				}
+			}
+			else if (!keyEvent.Pressed)
+			{
+				// Hide stats overlay when TAB is released
+				if (statsOverlay != null)
+				{
+					statsOverlay.HideOverlay();
+				}
+			}
 		}
 	}
 	
@@ -122,6 +143,7 @@ public partial class GameManager : Node
 		// If this is the local player, set up camera follow
 		if (isLocalPlayer)
 		{
+			localPlayer = player; // Store reference to local player for stats overlay
 			SetupCameraForPlayer(player);
 			SetupUIForPlayer(player);
 		}
@@ -265,11 +287,4 @@ public partial class GameManager : Node
 		return new List<Node3D>(spawnedPlayers);
 	}
 	
-	// Test method to manually spawn players for debugging
-	public void TestSpawnPlayers()
-	{
-		var testPlayers = new List<string> { "TestPlayer1", "TestPlayer2" };
-		GameData.SetLobbyPlayers(testPlayers);
-		SpawnLobbyPlayers();
-	}
 }

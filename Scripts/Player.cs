@@ -90,19 +90,26 @@ public partial class Player : CharacterBody3D
 	}
 	
 	private void UpdateFireCooldown(){
-		_fireTimer.WaitTime = _baseFireCooldown * (1.0f - CooldownReduction);
+		float newCooldown = _baseFireCooldown * (1.0f - CooldownReduction);
+		_fireTimer.WaitTime = newCooldown;
+		GD.Print($"Fire cooldown updated: {newCooldown:F2}s (base: {_baseFireCooldown}s, reduction: {CooldownReduction:P1})");
 	}
 	private void UpdateWaveCooldown()
 	{
-		_waveTimer.WaitTime = _baseWaveCooldown * (1.0f - CooldownReduction);
+		float newCooldown = _baseWaveCooldown * (1.0f - CooldownReduction);
+		_waveTimer.WaitTime = newCooldown;
+		GD.Print($"Wave cooldown updated: {newCooldown:F2}s (base: {_baseWaveCooldown}s, reduction: {CooldownReduction:P1})");
 	}
 	private void UpdateMortarCooldown()
 	{
-		_mortarTimer.WaitTime = _baseMortarCooldown * (1.0f - CooldownReduction);
+		float newCooldown = _baseMortarCooldown * (1.0f - CooldownReduction);
+		_mortarTimer.WaitTime = newCooldown;
+		GD.Print($"Mortar cooldown updated: {newCooldown:F2}s (base: {_baseMortarCooldown}s, reduction: {CooldownReduction:P1})");
 	}
 	public void GainXp(int amount){
-		GD.Print($"Player {_playerName} gaining {amount} XP (current: {CurrentXp}, to next level: {XpToNextLevel})");
-		CurrentXp += amount;
+		int modifiedAmount = Mathf.RoundToInt(amount * XpGainMultiplier);
+		GD.Print($"Player {_playerName} gaining {modifiedAmount} XP (base: {amount}, multiplier: {XpGainMultiplier:F2}x, current: {CurrentXp}, to next level: {XpToNextLevel})");
+		CurrentXp += modifiedAmount;
 		if(CurrentXp >= XpToNextLevel)
 		{
 			LevelUp();
@@ -186,6 +193,12 @@ public partial class Player : CharacterBody3D
 		}
 	}
 	
+	public void Heal(float amount)
+	{
+		CurrentHealth = Mathf.Min(CurrentHealth + amount, MaxHealth);
+		UpdateHealthBar();
+	}
+	
 	private Node3D FindRandomEnemyInRange()
 	{
 		// Get all enemies within the mortar's range.
@@ -209,6 +222,10 @@ public partial class Player : CharacterBody3D
 		MortarBoulder boulder = _mortarBoulderScene.Instantiate<MortarBoulder>();
 		GetTree().Root.AddChild(boulder);
 		Vector3 spawnPos = _spellSpawnPoint.GlobalPosition;
+		
+		// Set player stats for critical hits and life steal
+		boulder.SetPlayerStats(CriticalChance, CriticalDamageMultiplier, LifeSteal, this);
+		
 		boulder.Initialize(spawnPos, targetPos);
 	}
 	
@@ -222,19 +239,30 @@ public partial class Player : CharacterBody3D
 
 		sphere.GlobalTransform = this.GlobalTransform;
 		
-		sphere.LookAt(target.GlobalPosition);
+		// Set player stats for critical hits and life steal
+		sphere.SetPlayerStats(CriticalChance, CriticalDamageMultiplier, LifeSteal, this);
+		
+		// Calculate direction only on the horizontal plane (ignore Y difference)
+		Vector3 targetDirection = new Vector3(target.GlobalPosition.X, this.GlobalPosition.Y, target.GlobalPosition.Z);
+		sphere.LookAt(targetDirection);
 	}
 	private void FireWave(Node3D target)
 	{
 		if (_arcaneWaveScene == null || target == null) return;
+
 		ArcaneWave wave = _arcaneWaveScene.Instantiate<ArcaneWave>();
+
 		GetTree().Root.AddChild(wave);
-		wave.GlobalPosition = this.GlobalPosition;
-	
-		wave.LookAt(target.GlobalPosition);
-	}
-	
-	public void ConnectLevelUpScreen()
+
+		wave.GlobalTransform = this.GlobalTransform;
+		
+		// Set player stats for critical hits and life steal
+		wave.SetPlayerStats(CriticalChance, CriticalDamageMultiplier, LifeSteal, this);
+		
+		// Calculate direction only on the horizontal plane (ignore Y difference) - same as magic sphere
+		Vector3 targetDirection = new Vector3(target.GlobalPosition.X, this.GlobalPosition.Y, target.GlobalPosition.Z);
+		wave.LookAt(targetDirection);
+	}	public void ConnectLevelUpScreen()
 	{
 		if (_levelUpScreen != null)
 		{
@@ -279,10 +307,14 @@ public partial class Player : CharacterBody3D
 				MovementSpeed += upgrade.Value;
 				break;
 			case Stat.XpGain:
-				XpGainMultiplier += upgrade.Value;
+				XpGainMultiplier *= (1.0f + upgrade.Value);
 				break;
 			case Stat.CooldownReduction:
 				CooldownReduction += upgrade.Value;
+				// Update all cooldown timers when cooldown reduction changes
+				UpdateFireCooldown();
+				UpdateWaveCooldown();
+				UpdateMortarCooldown();
 				break;
 			case Stat.Lucky: // NEW
 				Lucky += upgrade.Value;

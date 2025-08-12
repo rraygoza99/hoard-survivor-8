@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="Upgrade" load_steps=2 format=3 uid="uid://bgkh0038xrb11"]
 
-[ext_resource type="Script" path="res://Scripts/Upgrade.cs" id="1_8xt4a"]
+[ext_resource type="Script" uid="uid://bujpibpep1yxw" path="res://Scripts/Upgrade.cs" id="1_8xt4a"]
 
 [resource]
 script = ExtResource("1_8xt4a")
@@ -8,5 +8,5 @@ Name = "XP (Legendary)"
 Description = "Increase XP Gain by 48%"
 Rarity = 2
 StatToUpgrade = 2
-Value = 48.0
+Value = 0.48
 metadata/_custom_type_script = "uid://bujpibpep1yxw"

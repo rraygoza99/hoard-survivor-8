@@ -1,4 +1,4 @@
-[gd_scene load_steps=42 format=3 uid="uid://d1k0xsj21ghfp"]
+[gd_scene load_steps=43 format=3 uid="uid://d1k0xsj21ghfp"]
 
 [ext_resource type="Script" uid="uid://dt6y7aa3ouu2e" path="res://Scripts/CameraFollow.cs" id="1_1bvp3"]
 [ext_resource type="PackedScene" uid="uid://nrkusjqe8uyu" path="res://dummy_enemy.tscn" id="2_0xm2m"]
@@ -10,6 +10,7 @@
 [ext_resource type="PackedScene" uid="uid://bbjgf2mgs0rc2" path="res://UtilityScenes/player_ui.tscn" id="9_kek77"]
 [ext_resource type="Script" uid="uid://b1mfb2qse5xew" path="res://Scripts/UpgradeManager.cs" id="10_4c57u"]
 [ext_resource type="PackedScene" uid="uid://de0c5bprdp1ps" path="res://UtilityScenes/level_up_screen.tscn" id="11_efxa6"]
+[ext_resource type="PackedScene" uid="uid://bs08fa8askebq" path="res://UtilityScenes/stats_overlay.tscn" id="11_stats"]
 [ext_resource type="Resource" uid="uid://cj8n5heltg8pm" path="res://Upgrades/common_health.tres" id="11_ycdy4"]
 [ext_resource type="PackedScene" uid="uid://dck41ol2vfb2c" path="res://UtilityScenes/upgrade_card.tscn" id="12_dg77c"]
 [ext_resource type="Resource" uid="uid://bx01xld7hg5fw" path="res://Upgrades/rare_health.tres" id="12_vivmo"]
@@ -89,6 +90,8 @@ _upgradePool = Array[Object]([ExtResource("11_ycdy4"), ExtResource("12_vivmo"), 
 [node name="LevelUpScreen" parent="." instance=ExtResource("11_efxa6")]
 visible = false
 _upgradeCardScene = ExtResource("12_dg77c")
+
+[node name="StatsOverlay" parent="." instance=ExtResource("11_stats")]
 
 [node name="GridMap" type="GridMap" parent="."]
 

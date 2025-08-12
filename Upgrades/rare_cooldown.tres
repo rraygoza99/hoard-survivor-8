@@ -5,8 +5,8 @@
 [resource]
 script = ExtResource("1_hj76a")
 Name = "Cooldown (Rare)"
-Description = "Reduce cooldown by 10%"
+Description = "Reduce cooldown by 15%"
 Rarity = 1
 StatToUpgrade = 3
-Value = 15.0
+Value = 0.15
 metadata/_custom_type_script = "uid://bujpibpep1yxw"

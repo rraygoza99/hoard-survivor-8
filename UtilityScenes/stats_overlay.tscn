@@ -1,0 +1,94 @@
+[gd_scene load_steps=2 format=3 uid="uid://bs08fa8askebq"]
+
+[ext_resource type="Script" uid="uid://bupe06hf6efkd" path="res://Scripts/StatsOverlay.cs" id="1_stats"]
+
+[node name="StatsOverlay" type="Control"]
+process_mode = 2
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("1_stats")
+
+[node name="BackgroundPanel" type="Panel" parent="."]
+layout_mode = 0
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 20.0
+offset_top = -250.0
+offset_right = 320.0
+offset_bottom = 250.0
+mouse_filter = 2
+
+[node name="StatsContainer" type="VBoxContainer" parent="BackgroundPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TitleLabel" type="Label" parent="BackgroundPanel/StatsContainer"]
+layout_mode = 2
+text = "PLAYER STATS"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="BackgroundPanel/StatsContainer"]
+layout_mode = 2
+
+[node name="HealthLabel" type="Label" parent="BackgroundPanel/StatsContainer"]
+layout_mode = 2
+text = "Health: 100/100"
+
+[node name="ArmorLabel" type="Label" parent="BackgroundPanel/StatsContainer"]
+layout_mode = 2
+text = "Armor: 0"
+
+[node name="MovementSpeedLabel" type="Label" parent="BackgroundPanel/StatsContainer"]
+layout_mode = 2
+text = "Movement Speed: 5.0"
+
+[node name="HSeparator2" type="HSeparator" parent="BackgroundPanel/StatsContainer"]
+layout_mode = 2
+
+[node name="CriticalChanceLabel" type="Label" parent="BackgroundPanel/StatsContainer"]
+layout_mode = 2
+text = "Critical Chance: 5%"
+
+[node name="CriticalDamageLabel" type="Label" parent="BackgroundPanel/StatsContainer"]
+layout_mode = 2
+text = "Critical Damage: 150%"
+
+[node name="LifeStealLabel" type="Label" parent="BackgroundPanel/StatsContainer"]
+layout_mode = 2
+text = "Life Steal: 0%"
+
+[node name="HSeparator3" type="HSeparator" parent="BackgroundPanel/StatsContainer"]
+layout_mode = 2
+
+[node name="XpGainLabel" type="Label" parent="BackgroundPanel/StatsContainer"]
+layout_mode = 2
+text = "XP Gain: 100%"
+
+[node name="CooldownReductionLabel" type="Label" parent="BackgroundPanel/StatsContainer"]
+layout_mode = 2
+text = "Cooldown Reduction: 0%"
+
+[node name="LuckyLabel" type="Label" parent="BackgroundPanel/StatsContainer"]
+layout_mode = 2
+text = "Lucky: 0"
+
+[node name="HSeparator4" type="HSeparator" parent="BackgroundPanel/StatsContainer"]
+layout_mode = 2
+
+[node name="XpLabel" type="Label" parent="BackgroundPanel/StatsContainer"]
+layout_mode = 2
+text = "XP: 0/100"
