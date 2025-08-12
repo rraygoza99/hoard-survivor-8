@@ -1,0 +1,32 @@
+[gd_scene load_steps=7 format=3 uid="uid://jvvr7x0f56a4"]
+
+[ext_resource type="PackedScene" uid="uid://b1ojwdmaawfeu" path="res://Assets/Monsters/shrooms/littleShroom/littleshroom.glb" id="1_6mtej"]
+[ext_resource type="Script" uid="uid://co0wkehn4hx" path="res://Enemies/littleshroom.cs" id="2_7v8mc"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_6mtej"]
+radius = 0.490496
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_7v8mc"]
+animation = &"run"
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_cte1p"]
+advance_mode = 2
+
+[sub_resource type="AnimationNodeStateMachine" id="AnimationNodeStateMachine_8vkft"]
+states/Start/position = Vector2(172, 90)
+states/run/node = SubResource("AnimationNodeAnimation_7v8mc")
+states/run/position = Vector2(312, 90)
+transitions = ["Start", "run", SubResource("AnimationNodeStateMachineTransition_cte1p")]
+
+[node name="littleshroom" instance=ExtResource("1_6mtej")]
+script = ExtResource("2_7v8mc")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.000194192, 0.542708, 0)
+shape = SubResource("SphereShape3D_6mtej")
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="." index="1"]
+
+[node name="AnimationTree" type="AnimationTree" parent="." index="4"]
+tree_root = SubResource("AnimationNodeStateMachine_8vkft")
+anim_player = NodePath("../AnimationPlayer")
