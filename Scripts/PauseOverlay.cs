@@ -110,10 +110,10 @@ public partial class PauseOverlay : Control
         // Create quit to menu confirmation dialog
         _quitToMenuConfirmDialog = new AcceptDialog();
         _quitToMenuConfirmDialog.DialogText = "Are you sure you want to quit to main menu?\nAny progress made will be lost.";
-        _quitToMenuConfirmDialog.Title = "Quit to Menu";
+        _quitToMenuConfirmDialog.Title = "Return to menu";
         _quitToMenuConfirmDialog.ProcessMode = ProcessModeEnum.WhenPaused;
         _quitToMenuConfirmDialog.OkButtonText = "Stay";
-        _quitToMenuConfirmDialog.AddButton("Yes, Quit to Menu", true, "quit_to_menu");
+        _quitToMenuConfirmDialog.AddButton("Yes, Return to menu", true, "quit_to_menu");
         _quitToMenuConfirmDialog.CustomAction += OnQuitToMenuConfirmed;
         AddChild(_quitToMenuConfirmDialog);
         
@@ -138,6 +138,20 @@ public partial class PauseOverlay : Control
     {
         if (_quitToMenuConfirmDialog != null)
         {
+            // Check if player is the host and update dialog text accordingly
+            bool isHost = SteamManager.Manager?.IsLobbyOwner() ?? false;
+            
+            if (isHost)
+            {
+                _quitToMenuConfirmDialog.DialogText = "As a host, if you quit, this will end the game for all the players. Are you sure you want to leave?";
+                _quitToMenuConfirmDialog.Title = "Host Leaving - End Game?";
+            }
+            else
+            {
+                _quitToMenuConfirmDialog.DialogText = "Are you sure you want to quit to main menu?\nAny progress made will be lost.";
+                _quitToMenuConfirmDialog.Title = "Return to menu";
+            }
+            
             _quitToMenuConfirmDialog.PopupCentered();
         }
     }
@@ -146,6 +160,20 @@ public partial class PauseOverlay : Control
     {
         if (_quitGameConfirmDialog != null)
         {
+            // Check if player is the host and update dialog text accordingly
+            bool isHost = SteamManager.Manager?.IsLobbyOwner() ?? false;
+            
+            if (isHost)
+            {
+                _quitGameConfirmDialog.DialogText = "As a host, if you quit, this will end the game for all the players. Are you sure you want to leave?";
+                _quitGameConfirmDialog.Title = "Host Leaving - End Game?";
+            }
+            else
+            {
+                _quitGameConfirmDialog.DialogText = "Are you sure you want to quit the game?\nAny progress made will be lost.";
+                _quitGameConfirmDialog.Title = "Quit Game";
+            }
+            
             _quitGameConfirmDialog.PopupCentered();
         }
     }

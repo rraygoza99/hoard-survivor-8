@@ -58,6 +58,7 @@ public partial class GameManager : Node
 		}
 		if (_pauseOverlay != null) _pauseOverlay.Hide();
 		SteamManager.OnPauseStateChanged += OnPauseStateChanged;
+		SteamManager.OnHostLeft += OnHostLeft;
 		
 		if (GameData.IsMultiplayerGame())
 		{
@@ -112,6 +113,28 @@ public partial class GameManager : Node
 			_pauseOverlay.UpdatePauseState(paused, initiator, votes, total);
 		}
 		GetTree().Paused = paused; // Pause entire tree for everyone
+	}
+	
+	private void OnHostLeft(string hostName)
+	{
+		GD.Print($"Host {hostName} has left the game!");
+		
+		// Create and show host left dialog
+		var hostLeftDialog = new AcceptDialog();
+		hostLeftDialog.DialogText = $"The host ({hostName}) has left the game.\nReturning to main menu.";
+		hostLeftDialog.Title = "Host Left";
+		hostLeftDialog.ProcessMode = ProcessModeEnum.WhenPaused;
+		hostLeftDialog.OkButtonText = "OK";
+		
+		// When dialog is closed, return to main menu
+		hostLeftDialog.Confirmed += () => {
+			GD.Print("Returning to main menu due to host leaving...");
+			GetTree().Paused = false;
+			GetTree().ChangeSceneToFile("res://UtilityScenes/main_menu.tscn");
+		};
+		
+		AddChild(hostLeftDialog);
+		hostLeftDialog.PopupCentered();
 	}
 	
 	private void SpawnLobbyPlayers()

@@ -23,6 +23,7 @@ public partial class SteamManager : Node
 	public static event Action OnAllPlayersReady;
 	public static event Action OnNotAllPlayersReady;
 	public static event Action OnGameStartSignaled;
+	public static event Action<string> OnHostLeft; // Event when host leaves the lobby
 	// Pause system (simplified)
 	public static event Action<bool,string,int,int> OnPauseStateChanged; // paused, initiator, votes(current phase), total
 	
@@ -103,6 +104,14 @@ public partial class SteamManager : Node
 
 	private void OnLobbyMemberLeaveCallback(Lobby lobby, Friend friend){
 		GD.Print($"User has left the lobby: {friend.Name}");
+		
+		// Check if the person who left was the host
+		if (lobby.Owner.Id == friend.Id)
+		{
+			GD.Print($"Host {friend.Name} has left the lobby!");
+			OnHostLeft?.Invoke(friend.Name);
+		}
+		
 		OnLobbyMemberCountChanged?.Invoke(lobby.MemberCount);
 	}
 	private void OnLobbyGameCreatedCallback(Lobby lobby, uint id, ushort port, SteamId steamId){

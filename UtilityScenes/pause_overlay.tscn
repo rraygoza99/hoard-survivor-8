@@ -48,7 +48,7 @@ text = "Options"
 
 [node name="QuitToMenuButton" type="Button" parent="Center"]
 layout_mode = 2
-text = "Quit to Menu"
+text = "Return to menu"
 
 [node name="QuitGameButton" type="Button" parent="Center"]
 layout_mode = 2
