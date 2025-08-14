@@ -41,3 +41,15 @@ horizontal_alignment = 1
 [node name="ResumeButton" type="Button" parent="Center"]
 layout_mode = 2
 text = "Resume"
+
+[node name="OptionsButton" type="Button" parent="Center"]
+layout_mode = 2
+text = "Options"
+
+[node name="QuitToMenuButton" type="Button" parent="Center"]
+layout_mode = 2
+text = "Quit to Menu"
+
+[node name="QuitGameButton" type="Button" parent="Center"]
+layout_mode = 2
+text = "Quit game"
