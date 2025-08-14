@@ -34,10 +34,10 @@ text = "Player:"
 
 [node name="ReadyButton" type="Button" parent="."]
 layout_mode = 0
-offset_left = 833.0
-offset_top = 491.0
-offset_right = 1089.0
-offset_bottom = 603.0
+offset_left = 973.0
+offset_top = 569.0
+offset_right = 1229.0
+offset_bottom = 681.0
 icon = ExtResource("3_ha1r6")
 flat = true
 alignment = 0
@@ -53,11 +53,18 @@ text = "Ready"
 label_settings = SubResource("LabelSettings_th56o")
 
 [node name="CountdownLabel" type="Label" parent="."]
-layout_mode = 0
-offset_left = 907.0
-offset_top = 438.0
-offset_right = 1013.0
-offset_bottom = 480.0
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 28.661
+anchor_top = 16.139
+anchor_right = 28.661
+anchor_bottom = 16.139
+offset_left = -241.44
+offset_top = -206.56
+offset_right = -135.44
+offset_bottom = -164.56
+grow_horizontal = 0
+grow_vertical = 0
 
 [node name="CounterdownTimer" type="Timer" parent="."]
 
