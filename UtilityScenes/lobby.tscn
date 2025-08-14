@@ -54,10 +54,10 @@ label_settings = SubResource("LabelSettings_th56o")
 
 [node name="CountdownLabel" type="Label" parent="."]
 layout_mode = 0
-offset_left = 984.0
-offset_top = 495.0
-offset_right = 1090.0
-offset_bottom = 537.0
+offset_left = 907.0
+offset_top = 438.0
+offset_right = 1013.0
+offset_bottom = 480.0
 
 [node name="CounterdownTimer" type="Timer" parent="."]
 
@@ -73,3 +73,13 @@ offset_right = 150.603
 offset_bottom = -36.2352
 text = "Waiting for players..."
 label_settings = SubResource("LabelSettings_fv0q1")
+
+[node name="ReturnButton" type="Button" parent="."]
+layout_mode = 0
+offset_left = 23.0
+offset_top = 15.0
+offset_right = 57.0
+offset_bottom = 51.0
+text = "Back"
+
+[connection signal="pressed" from="ReturnButton" to="." method="_on_return_button_pressed"]

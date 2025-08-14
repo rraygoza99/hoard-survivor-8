@@ -86,8 +86,8 @@ public partial class LobbyUI : Control
             GD.Print("ReadyButton not found, creating one programmatically");
             _readyButton = new Button();
             _readyButton.Name = "ReadyButton";
-            _readyButton.Text = "Ready";
-            _readyButton.Size = new Vector2(100, 40);
+            _readyButton.Text = ""; // We'll use internal label for precise centering
+            _readyButton.Size = new Vector2(140, 40); // Wider so both "Ready" and "Not Ready" stay centered
             
             // Position it in bottom right
             _readyButton.AnchorLeft = 1.0f;
@@ -100,6 +100,37 @@ public partial class LobbyUI : Control
             _readyButton.OffsetBottom = -20;
             
             AddChild(_readyButton);
+        }
+        else
+        {
+            // Ensure consistent size if it already existed
+            _readyButton.CustomMinimumSize = new Vector2(140, 40);
+        }
+
+        // If we rely on an internal label for text, ensure it exists & centered
+        if (_readyStatusLabel == null)
+        {
+            _readyStatusLabel = new Label();
+            _readyStatusLabel.Name = "ReadyStatusLabel";
+            _readyStatusLabel.Text = "Ready";
+            // Fill the button area
+            _readyStatusLabel.AnchorLeft = 0; _readyStatusLabel.AnchorTop = 0; _readyStatusLabel.AnchorRight = 1; _readyStatusLabel.AnchorBottom = 1;
+            _readyStatusLabel.OffsetLeft = 0; _readyStatusLabel.OffsetTop = 0; _readyStatusLabel.OffsetRight = 0; _readyStatusLabel.OffsetBottom = 0;
+            _readyStatusLabel.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
+            _readyStatusLabel.SizeFlagsVertical = Control.SizeFlags.ExpandFill;
+            _readyStatusLabel.HorizontalAlignment = HorizontalAlignment.Center;
+            _readyStatusLabel.VerticalAlignment = VerticalAlignment.Center;
+            _readyButton.AddChild(_readyStatusLabel);
+        }
+        else
+        {
+            _readyStatusLabel.AnchorLeft = 0; _readyStatusLabel.AnchorTop = 0; _readyStatusLabel.AnchorRight = 1; _readyStatusLabel.AnchorBottom = 1;
+            _readyStatusLabel.OffsetLeft = 0; _readyStatusLabel.OffsetTop = 0; _readyStatusLabel.OffsetRight = 0; _readyStatusLabel.OffsetBottom = 0;
+            _readyStatusLabel.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
+            _readyStatusLabel.SizeFlagsVertical = Control.SizeFlags.ExpandFill;
+            _readyStatusLabel.HorizontalAlignment = HorizontalAlignment.Center;
+            _readyStatusLabel.VerticalAlignment = VerticalAlignment.Center;
+            _readyStatusLabel.Text = "Ready";
         }
         
         _readyButton.Pressed += OnReadyButtonPressed;
@@ -155,6 +186,7 @@ public partial class LobbyUI : Control
         SteamManager.Manager.SetPlayerReady(newReadyState);
         
         _readyStatusLabel.Text = newReadyState ? "Not Ready" : "Ready";
+        
         _readyButton.Modulate = newReadyState ? Colors.Green : Colors.White;
         
         
@@ -172,7 +204,20 @@ public partial class LobbyUI : Control
             RefreshPlayerList(SteamManager.Manager.CurrentLobbyMemberCount);
         }
     }
-    
+
+    public override void _UnhandledInput(InputEvent @event)
+    {
+        if (@event is InputEventKey key && key.Pressed && !key.Echo && key.Keycode == Key.Escape)
+        {
+            GD.Print("ESC pressed in lobby - returning to main menu");
+            ReturnToMainMenu();
+            GetViewport().SetInputAsHandled();
+        }
+    }
+    private void _on_return_button_pressed()
+    {
+        ReturnToMainMenu();
+    }
     private void OnAllPlayersReady()
     {
         GD.Print("All players ready - starting countdown!");
@@ -239,7 +284,6 @@ public partial class LobbyUI : Control
     private void OnGameStartSignaled()
     {
         GD.Print("Received game start signal from host!");
-        
         // Stop countdown if running
         if (_countdownTimer != null)
         {
@@ -279,6 +323,18 @@ public partial class LobbyUI : Control
         
         // Transition to the main game scene
         GetTree().ChangeSceneToFile("res://main.tscn");
+    }
+
+    private void ReturnToMainMenu()
+    {
+        // Best-effort: clear lobby data flag so others know we left
+        if (SteamManager.Manager != null)
+        {
+            GD.Print("Returning to main menu: clearing ready status");
+            // Mark not ready to inform others (if still in lobby)
+            SteamManager.Manager.SetPlayerReady(false);
+        }
+        GetTree().ChangeSceneToFile("res://UtilityScenes/main_menu.tscn");
     }
     private void RefreshPlayerList(int memberCount)
     {
