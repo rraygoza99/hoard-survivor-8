@@ -1,8 +1,15 @@
-[gd_scene load_steps=4 format=3 uid="uid://dbefrtiwqngk5"]
+[gd_scene load_steps=5 format=3 uid="uid://dbefrtiwqngk5"]
 
 [ext_resource type="Script" uid="uid://c4yypvfm4ltla" path="res://Scripts/XpOrb.cs" id="1_u4m3h"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_at6hp"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_u4m3h"]
+transparency = 1
+albedo_color = Color(0.784314, 1, 1, 1)
+emission_enabled = true
+emission = Color(0.443137, 0.823529, 1, 1)
+emission_energy_multiplier = 16.0
 
 [sub_resource type="SphereMesh" id="SphereMesh_4o45f"]
 
@@ -14,5 +21,6 @@ transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 0, 0, 0)
 shape = SubResource("SphereShape3D_at6hp")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
-transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 0, 0, 0)
+transform = Transform3D(0.4, 0, 0, 0, 0.4, 0, 0, 0, 0.4, 0, 0, 0)
+material_override = SubResource("StandardMaterial3D_u4m3h")
 mesh = SubResource("SphereMesh_4o45f")
