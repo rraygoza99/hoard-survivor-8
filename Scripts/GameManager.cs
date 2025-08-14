@@ -199,24 +199,31 @@ public partial class GameManager : Node
 	private void SetupUIForPlayer(Node3D player)
 	{
 		// Find the PlayerUI in the scene
-		var playerUI = GetNode<Control>("PlayerUI");
+		var playerUI = GetNodeOrNull<Control>("PlayerUI");
 		if (playerUI != null)
 		{
-			// Get the UI components
-			var healthBar = playerUI.GetNode<ProgressBar>("HealthBar");
-			var healthLabel = playerUI.GetNode<Label>("HealthBar/HealthLabel");
-			var xpCircle = playerUI.GetNode<TextureProgressBar>("XpCircle");
-			
-			// Set these UI elements on the player
+			// New bars
+			var healthBar = playerUI.GetNodeOrNull<TextureProgressBar>("HealthBar");
+			var xpBar = playerUI.GetNodeOrNull<TextureProgressBar>("XpBar");
+			var xpCircle = playerUI.GetNodeOrNull<TextureProgressBar>("XpCircle");
+			// Health label may be sibling or child
+			Label healthLabel = playerUI.GetNodeOrNull<Label>("HealthLabel")
+				?? healthBar?.GetNodeOrNull<Label>("HealthLabel");
+
 			if (healthBar != null)
 			{
 				player.Set("_healthBar", healthBar);
+				GD.Print("Assigned new health bar to player");
 			}
 			else
 			{
 				GD.PrintErr("Could not find HealthBar in PlayerUI");
 			}
-			
+			if (xpBar != null)
+			{
+				player.Set("_xpBar", xpBar);
+			}
+
 			if (healthLabel != null)
 			{
 				player.Set("_healthLabel", healthLabel);
@@ -225,7 +232,7 @@ public partial class GameManager : Node
 			{
 				GD.PrintErr("Could not find HealthLabel in PlayerUI");
 			}
-			
+
 			if (xpCircle != null)
 			{
 				player.Set("_xpCircle", xpCircle);
@@ -234,29 +241,16 @@ public partial class GameManager : Node
 			{
 				GD.PrintErr("Could not find XpCircle in PlayerUI");
 			}
-			
-			// Trigger initial UI update
-			if (player.HasMethod("UpdateHealthBar"))
-			{
-				player.Call("UpdateHealthBar");
-			}
-			if (player.HasMethod("UpdateXpCircle"))
-			{
-				player.Call("UpdateXpCircle");
-			}
-			
-			// Also call the new ForceUIUpdate method
+
+			// Force immediate UI sync
 			if (player.HasMethod("ForceUIUpdate"))
 			{
 				player.Call("ForceUIUpdate");
 			}
-			
-			// Also schedule a delayed update to make sure everything is connected
-			GetTree().CreateTimer(0.1f).Timeout += () => {
+			// Delayed sync after one frame for safety
+			GetTree().CreateTimer(0.05f).Timeout += () => {
 				if (player.HasMethod("ForceUIUpdate"))
-				{
 					player.Call("ForceUIUpdate");
-				}
 			};
 		}
 		else
