@@ -1,7 +1,17 @@
-[gd_scene load_steps=3 format=3 uid="uid://beqyuykr5xpp1"]
+[gd_scene load_steps=7 format=3 uid="uid://beqyuykr5xpp1"]
 
 [ext_resource type="Script" uid="uid://d0v1qr77s73k4" path="res://Scripts/LobbyUI.cs" id="1_y6fhc"]
 [ext_resource type="PackedScene" uid="uid://cnnbodd1ccndn" path="res://UtilityScenes/player_list_item.tscn" id="2_v308k"]
+[ext_resource type="Texture2D" uid="uid://bapf6tjfs83ci" path="res://Assets/UI/Retro Pixel Ribbons, Banners and Frames 2/ready_button.png" id="3_ha1r6"]
+[ext_resource type="Texture2D" uid="uid://t45a30w0v3dq" path="res://Assets/UI/Retro Pixel Ribbons, Banners and Frames 2/banner2.png" id="4_iom3b"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_th56o"]
+font_size = 24
+font_color = Color(0.0736445, 0.447189, 0.657821, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_fv0q1"]
+font_size = 29
+font_color = Color(0.000693898, 0.000693898, 0.000693898, 1)
 
 [node name="Lobby" type="Control"]
 layout_mode = 3
@@ -10,14 +20,6 @@ offset_right = 40.0
 offset_bottom = 40.0
 script = ExtResource("1_y6fhc")
 PlayerListItemScene = ExtResource("2_v308k")
-
-[node name="Label" type="Label" parent="."]
-layout_mode = 0
-offset_left = 540.0
-offset_top = 92.0
-offset_right = 692.0
-offset_bottom = 121.0
-text = "Waiting for players..."
 
 [node name="PlayerListContainer" type="VBoxContainer" parent="."]
 layout_mode = 0
@@ -32,17 +34,59 @@ text = "Player:"
 
 [node name="ReadyButton" type="Button" parent="."]
 layout_mode = 0
-offset_left = 959.0
-offset_top = 556.0
-offset_right = 1102.0
-offset_bottom = 608.0
-text = "Ready..."
+offset_left = 973.0
+offset_top = 569.0
+offset_right = 1229.0
+offset_bottom = 681.0
+icon = ExtResource("3_ha1r6")
+flat = true
+alignment = 0
+clip_text = true
+
+[node name="ReadyStatusLabel" type="Label" parent="ReadyButton"]
+layout_mode = 0
+offset_left = 94.0
+offset_top = 39.0
+offset_right = 165.0
+offset_bottom = 73.0
+text = "Ready"
+label_settings = SubResource("LabelSettings_th56o")
 
 [node name="CountdownLabel" type="Label" parent="."]
-layout_mode = 0
-offset_left = 984.0
-offset_top = 495.0
-offset_right = 1090.0
-offset_bottom = 537.0
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 28.661
+anchor_top = 16.139
+anchor_right = 28.661
+anchor_bottom = 16.139
+offset_left = -241.44
+offset_top = -206.56
+offset_right = -135.44
+offset_bottom = -164.56
+grow_horizontal = 0
+grow_vertical = 0
 
 [node name="CounterdownTimer" type="Timer" parent="."]
+
+[node name="Banner2" type="Sprite2D" parent="."]
+position = Vector2(631, 112)
+scale = Vector2(0.388571, 0.388571)
+texture = ExtResource("4_iom3b")
+
+[node name="Label" type="Label" parent="Banner2"]
+offset_left = -136.397
+offset_top = -113.235
+offset_right = 150.603
+offset_bottom = -36.2352
+text = "Waiting for players..."
+label_settings = SubResource("LabelSettings_fv0q1")
+
+[node name="ReturnButton" type="Button" parent="."]
+layout_mode = 0
+offset_left = 23.0
+offset_top = 15.0
+offset_right = 57.0
+offset_bottom = 51.0
+text = "Back"
+
+[connection signal="pressed" from="ReturnButton" to="." method="_on_return_button_pressed"]
