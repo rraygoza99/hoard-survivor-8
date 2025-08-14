@@ -5,6 +5,9 @@ using System.Collections.Generic;
 public partial class GameManager : Node
 {
 	[Export] public PackedScene PlayerScene { get; set; }
+	[Export] public PackedScene PauseOverlayScene { get; set; }
+
+	private PauseOverlay _pauseOverlay;
 	
 	private List<Node3D> spawnedPlayers = new List<Node3D>();
 	private Node3D localPlayer = null;
@@ -24,6 +27,37 @@ public partial class GameManager : Node
 	{
 		// Find and initialize the stats overlay
 		statsOverlay = GetNode<StatsOverlay>("StatsOverlay");
+		// Pause overlay (create if scene provided or create basic one)
+		_pauseOverlay = GetNodeOrNull<PauseOverlay>("PauseOverlay");
+		if (_pauseOverlay == null)
+		{
+			if (PauseOverlayScene != null)
+			{
+				_pauseOverlay = PauseOverlayScene.Instantiate<PauseOverlay>();
+				_pauseOverlay.Name = "PauseOverlay";
+				AddChild(_pauseOverlay);
+			}
+			else
+			{
+				// Try to load default scene file
+				var defaultScene = GD.Load<PackedScene>("res://UtilityScenes/pause_overlay.tscn");
+				if (defaultScene != null)
+				{
+					_pauseOverlay = defaultScene.Instantiate<PauseOverlay>();
+					_pauseOverlay.Name = "PauseOverlay";
+					AddChild(_pauseOverlay);
+				}
+				else
+				{
+					_pauseOverlay = new PauseOverlay();
+					_pauseOverlay.Name = "PauseOverlay";
+					AddChild(_pauseOverlay);
+				}
+				_pauseOverlay.Name = "PauseOverlay";
+			}
+		}
+		if (_pauseOverlay != null) _pauseOverlay.Hide();
+		SteamManager.OnPauseStateChanged += OnPauseStateChanged;
 		
 		if (GameData.IsMultiplayerGame())
 		{
@@ -38,26 +72,46 @@ public partial class GameManager : Node
 	public override void _Input(InputEvent @event)
 	{
 		// Handle TAB key for stats overlay
-		if (@event is InputEventKey keyEvent && keyEvent.Keycode == Key.Tab)
+		if (@event is InputEventKey keyEvent)
 		{
-			if (keyEvent.Pressed && !keyEvent.Echo)
+			if (keyEvent.Keycode == Key.Tab)
 			{
-				// Show stats overlay when TAB is pressed
-				if (statsOverlay != null && localPlayer != null)
+				if (keyEvent.Pressed && !keyEvent.Echo)
 				{
-					statsOverlay.UpdateStats(localPlayer);
-					statsOverlay.ShowOverlay();
+					if (statsOverlay != null && localPlayer != null)
+					{
+						statsOverlay.UpdateStats(localPlayer);
+						statsOverlay.ShowOverlay();
+					}
+				}
+				else if (!keyEvent.Pressed)
+				{
+					if (statsOverlay != null)
+					{
+						statsOverlay.HideOverlay();
+					}
 				}
 			}
-			else if (!keyEvent.Pressed)
+			else if (keyEvent.Keycode == Key.Escape && keyEvent.Pressed && !keyEvent.Echo)
 			{
-				// Hide stats overlay when TAB is released
-				if (statsOverlay != null)
-				{
-					statsOverlay.HideOverlay();
-				}
+				// ESC key toggles pause/resume vote using unified system
+				// - If game is running: votes to pause
+				// - If game is paused: votes to resume
+				bool currentlyPaused = GetTree().Paused;
+				SteamManager.Manager?.TogglePausePhaseVote();
+				GD.Print($"ESC pressed: Toggled {(currentlyPaused ? "resume" : "pause")} vote");
 			}
 		}
+	}
+
+	private void OnPauseStateChanged(bool paused, string initiator, int votes, int total)
+	{
+		GD.Print($"Pause state changed. Paused={paused} Initiator={initiator} Votes={votes}/{total}");
+		if (_pauseOverlay != null)
+		{
+			_pauseOverlay.UpdatePauseState(paused, initiator, votes, total);
+		}
+		GetTree().Paused = paused; // Pause entire tree for everyone
 	}
 	
 	private void SpawnLobbyPlayers()
@@ -279,6 +333,11 @@ public partial class GameManager : Node
 	public List<Node3D> GetSpawnedPlayers()
 	{
 		return new List<Node3D>(spawnedPlayers);
+	}
+
+	public override void _ExitTree()
+	{
+		SteamManager.OnPauseStateChanged -= OnPauseStateChanged;
 	}
 	
 }

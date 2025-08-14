@@ -8,7 +8,7 @@ public partial class EnemySpawner : Node3D
 	[Export] public float SpawnInterval { get;set;} = 2.0f;
 
 	// Scaling
-	[Export] public float EnemyScalingFactor { get; set; } = 1.6f;
+	[Export] public float EnemyScalingFactor { get; set; } = 1.3f;
 	[Export] public float ScalingIntervalSeconds { get; set; } = 60.0f;
 
 	private Node3D _player;

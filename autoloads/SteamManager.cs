@@ -23,6 +23,8 @@ public partial class SteamManager : Node
 	public static event Action OnAllPlayersReady;
 	public static event Action OnNotAllPlayersReady;
 	public static event Action OnGameStartSignaled;
+	// Pause system (simplified)
+	public static event Action<bool,string,int,int> OnPauseStateChanged; // paused, initiator, votes(current phase), total
 	
 	// Ready system
 	private Dictionary<string, bool> playerReadyStatus = new Dictionary<string, bool>();
@@ -32,6 +34,10 @@ public partial class SteamManager : Node
 	private bool gameStartProcessed = false;
 	private bool lastAllPlayersReadyState = false;
 	private float lastLobbyDataChangeTime = 0.0f;
+	private bool lastPausedState = false;
+	private string lastPauseInitiator = "";
+	// Track last vote count for current phase
+	private int lastPhaseVotes = 0;
 	
 	// Property to get current lobby member count
 	public int CurrentLobbyMemberCount 
@@ -43,74 +49,60 @@ public partial class SteamManager : Node
 			return 0;
 		} 
 	}
-	public SteamManager()
-	{
-		if (Manager == null)
-		{
+	public SteamManager() {
+		if (Manager == null) {
 			Manager = this;
-			try
-			{
+			try {
 				GD.Print("Attempting to initialize Steam client...");
-				GD.Print($"App ID: {gameAppId}");
-				GD.Print($"Test Mode: {enableTestMode}");
-				
-				SteamClient.Init(gameAppId, enableTestMode);				if (!SteamClient.IsValid)
-				{
-					GD.PrintErr("Error initializing steam client - SteamClient is not valid");
-					GD.PrintErr("Make sure Steam is running and you have the correct steam_api64.dll version");
+				SteamClient.Init(gameAppId, enableTestMode);
+				if (!SteamClient.IsValid) {
+					GD.PrintErr("SteamClient not valid");
 					return;
 				}
-
-				GD.Print("Successfully initialized steam client");
 				PlayerName = SteamClient.Name;
-				GD.Print($"Player name: {PlayerName}");
 				IsSteamInitialized = true;
-
-			}
-			catch (System.DllNotFoundException dllEx)
-			{
-				GD.PrintErr($"DLL not found: {dllEx.Message}");
-				GD.PrintErr("Make sure steam_api64.dll is in the correct location and is the right version");
-			}
-			catch (System.EntryPointNotFoundException entryEx)
-			{
-				GD.PrintErr($"Entry point not found: {entryEx.Message}");
-				GD.PrintErr("This usually means there's a version mismatch between Facepunch.Steamworks and steam_api64.dll");
-				GD.PrintErr("Try updating both to the latest compatible versions");
-			}
-			catch (Exception e)
-			{
-				GD.PrintErr($"Steam initialization error: {e.Message}");
-				GD.PrintErr($"Exception type: {e.GetType().Name}");
+			} catch (Exception e) {
+				GD.PrintErr($"Steam init error: {e.Message}");
 			}
 		}
 	}
-	public override void _Ready()
-	{
-		_sceneManager = GetNode<SceneManager>("/root/SceneManager");
-		if (!IsSteamInitialized)
-		{
-			GD.PrintErr("Steam is not initialized, skipping lobby callbacks setup");
-			return;
-		}
 
+	public override void _Ready() {
+		_sceneManager = GetNodeOrNull<SceneManager>("/root/SceneManager");
+		if (!IsSteamInitialized) return;
 		SteamMatchmaking.OnLobbyGameCreated += OnLobbyGameCreatedCallback;
 		SteamMatchmaking.OnLobbyCreated += OnLobbyCreatedCallback;
 		SteamMatchmaking.OnLobbyMemberJoined += OnLobbyMemberJoinedCallback;
-		SteamMatchmaking.OnLobbyMemberDisconnected += OnLobbyMemberDisconnectedCallback;
 		SteamMatchmaking.OnLobbyMemberLeave += OnLobbyMemberLeaveCallback;
 		SteamMatchmaking.OnLobbyEntered += OnLobbyEnteredCallback;
 		SteamMatchmaking.OnLobbyDataChanged += OnLobbyDataChangedCallback;
 	}
-	
+
+	// Simplified unified vote (placed after initialization)
+	public void TogglePausePhaseVote()
+	{
+		if (hostedLobby.Id == 0)
+		{
+			lastPausedState = !lastPausedState;
+			lastPauseInitiator = lastPausedState ? PlayerName : "";
+			OnPauseStateChanged?.Invoke(lastPausedState, lastPauseInitiator, (lastPausedState?1:0), 1);
+			return;
+		}
+		bool paused = hostedLobby.GetData("game_paused") == "true";
+		Friend self = default;
+		foreach (Friend f in hostedLobby.Members) { if (f.Name == PlayerName) { self = f; break; } }
+		string myVote = hostedLobby.GetMemberData(self, "vote");
+		string newVote = (myVote == "1") ? "0" : "1";
+		hostedLobby.SetMemberData("vote", newVote);
+		GD.Print($"[PauseSystem] {PlayerName} vote -> {newVote} phase={(paused?"RESUME":"PAUSE")}");
+		if (IsLobbyOwner()) RecalculatePhase(paused); else {
+			string ping = hostedLobby.GetData("vote_ping");
+			hostedLobby.SetData("vote_ping", (ping == "1" ? "0" : "1"));
+		}
+	}
+
 	private void OnLobbyMemberLeaveCallback(Lobby lobby, Friend friend){
 		GD.Print($"User has left the lobby: {friend.Name}");
-		GD.Print($"Current lobby members: {lobby.MemberCount}");
-		OnLobbyMemberCountChanged?.Invoke(lobby.MemberCount);
-	}
-	private void OnLobbyMemberDisconnectedCallback(Lobby lobby, Friend friend){
-		GD.Print($"User has disconnected from the lobby: {friend.Name}");
-		GD.Print($"Current lobby members: {lobby.MemberCount}");
 		OnLobbyMemberCountChanged?.Invoke(lobby.MemberCount);
 	}
 	private void OnLobbyGameCreatedCallback(Lobby lobby, uint id, ushort port, SteamId steamId){
@@ -162,6 +154,33 @@ public partial class SteamManager : Node
 		
 		// Also refresh ready status when lobby data changes
 		RefreshAllPlayerReadyStatus();
+
+		// Host: check unified vote tally when ping toggled or any vote present
+		if (IsLobbyOwner())
+		{
+			string pingVal = lobby.GetData("vote_ping");
+			bool hostPaused = lobby.GetData("game_paused") == "true";
+			bool anyVote = false;
+			foreach (Friend m in lobby.Members)
+			{
+				if (lobby.GetMemberData(m, "vote") == "1") { anyVote = true; break; }
+			}
+			if (anyVote || !string.IsNullOrEmpty(pingVal)) RecalculatePhase(hostPaused);
+		}
+
+		// Pause / resume state change detection
+		bool isPaused = lobby.GetData("game_paused") == "true";
+		string initiator = lobby.GetData("pause_initiator");
+		int total = lobby.MemberCount;
+		int votes = 0;
+		int.TryParse(lobby.GetData(isPaused?"resume_vote_count":"pause_vote_count"), out votes);
+		if (isPaused != lastPausedState || initiator != lastPauseInitiator || votes != lastPhaseVotes)
+		{
+			lastPausedState = isPaused;
+			lastPauseInitiator = initiator;
+			lastPhaseVotes = votes;
+			OnPauseStateChanged?.Invoke(isPaused, initiator, votes, total);
+		}
 	}
 	
 	public override void _Process(double delta){
@@ -391,7 +410,93 @@ public partial class SteamManager : Node
 			hostedLobby.SetData("game_start", "true");
 		}
 	}
-	
+
+	// ===== PAUSE SYSTEM =====
+	public void SetPauseVote(bool vote)
+	{
+		if (hostedLobby.Id == 0)
+		{
+			// Single-player fallback: directly fire event
+			lastPausedState = vote;
+			lastPauseInitiator = PlayerName;
+			OnPauseStateChanged?.Invoke(vote, PlayerName, vote ? 1 : 0, 1);
+			return;
+		}
+		// Ignore new pause votes while already paused (but allow clearing vote=false)
+		if (hostedLobby.GetData("game_paused") == "true" && vote) return;
+		GD.Print($"[PauseVote] vote={vote} paused={hostedLobby.GetData("game_paused")} members={hostedLobby.MemberCount}");
+		// Single-member direct pause/unpause handling
+		if (hostedLobby.MemberCount <= 1 && vote)
+		{
+			hostedLobby.SetData("game_paused", "true");
+			hostedLobby.SetData("pause_initiator", PlayerName);
+			hostedLobby.SetData("pause_vote_count", "1");
+			lastPausedState = true;
+			lastPauseInitiator = PlayerName;
+			OnPauseStateChanged?.Invoke(true, PlayerName, 1, 1);
+			return;
+		}
+		// OLD SYSTEM - Use TogglePausePhaseVote instead
+		GD.PrintErr("SetPauseVote is deprecated. Use TogglePausePhaseVote instead.");
+	}
+
+	public void SetResumeVote(bool vote)
+	{
+		if (hostedLobby.Id == 0)
+		{
+			// single player immediate resume
+			if (lastPausedState && vote)
+			{
+				lastPausedState = false;
+				OnPauseStateChanged?.Invoke(false, "", 0, 1);
+			}
+			return;
+		}
+		if (hostedLobby.GetData("game_paused") != "true") return; // only valid when paused
+		
+		// OLD SYSTEM - Use TogglePausePhaseVote instead
+		GD.PrintErr("SetResumeVote is deprecated. Use TogglePausePhaseVote instead.");
+	}
+
+	private void ClearAllMemberVotes()
+	{
+		if (hostedLobby.Id == 0) return;
+		foreach (Friend m in hostedLobby.Members)
+		{
+			hostedLobby.SetMemberData("vote", "0");
+		}
+	}
+
+	private void RecalculatePhase(bool pausedPhase)
+	{
+		// pausedPhase true => counting resume votes. false => counting pause votes.
+		if (hostedLobby.Id == 0) return;
+		int total = hostedLobby.MemberCount;
+		int votes = 0;
+		foreach (Friend m in hostedLobby.Members)
+		{
+			if (hostedLobby.GetMemberData(m, "vote") == "1") votes++;
+		}
+		bool threshold = votes > total / 2; // strict majority
+		hostedLobby.SetData(pausedPhase ? "resume_vote_count" : "pause_vote_count", votes.ToString());
+		if (threshold)
+		{
+			bool newPaused = !pausedPhase; // if we were unpaused (pausedPhase==false) we now pause; else resume
+			hostedLobby.SetData("game_paused", newPaused ? "true" : "false");
+			hostedLobby.SetData("pause_initiator", newPaused ? PlayerName : "");
+			
+			// Clear all vote counts when state changes
+			hostedLobby.SetData("pause_vote_count", "0");
+			hostedLobby.SetData("resume_vote_count", "0");
+			
+			ClearAllMemberVotes();
+			lastPhaseVotes = 0;
+		}
+		else
+		{
+			lastPhaseVotes = votes;
+		}
+	}
 	// Position synchronization methods
 	public void UpdatePlayerPosition(string playerName, Vector3 position, Vector3 rotation, bool isMoving)
 	{
