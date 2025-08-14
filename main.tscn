@@ -1,10 +1,14 @@
-[gd_scene load_steps=42 format=3 uid="uid://d1k0xsj21ghfp"]
+[gd_scene load_steps=48 format=3 uid="uid://d1k0xsj21ghfp"]
 
 [ext_resource type="Script" uid="uid://dt6y7aa3ouu2e" path="res://Scripts/CameraFollow.cs" id="1_1bvp3"]
 [ext_resource type="PackedScene" uid="uid://2s1ry0cd6jh0" path="res://player.tscn" id="2_player"]
 [ext_resource type="Script" uid="uid://dvdx4vkk1lski" path="res://Scripts/GameManager.cs" id="3_gamemanager"]
+[ext_resource type="Shader" uid="uid://fxuif8upw4h5" path="res://Shader/PostProcessShader.gdshader" id="4_come4"]
+[ext_resource type="Texture2D" uid="uid://clwuhggy48ige" path="res://Shader/Hatch/crosshatch_light.png" id="5_0cp0l"]
 [ext_resource type="PackedScene" uid="uid://jn0gdhj261hd" path="res://Enemies/Chasers/CocoChaser.tscn" id="6_b1qrp"]
+[ext_resource type="Texture2D" uid="uid://dspb1nmd2rain" path="res://Shader/Hatch/crosshatch_medium.png" id="6_d2t1y"]
 [ext_resource type="Texture2D" uid="uid://bchjrspkuhsup" path="res://Assets/Terrain/Textures/Leaves_GiantPine_C.png" id="7_2cqfq"]
+[ext_resource type="Texture2D" uid="uid://by3h6eg2sm0e6" path="res://Shader/Hatch/crosshatch_heavy.PNG" id="7_gngh3"]
 [ext_resource type="Script" uid="uid://cukffo3h6usas" path="res://Scripts/EnemySpawner.cs" id="8_5vw27"]
 [ext_resource type="PackedScene" uid="uid://bbjgf2mgs0rc2" path="res://UtilityScenes/player_ui.tscn" id="9_kek77"]
 [ext_resource type="Script" uid="uid://b1mfb2qse5xew" path="res://Scripts/UpgradeManager.cs" id="10_4c57u"]
@@ -39,6 +43,20 @@
 [ext_resource type="Resource" uid="uid://cyu1gj04iionf" path="res://Upgrades/legendary_speed.tres" id="36_ruth0"]
 [ext_resource type="Resource" uid="uid://bgkh0038xrb11" path="res://Upgrades/legendary_xp.tres" id="37_rm4vd"]
 
+[sub_resource type="QuadMesh" id="QuadMesh_come4"]
+size = Vector2(2, 2)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_h8e4i"]
+render_priority = 0
+shader = ExtResource("4_come4")
+shader_parameter/hatch1 = ExtResource("5_0cp0l")
+shader_parameter/hatch2 = ExtResource("6_d2t1y")
+shader_parameter/hatch3 = ExtResource("7_gngh3")
+shader_parameter/edge_color = Color(0, 0, 0, 1)
+shader_parameter/edge_threshold = 0.017
+shader_parameter/noise_frequency = 1.9
+shader_parameter/noise_offset_intensity = 0.0
+
 [sub_resource type="NavigationMesh" id="NavigationMesh_7mycd"]
 vertices = PackedVector3Array(-74.5, 0.276383, -74.5, -74.5, 0.276383, 74.5, 74.5, 0.276383, 74.5, 74.5, 0.276383, -74.5)
 polygons = [PackedInt32Array(3, 2, 0), PackedInt32Array(0, 2, 1)]
@@ -59,6 +77,11 @@ transform = Transform3D(1, 0, 0, 0, 0.471705, 0.881757, 0, -0.881757, 0.471705, 
 transform = Transform3D(1, 0, 0, 0, 0.49555, 0.86858, 0, -0.86858, 0.49555, 0, 12.4766, 12.7395)
 script = ExtResource("1_1bvp3")
 TargetNodePath = NodePath("")
+
+[node name="Outline" type="MeshInstance3D" parent="Camera3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.108713, -0.183626)
+mesh = SubResource("QuadMesh_come4")
+surface_material_override/0 = SubResource("ShaderMaterial_h8e4i")
 
 [node name="NavigationRegion3D" type="NavigationRegion3D" parent="."]
 navigation_mesh = SubResource("NavigationMesh_7mycd")
