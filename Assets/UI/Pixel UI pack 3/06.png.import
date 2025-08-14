@@ -1,0 +1,26 @@
+[remap]
+
+importer="2d_array_texture"
+type="CompressedTexture2DArray"
+uid="uid://de2iyn3lfgumf"
+path="res://.godot/imported/06.png-9bb57990a4d97246674ba01f1e2f2dc0.ctexarray"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://Assets/UI/Pixel UI pack 3/06.png"
+dest_files=["res://.godot/imported/06.png-9bb57990a4d97246674ba01f1e2f2dc0.ctexarray"]
+
+[params]
+
+compress/mode=0
+compress/high_quality=false
+compress/lossy_quality=0.7
+compress/hdr_compression=1
+compress/channel_pack=0
+mipmaps/generate=true
+mipmaps/limit=1
+slices/horizontal=8
+slices/vertical=8

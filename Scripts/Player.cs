@@ -52,7 +52,9 @@ public partial class Player : CharacterBody3D
 	[Export] private float _mortarRange = 15.0f;
 	
 	[ExportGroup("UI")]
-	[Export] private ProgressBar _healthBar;
+	// Use Range so either ProgressBar or TextureProgressBar can be assigned
+	[Export] private TextureProgressBar _healthBar;
+	[Export] private TextureProgressBar _xpBar;
 	[Export] private Label _healthLabel;
 	[Export] private TextureProgressBar _xpCircle;
 	[Export] private LevelUpScreen _levelUpScreen;
@@ -124,30 +126,46 @@ public partial class Player : CharacterBody3D
 		
 		GD.Print($"UpdateHealthBar called - CurrentHealth: {CurrentHealth}, MaxHealth: {MaxHealth}, _healthBar: {(_healthBar != null ? "Connected" : "NULL")}");
 		
+		float percent = CurrentHealth / MaxHealth;
 		if (_healthBar != null)
 		{
-			_healthBar.Value = (CurrentHealth / MaxHealth) * 100;
-			GD.Print($"Health bar updated to: {_healthBar.Value}%");
-			if (_healthLabel != null)
+			if (_healthBar is SmoothBar smooth)
 			{
-				// Update the text with the current and max health values
-				_healthLabel.Text = $"{Mathf.Round(CurrentHealth)} / {MaxHealth}";
-				GD.Print($"Health label updated to: {_healthLabel.Text}");
+				smooth.SetTargetPercent(percent);
+				GD.Print($"Health smooth target set to: {percent * 100f}%");
 			}
+			else
+			{
+				_healthBar.Value = percent * 100f;
+				GD.Print($"Health bar updated to: {_healthBar.Value}%");
+			}
+		}
+		if (_healthLabel != null)
+		{
+			_healthLabel.Text = $"{Mathf.Round(CurrentHealth)} / {MaxHealth}";
+			GD.Print($"Health label updated to: {_healthLabel.Text}");
 		}
 		else
 		{
-			GD.Print("Health bar is NULL - cannot update UI");
+			GD.Print("No health bar reference - cannot update UI label");
 		}
 	}
 	private void UpdateXpCircle()
 	{
-		// Only update UI for local player
 		if (!_isLocalPlayer) return;
-		
+		float pct = (float)CurrentXp / XpToNextLevel * 100f;
 		if (_xpCircle != null)
+			_xpCircle.Value = pct;
+		if (_xpBar != null)
 		{
-			_xpCircle.Value = (float)CurrentXp / XpToNextLevel * 100;
+			if (_xpBar is SmoothBar smooth)
+			{
+				smooth.SetTargetPercent(pct / 100f);
+			}
+			else
+			{
+				_xpBar.Value = pct;
+			}
 		}
 	}
 	

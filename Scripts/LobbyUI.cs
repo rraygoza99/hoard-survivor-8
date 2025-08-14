@@ -7,6 +7,7 @@ public partial class LobbyUI : Control
     [Export] public PackedScene PlayerListItemScene;
     private VBoxContainer _playerListContainer;
     private Button _readyButton;
+    private Label _readyStatusLabel;
     private Label _countdownLabel;
     private Timer _countdownTimer;
     private Dictionary<string, bool> _currentReadyStatus = new Dictionary<string, bool>();
@@ -79,7 +80,7 @@ public partial class LobbyUI : Control
     {
         // Try to find existing ready button or create one
         _readyButton = GetNodeOrNull<Button>("ReadyButton");
-        
+        _readyStatusLabel = GetNodeOrNull<Label>("ReadyButton/ReadyStatusLabel");
         if (_readyButton == null)
         {
             GD.Print("ReadyButton not found, creating one programmatically");
@@ -153,8 +154,9 @@ public partial class LobbyUI : Control
         bool newReadyState = !SteamManager.Manager.IsLocalPlayerReady;
         SteamManager.Manager.SetPlayerReady(newReadyState);
         
-        _readyButton.Text = newReadyState ? "Not Ready" : "Ready";
+        _readyStatusLabel.Text = newReadyState ? "Not Ready" : "Ready";
         _readyButton.Modulate = newReadyState ? Colors.Green : Colors.White;
+        
         
         GD.Print($"Local player ready status changed to: {newReadyState}");
     }

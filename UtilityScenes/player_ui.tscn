@@ -1,11 +1,12 @@
-[gd_scene load_steps=5 format=3 uid="uid://bbjgf2mgs0rc2"]
+[gd_scene load_steps=8 format=3 uid="uid://bbjgf2mgs0rc2"]
 
 [ext_resource type="Texture2D" uid="uid://cwy2duun031nh" path="res://Assets/button_round_depth_line.png" id="1_7vllg"]
 [ext_resource type="Script" uid="uid://25psu3cbq7mb" path="res://Scripts/PlayerUi.cs" id="1_s2ko4"]
 [ext_resource type="Texture2D" uid="uid://g63oqe0ghka5" path="res://Assets/button_round_depth_gradient.png" id="2_s2ko4"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ay1j7"]
-bg_color = Color(0.735275, 0.160431, 0.0120511, 1)
+[ext_resource type="Texture2D" uid="uid://hcj8u3c51qrt" path="res://Assets/UI/Fantasy Minimal Pixel Art GUI by eta-commercial-free/UI/ValueBar_128x16.png" id="3_frame"]
+[ext_resource type="Texture2D" uid="uid://da4240dqvuurc" path="res://Assets/UI/Fantasy Minimal Pixel Art GUI by eta-commercial-free/UI/ValueRed_120x8.png" id="4_red"]
+[ext_resource type="Texture2D" uid="uid://01o8lvkmsng2" path="res://Assets/UI/Fantasy Minimal Pixel Art GUI by eta-commercial-free/UI/ValueBlue_120x8.png" id="5_blue"]
+[ext_resource type="Script" uid="uid://blnmh7ptvamir" path="res://Scripts/SmoothBar.cs" id="6_smooth"]
 
 [node name="PlayerUI" type="Control"]
 layout_mode = 3
@@ -16,25 +17,30 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_s2ko4")
 
-[node name="HealthBar" type="ProgressBar" parent="."]
+[node name="HealthBar" type="TextureProgressBar" parent="."]
 layout_mode = 0
 offset_left = 14.0
-offset_top = 19.0
-offset_right = 172.0
-offset_bottom = 46.0
-theme_override_styles/fill = SubResource("StyleBoxFlat_ay1j7")
-show_percentage = false
+offset_top = 15.0
+offset_right = 142.0
+offset_bottom = 31.0
+step = 0.0
+value = 100.0
+texture_under = ExtResource("3_frame")
+texture_progress = ExtResource("4_red")
+texture_progress_offset = Vector2(4, 4)
+script = ExtResource("6_smooth")
 
-[node name="HealthLabel" type="Label" parent="HealthBar"]
+[node name="HealthLabel" type="Label" parent="."]
+visible = false
 layout_mode = 0
-offset_left = 13.0
-offset_top = 1.0
-offset_right = 143.0
-offset_bottom = 24.0
-horizontal_alignment = 1
+offset_left = 290.0
+offset_top = 15.0
+offset_right = 470.0
+offset_bottom = 55.0
 vertical_alignment = 1
 
 [node name="XpCircle" type="TextureProgressBar" parent="."]
+visible = false
 layout_mode = 0
 offset_left = 18.0
 offset_top = 65.0
@@ -43,3 +49,16 @@ offset_bottom = 126.0
 fill_mode = 4
 texture_under = ExtResource("1_7vllg")
 texture_progress = ExtResource("2_s2ko4")
+
+[node name="XpBar" type="TextureProgressBar" parent="."]
+layout_mode = 0
+offset_left = 14.0
+offset_top = 60.0
+offset_right = 142.0
+offset_bottom = 76.0
+max_value = 1.0
+step = 0.0
+texture_under = ExtResource("3_frame")
+texture_progress = ExtResource("5_blue")
+texture_progress_offset = Vector2(4, 4)
+script = ExtResource("6_smooth")
