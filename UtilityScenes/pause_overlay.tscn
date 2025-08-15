@@ -1,4 +1,4 @@
-[gd_scene load_steps=2 format=3 uid="uid://ec1cg7mffvg2"]
+[gd_scene load_steps=2 format=3 uid="uid://dbvpuxel8xr7a"]
 
 [ext_resource type="Script" uid="uid://b60l7ktwgx57f" path="res://Scripts/PauseOverlay.cs" id="1"]
 

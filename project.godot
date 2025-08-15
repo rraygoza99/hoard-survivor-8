@@ -15,21 +15,20 @@ run/main_scene="uid://dmv1p00qidy4n"
 config/features=PackedStringArray("4.4", "C#", "Forward Plus")
 config/icon="res://icon.svg"
 
-[display]
-window/size/viewport_width=1280
-window/size/viewport_height=720
-window/size/mode=3
-window/size/resizable=true
-window/stretch/mode="canvas_items"
-window/stretch/aspect="keep"
-window/size/fullscreen=true
-
 [autoload]
 
 SimpleGrass="*res://addons/simplegrasstextured/singleton.tscn"
 SteamManager="*res://autoloads/SteamManager.cs"
 SceneManager="*res://Scripts/SceneManager.cs"
 GameData="*res://Scripts/GameData.cs"
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/size/mode=3
+window/stretch/mode="canvas_items"
+window/size/fullscreen=true
 
 [dotnet]
 
