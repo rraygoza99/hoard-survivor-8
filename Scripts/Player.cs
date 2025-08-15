@@ -7,6 +7,7 @@ public partial class Player : CharacterBody3D
 	[ExportGroup("Player Stats")]
 	[Export] public int CurrentXp { get; private set; } = 0;
 	[Export] public int XpToNextLevel {get; private set;} =100;
+	[Export] public int CurrentLevel { get; private set; } = 1;
 	[Export] public float MaxHealth { get; set; } = 100.0f;
 	public float CurrentHealth { get; set; }
 	[Export] float MovementSpeed { get; set; } = 5.0f;
@@ -62,6 +63,7 @@ public partial class Player : CharacterBody3D
 	[Export] private TextureProgressBar _healthBar;
 	[Export] private TextureProgressBar _xpBar;
 	[Export] private Label _healthLabel;
+	[Export] private Label _levelLabel;
 	[Export] private TextureProgressBar _xpCircle;
 	[Export] private LevelUpScreen _levelUpScreen;
 	
@@ -96,6 +98,7 @@ public partial class Player : CharacterBody3D
 		
 		UpdateHealthBar();
 		UpdateXpCircle();
+		UpdateLevelDisplay();
 		UpdateFireCooldown();
 		UpdateWaveCooldown();
 		UpdateMortarCooldown();
@@ -181,10 +184,30 @@ public partial class Player : CharacterBody3D
 		}
 	}
 	
+	private void UpdateLevelDisplay()
+	{
+		// Only update UI for local player
+		if (!_isLocalPlayer) return;
+		
+		if (_levelLabel != null)
+		{
+			_levelLabel.Text = $"Level {CurrentLevel}";
+			GD.Print($"Level label updated to: {_levelLabel.Text}");
+		}
+		else
+		{
+			GD.Print("No level label reference - cannot update level display");
+		}
+	}
+	
 	private void LevelUp(){
 		GD.Print("LevelUp function called!");
 		CurrentXp -= XpToNextLevel;
 		XpToNextLevel = (int)(XpToNextLevel *1.5f);
+		CurrentLevel++; // Increment the player level
+		
+		// Update the level display
+		UpdateLevelDisplay();
 		
 		var choices = _upgradeManager.GetUpgradeChoices(Lucky);
 		
@@ -518,6 +541,7 @@ public partial class Player : CharacterBody3D
 		GD.Print($"ForceUIUpdate called - CurrentHealth: {CurrentHealth}, MaxHealth: {MaxHealth}");
 		UpdateHealthBar();
 		UpdateXpCircle();
+		UpdateLevelDisplay();
 	}
 	
 	// Public method to initialize health properly (called by GameManager)

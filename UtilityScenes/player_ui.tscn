@@ -62,3 +62,12 @@ texture_under = ExtResource("3_frame")
 texture_progress = ExtResource("5_blue")
 texture_progress_offset = Vector2(4, 4)
 script = ExtResource("6_smooth")
+
+[node name="LevelLabel" type="Label" parent="."]
+layout_mode = 0
+offset_left = 14.0
+offset_top = 80.0
+offset_right = 100.0
+offset_bottom = 100.0
+text = "Level 1"
+vertical_alignment = 1

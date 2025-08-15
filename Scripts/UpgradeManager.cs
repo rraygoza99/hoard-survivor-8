@@ -33,8 +33,7 @@ public partial class UpgradeManager : Node
 	public List<Upgrade> GetUpgradeChoices(float playerLuck){
 		GD.Print("Getting upgrades");
 		var choices = new List<Upgrade>();
-		var availableUpgrades = new List<Upgrade>(_upgradePool);
-		var usedStats = new HashSet<Stat>(); // Track which stats have been used
+		var availableUpgrades = new List<Upgrade>(_upgradePool); // Fresh copy for each level-up
 
 		for (int i = 0; i < 3; i++)
 		{
@@ -56,16 +55,13 @@ public partial class UpgradeManager : Node
 			choices.Add(chosenUpgrade);
 			GD.Print($"Adding {chosenUpgrade.Name} (Stat: {chosenUpgrade.StatToUpgrade})");
 			
-			// Add the stat to the used stats set
-			usedStats.Add(chosenUpgrade.StatToUpgrade);
-			
 			// Count how many upgrades will be removed
 			int upgradesWithSameStat = availableUpgrades.Count(u => u.StatToUpgrade == chosenUpgrade.StatToUpgrade);
 			
-			// Remove all upgrades with the same StatToUpgrade (regardless of rarity)
+			// Remove all upgrades with the same StatToUpgrade for THIS level-up only
 			availableUpgrades.RemoveAll(upgrade => upgrade.StatToUpgrade == chosenUpgrade.StatToUpgrade);
 			
-			GD.Print($"Removed {upgradesWithSameStat} upgrades with stat {chosenUpgrade.StatToUpgrade}. {availableUpgrades.Count} upgrades remaining.");
+			GD.Print($"Removed {upgradesWithSameStat} upgrades with stat {chosenUpgrade.StatToUpgrade} from this level-up. {availableUpgrades.Count} upgrades remaining.");
 		}
 		
 		return choices;

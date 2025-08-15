@@ -263,6 +263,8 @@ public partial class GameManager : Node
 			// Health label may be sibling or child
 			Label healthLabel = playerUI.GetNodeOrNull<Label>("HealthLabel")
 				?? healthBar?.GetNodeOrNull<Label>("HealthLabel");
+			// Level label should be near the XP bar
+			Label levelLabel = playerUI.GetNodeOrNull<Label>("LevelLabel");
 
 			if (healthBar != null)
 			{
@@ -285,6 +287,15 @@ public partial class GameManager : Node
 			else
 			{
 				GD.PrintErr("Could not find HealthLabel in PlayerUI");
+			}
+
+			if (levelLabel != null)
+			{
+				player.Set("_levelLabel", levelLabel);
+			}
+			else
+			{
+				GD.PrintErr("Could not find LevelLabel in PlayerUI");
 			}
 
 			if (xpCircle != null)

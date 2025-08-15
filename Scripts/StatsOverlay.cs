@@ -14,6 +14,7 @@ public partial class StatsOverlay : Control
 	private Label _cooldownReductionLabel;
 	private Label _luckyLabel;
 	private Label _xpLabel;
+	private Label _levelLabel;
 	
 	public override void _Ready()
 	{
@@ -28,6 +29,7 @@ public partial class StatsOverlay : Control
 		_cooldownReductionLabel = GetNode<Label>("BackgroundPanel/StatsContainer/CooldownReductionLabel");
 		_luckyLabel = GetNode<Label>("BackgroundPanel/StatsContainer/LuckyLabel");
 		_xpLabel = GetNode<Label>("BackgroundPanel/StatsContainer/XpLabel");
+		_levelLabel = GetNodeOrNull<Label>("BackgroundPanel/StatsContainer/LevelLabel");
 	}
 	
 	public void UpdateStats(Node3D player)
@@ -47,6 +49,7 @@ public partial class StatsOverlay : Control
 		var lucky = (float)player.Get("Lucky");
 		var currentXp = (int)player.Get("CurrentXp");
 		var xpToNextLevel = (int)player.Get("XpToNextLevel");
+		var currentLevel = (int)player.Get("CurrentLevel");
 		
 		// Update all the labels
 		_healthLabel.Text = $"Health: {Mathf.Round(currentHealth)}/{Mathf.Round(maxHealth)}";
@@ -59,6 +62,12 @@ public partial class StatsOverlay : Control
 		_cooldownReductionLabel.Text = $"Cooldown Reduction: {(cooldownReduction * 100):F1}%";
 		_luckyLabel.Text = $"Lucky: {lucky}";
 		_xpLabel.Text = $"XP: {currentXp}/{xpToNextLevel}";
+		
+		// Update level label if it exists
+		if (_levelLabel != null)
+		{
+			_levelLabel.Text = $"Level: {currentLevel}";
+		}
 	}
 	
 	public void ShowOverlay()
