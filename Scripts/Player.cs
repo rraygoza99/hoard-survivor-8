@@ -38,6 +38,12 @@ public partial class Player : CharacterBody3D
 	[Export(PropertyHint.Range, "0,1")]	public float LifeSteal { get; set; } = 0.0f;
 	[Export] public float Lucky {get; set; } = 0.0f;
 	
+	[ExportGroup("Damage Bonuses")]
+	[Export] public float GeneralDamage { get; set; } = 0.0f;
+	[Export] public float MagicSphereDamage { get; set; } = 0.0f;
+	[Export] public float ArcaneWaveDamage { get; set; } = 0.0f;
+	[Export] public float MortarDamage { get; set; } = 0.0f;
+	
 	[ExportGroup("Combat")]
 	[Export] PackedScene _magicSphereScene;
 	[Export] private float _baseFireCooldown = 1.0f;
@@ -73,6 +79,12 @@ public partial class Player : CharacterBody3D
 		_fireTimer = GetNode<Timer>("FireTimer");
 		_waveTimer = GetNode<Timer>("WaveTimer");
 		_mortarTimer = GetNode<Timer>("MortarTimer");
+		
+		// Configure collision to allow walking through enemies
+		// Player is on layer 2, enemies are on layer 4 (3rd bit)
+		// Remove enemy layer from collision mask so player can walk through them
+		CollisionMask = (uint)(CollisionMask & ~4u); // Remove bit 3 (enemy layer)
+		GD.Print($"Player collision mask set to: {CollisionMask}");
 		
 		// Only connect if _levelUpScreen is already set (for players spawned in editor)
 		if (_levelUpScreen != null)
@@ -241,8 +253,8 @@ public partial class Player : CharacterBody3D
 		GetTree().Root.AddChild(boulder);
 		Vector3 spawnPos = _spellSpawnPoint.GlobalPosition;
 		
-		// Set player stats for critical hits and life steal
-		boulder.SetPlayerStats(CriticalChance, CriticalDamageMultiplier, LifeSteal, this);
+		// Set player stats for critical hits and life steal with damage bonuses
+		boulder.SetPlayerStats(CriticalChance, CriticalDamageMultiplier, LifeSteal, GeneralDamage, MortarDamage, this);
 		
 		boulder.Initialize(spawnPos, targetPos);
 	}
@@ -257,8 +269,8 @@ public partial class Player : CharacterBody3D
 
 		sphere.GlobalTransform = this.GlobalTransform;
 		
-		// Set player stats for critical hits and life steal
-		sphere.SetPlayerStats(CriticalChance, CriticalDamageMultiplier, LifeSteal, this);
+		// Set player stats for critical hits and life steal with damage bonuses
+		sphere.SetPlayerStats(CriticalChance, CriticalDamageMultiplier, LifeSteal, GeneralDamage, MagicSphereDamage, this);
 		
 		// Calculate direction only on the horizontal plane (ignore Y difference)
 		Vector3 targetDirection = new Vector3(target.GlobalPosition.X, this.GlobalPosition.Y, target.GlobalPosition.Z);
@@ -274,8 +286,8 @@ public partial class Player : CharacterBody3D
 
 		wave.GlobalTransform = this.GlobalTransform;
 		
-		// Set player stats for critical hits and life steal
-		wave.SetPlayerStats(CriticalChance, CriticalDamageMultiplier, LifeSteal, this);
+		// Set player stats for critical hits and life steal with damage bonuses
+		wave.SetPlayerStats(CriticalChance, CriticalDamageMultiplier, LifeSteal, GeneralDamage, ArcaneWaveDamage, this);
 		
 		// Calculate direction only on the horizontal plane (ignore Y difference) - same as magic sphere
 		Vector3 targetDirection = new Vector3(target.GlobalPosition.X, this.GlobalPosition.Y, target.GlobalPosition.Z);
@@ -348,6 +360,18 @@ public partial class Player : CharacterBody3D
 				break;
 			case Stat.Armor:
 				Armor += upgrade.Value;
+				break;
+			case Stat.GeneralDamage:
+				GeneralDamage += upgrade.Value;
+				break;
+			case Stat.MagicSphereDamage:
+				MagicSphereDamage += upgrade.Value;
+				break;
+			case Stat.ArcaneWaveDamage:
+				ArcaneWaveDamage += upgrade.Value;
+				break;
+			case Stat.MortarDamage:
+				MortarDamage += upgrade.Value;
 				break;
 		}
 		GD.Print($"Applied upgrade: {upgrade.Name} - {upgrade.StatToUpgrade}: +{upgrade.Value}");
