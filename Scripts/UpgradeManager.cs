@@ -31,17 +31,37 @@ public partial class UpgradeManager : Node
 	}
 	
 	public List<Upgrade> GetUpgradeChoices(float playerLuck){
-		GD.Print("Geting upgrades");
+		GD.Print("Getting upgrades");
 		var choices = new List<Upgrade>();
-		var availableUpgrades = new List<Upgrade>(_upgradePool);
+		var availableUpgrades = new List<Upgrade>(_upgradePool); // Fresh copy for each level-up
 
 		for (int i = 0; i < 3; i++)
 		{
-			if (availableUpgrades.Count == 0) break;
+			if (availableUpgrades.Count == 0) 
+			{
+				GD.Print($"No more available upgrades after {i} selections");
+				break;
+			}
 
 			Upgrade chosenUpgrade = PickOneUpgrade(playerLuck, availableUpgrades);
+			
+			// Safety check for null upgrade
+			if (chosenUpgrade == null)
+			{
+				GD.Print($"No valid upgrade could be selected on attempt {i + 1}");
+				break;
+			}
+			
 			choices.Add(chosenUpgrade);
-			GD.Print($"Adding {chosenUpgrade.Name}");
+			GD.Print($"Adding {chosenUpgrade.Name} (Stat: {chosenUpgrade.StatToUpgrade})");
+			
+			// Count how many upgrades will be removed
+			int upgradesWithSameStat = availableUpgrades.Count(u => u.StatToUpgrade == chosenUpgrade.StatToUpgrade);
+			
+			// Remove all upgrades with the same StatToUpgrade for THIS level-up only
+			availableUpgrades.RemoveAll(upgrade => upgrade.StatToUpgrade == chosenUpgrade.StatToUpgrade);
+			
+			GD.Print($"Removed {upgradesWithSameStat} upgrades with stat {chosenUpgrade.StatToUpgrade} from this level-up. {availableUpgrades.Count} upgrades remaining.");
 		}
 		
 		return choices;
@@ -73,6 +93,14 @@ public partial class UpgradeManager : Node
 		{
 			commonWeight = 0;
 		}
+		
+		// Safety check: if no upgrades are available, return null
+		if (availableCommon.Count == 0 && availableRare.Count == 0 && availableLegendary.Count == 0)
+		{
+			GD.PrintErr("No upgrades available in any rarity category!");
+			return null;
+		}
+		
 		float totalWeight = commonWeight + rareWeight + legendaryWeight;
 		float roll = _rng.Randf() * totalWeight;
 

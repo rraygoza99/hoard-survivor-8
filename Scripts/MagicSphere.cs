@@ -14,13 +14,17 @@ public partial class MagicSphere : Area3D
 	private float _criticalChance = 0.05f;
 	private float _criticalDamageMultiplier = 1.5f;
 	private float _lifeSteal = 0.0f;
+	private float _generalDamage = 0.0f;
+	private float _magicSphereDamage = 0.0f;
 	private Node3D _caster = null;
 
-	public void SetPlayerStats(float criticalChance, float criticalDamageMultiplier, float lifeSteal, Node3D caster)
+	public void SetPlayerStats(float criticalChance, float criticalDamageMultiplier, float lifeSteal, float generalDamage, float magicSphereDamage, Node3D caster)
 	{
 		_criticalChance = criticalChance;
 		_criticalDamageMultiplier = criticalDamageMultiplier;
 		_lifeSteal = lifeSteal;
+		_generalDamage = generalDamage;
+		_magicSphereDamage = magicSphereDamage;
 		_caster = caster;
 	}
 
@@ -63,15 +67,19 @@ public partial class MagicSphere : Area3D
 	
 	private float CalculateDamage()
 	{
+		// Apply percentage damage bonuses (convert from percentage to multiplier)
+		float damageMultiplier = 1.0f + (_generalDamage / 100.0f) + (_magicSphereDamage / 100.0f);
+		float baseDamage = Damage * damageMultiplier;
+		
 		// Roll for critical hit
 		var rng = new RandomNumberGenerator();
 		bool isCritical = rng.Randf() < _criticalChance;
 		
-		float finalDamage = Damage;
+		float finalDamage = baseDamage;
 		if (isCritical)
 		{
 			finalDamage *= _criticalDamageMultiplier;
-			GD.Print($"CRITICAL HIT! Damage: {finalDamage:F1} (base: {Damage}, crit multiplier: {_criticalDamageMultiplier:F1}x)");
+			GD.Print($"Magic Sphere CRITICAL HIT! Damage: {finalDamage:F1} (base: {baseDamage:F1}, multiplier: {damageMultiplier:F2}x, crit: {_criticalDamageMultiplier:F1}x)");
 		}
 		
 		return finalDamage;

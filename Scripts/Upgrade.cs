@@ -15,7 +15,11 @@ public enum Stat
 	CriticalChance,
 	CriticalDamage,
 	Armor,
-	Lucky
+	Lucky,
+	GeneralDamage,
+	MagicSphereDamage,
+	ArcaneWaveDamage,
+	MortarDamage
 }
 [GlobalClass]
 public partial class Upgrade : Resource
