@@ -17,7 +17,7 @@ texture = ExtResource("1_qkdvs")
 [sub_resource type="GradientTexture2D" id="GradientTexture2D_r7sng"]
 gradient = SubResource("Gradient_4teal")
 fill_from = Vector2(1, 0)
-fill_to = Vector2(1, 0.880342)
+fill_to = Vector2(1, 0.816239)
 
 [sub_resource type="VisualShaderNodeTexture" id="VisualShaderNodeTexture_5ye72"]
 expanded_output_ports = [0]
@@ -99,7 +99,7 @@ void fragment() {
 
 }
 "
-graph_offset = Vector2(-429.105, 120.191)
+graph_offset = Vector2(-508.105, 42.1906)
 modes/cull = 2
 flags/unshaded = true
 flags/shadows_disabled = true
