@@ -1,10 +1,9 @@
-[gd_scene load_steps=14 format=3 uid="uid://3p7ywwnqo2av"]
+[gd_scene load_steps=9 format=3 uid="uid://3p7ywwnqo2av"]
 
 [ext_resource type="Script" uid="uid://ctipd0sh28kpj" path="res://Scripts/MagicSphere.cs" id="1_scs70"]
 [ext_resource type="Shader" uid="uid://763no1avws42" path="res://Shader/Spells/innerfireball_shader.tres" id="2_7fy33"]
 [ext_resource type="Shader" uid="uid://bfbvke0v8a8cl" path="res://Shader/Spells/fireball_shader.tres" id="2_fowgc"]
 [ext_resource type="ArrayMesh" uid="uid://dwfvjf8rpxxdc" path="res://Assets/Spells/Fireball/fireball_mesh.obj" id="3_7fy33"]
-[ext_resource type="Shader" uid="uid://bdvht3fikwt0g" path="res://Shader/Spells/fireballtrail_shader.tres" id="5_ok4lc"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_xm0wo"]
 radius = 0.748531
@@ -23,22 +22,6 @@ shader = ExtResource("2_fowgc")
 shader_parameter/Fire_Color = Color(2, 1.23, 85.083, 1)
 shader_parameter/Speed = Vector2(0, -1)
 
-[sub_resource type="Gradient" id="Gradient_ok4lc"]
-offsets = PackedFloat32Array(0, 0.262295, 0.967213, 1)
-colors = PackedColorArray(0.512342, 0.000677103, 0.613425, 0, 0.697205, 0.16889, 1, 1, 0.993334, 0.623192, 1, 1, 0.893, 0.522, 0.911, 0)
-
-[sub_resource type="GradientTexture1D" id="GradientTexture1D_fd6r4"]
-gradient = SubResource("Gradient_ok4lc")
-use_hdr = true
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_g4v66"]
-render_priority = 0
-shader = ExtResource("5_ok4lc")
-shader_parameter/ColorTexture = SubResource("GradientTexture1D_fd6r4")
-shader_parameter/Trailspeed = Vector2(2, 0)
-
-[sub_resource type="QuadMesh" id="QuadMesh_7fy33"]
-
 [node name="MagicSphere" type="Area3D"]
 collision_mask = 5
 script = ExtResource("1_scs70")
@@ -48,7 +31,7 @@ transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0, 0)
 shape = SubResource("SphereShape3D_xm0wo")
 
 [node name="BallCenter" type="MeshInstance3D" parent="."]
-transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0, -0.00957704)
+transform = Transform3D(0.6, 0, 0, 0, 0.606, 0, 0, 0, 0.6, 0, 0, -0.00957704)
 material_override = SubResource("ShaderMaterial_fd6r4")
 mesh = SubResource("SphereMesh_scs70")
 
@@ -56,16 +39,10 @@ mesh = SubResource("SphereMesh_scs70")
 wait_time = 2.0
 
 [node name="FireballMesh" type="MeshInstance3D" parent="."]
-transform = Transform3D(-0.4, 0, 3.49691e-08, 0, 0.4, 0, -3.49691e-08, 0, -0.4, 0, 0, 0.035349)
+transform = Transform3D(-0.45, 0, 6.79481e-08, 0, 0.45, 0, -6.79481e-08, 0, -0.45, 0, 0, 0.0723171)
 material_override = SubResource("ShaderMaterial_ok4lc")
 cast_shadow = 0
 mesh = ExtResource("3_7fy33")
-
-[node name="TrailMesh" type="MeshInstance3D" parent="."]
-transform = Transform3D(-4.30409e-08, 0, 1, 0, 0.626555, 0, -0.984661, 0, -4.37114e-08, 0, 0, 0.412129)
-visible = false
-material_override = SubResource("ShaderMaterial_g4v66")
-mesh = SubResource("QuadMesh_7fy33")
 
 [connection signal="body_entered" from="." to="." method="_on_body_entered"]
 [connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]
