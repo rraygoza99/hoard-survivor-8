@@ -6,16 +6,27 @@ using Steamworks.Data;
 
 public class SteamConnectionManager : ConnectionManager
 {
-	public override void OnConnected(ConnectionInfo info){
-		
-	}
-	public override void OnConnecting(ConnectionInfo info){
-		
-	}
-	public override void OnDisconnected(ConnectionInfo info){
-		
-	}
-	public override void OnMessage(IntPtr data, int size, long messageNum, long recbTime, int channel){
-		
-	}
+	public override void OnConnected(ConnectionInfo info)
+    {
+        base.OnConnected(info);
+        GD.Print("on Connection");
+    }
+
+    public override void OnConnecting(ConnectionInfo info)
+    {
+        base.OnConnecting(info);
+        GD.Print("on Connecting");
+    }
+
+    public override void OnDisconnected(ConnectionInfo info)
+    {
+        base.OnDisconnected(info);
+        GD.Print("on Disconnection");
+    }
+    
+    public override void OnMessage(IntPtr data, int size, long messageNum, long recvTime, int channel)
+    {
+        base.OnMessage(data, size, messageNum, recvTime, channel);
+        DataParser.ProcessData(data, size);
+    }
 }

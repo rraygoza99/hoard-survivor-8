@@ -11,3 +11,7 @@ script = ExtResource("1_cl57t")
 
 [node name="PlayerLabelName" type="Label" parent="."]
 layout_mode = 2
+
+[node name="Ready" type="RichTextLabel" parent="."]
+layout_mode = 2
+horizontal_alignment = 2

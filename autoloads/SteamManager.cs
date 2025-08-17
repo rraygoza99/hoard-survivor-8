@@ -4,32 +4,39 @@ using Steamworks;
 using Steamworks.Data;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Linq;
 
 public partial class SteamManager : Node
 {
-	public static SteamManager Manager {get; set;}
-	private static uint gameAppId {get;set;} = 480;
-	public string PlayerName {get;set;}
-	private Lobby hostedLobby {get; set;}
-	private List<Lobby> availableLobbies {get;set;} = new List<Lobby>();
+	public static SteamManager Manager { get; set; }
+	private static uint gameAppId { get; set; } = 480;
+	public string PlayerName { get; set; }
+	public SteamId PlayerSteamID { get; set; }
+	private Lobby hostedLobby { get; set; }
+	public bool IsHost { get; private set; } = false;
+	private List<Lobby> availableLobbies { get; set; } = new List<Lobby>();
 	public bool IsSteamInitialized { get; private set; } = false;
 	private SceneManager _sceneManager;
-	
+	public SteamSocketManager SteamSocketManager;
+	public SteamConnectionManager SteamConnectionManager;
+
 	// For testing: allows multiple instances with same Steam account
 	private static bool enableTestMode = true;
-	public static event Action<List<Lobby>> OnLobbiesRefreshCompleted;
+	public static event Action<List<Lobby>> OnLobbyRefreshCompleted;
+	public static event Action<Friend> OnPlayerJoinLobby;
+    public static event Action<Friend> OnPlayerLeftLobby;
 	public static event Action<int> OnLobbyMemberCountChanged;
 	public static event Action<Dictionary<string, bool>> OnPlayerReadyStatusChanged;
 	public static event Action OnAllPlayersReady;
 	public static event Action OnNotAllPlayersReady;
 	public static event Action OnGameStartSignaled;
 	// Pause system (simplified)
-	public static event Action<bool,string,int,int> OnPauseStateChanged; // paused, initiator, votes(current phase), total
-	
+	public static event Action<bool, string, int, int> OnPauseStateChanged; // paused, initiator, votes(current phase), total
+
 	// Ready system
 	private Dictionary<string, bool> playerReadyStatus = new Dictionary<string, bool>();
 	public bool IsLocalPlayerReady { get; private set; } = false;
-	
+
 	// State tracking to prevent repeated messages
 	private bool gameStartProcessed = false;
 	private bool lastAllPlayersReadyState = false;
@@ -38,36 +45,44 @@ public partial class SteamManager : Node
 	private string lastPauseInitiator = "";
 	// Track last vote count for current phase
 	private int lastPhaseVotes = 0;
-	
+
 	// Property to get current lobby member count
-	public int CurrentLobbyMemberCount 
-	{ 
-		get 
-		{ 
+	public int CurrentLobbyMemberCount
+	{
+		get
+		{
 			if (hostedLobby.Id != 0)
 				return hostedLobby.MemberCount;
 			return 0;
-		} 
+		}
 	}
-	public SteamManager() {
-		if (Manager == null) {
+	public SteamManager()
+	{
+		if (Manager == null)
+		{
 			Manager = this;
-			try {
+			try
+			{
 				GD.Print("Attempting to initialize Steam client...");
 				SteamClient.Init(gameAppId, enableTestMode);
-				if (!SteamClient.IsValid) {
+				if (!SteamClient.IsValid)
+				{
 					GD.PrintErr("SteamClient not valid");
 					return;
 				}
 				PlayerName = SteamClient.Name;
+				PlayerSteamID = SteamClient.SteamId;
 				IsSteamInitialized = true;
-			} catch (Exception e) {
+			}
+			catch (Exception e)
+			{
 				GD.PrintErr($"Steam init error: {e.Message}");
 			}
 		}
 	}
 
-	public override void _Ready() {
+	public override void _Ready()
+	{
 		_sceneManager = GetNodeOrNull<SceneManager>("/root/SceneManager");
 		if (!IsSteamInitialized) return;
 		SteamMatchmaking.OnLobbyGameCreated += OnLobbyGameCreatedCallback;
@@ -76,6 +91,7 @@ public partial class SteamManager : Node
 		SteamMatchmaking.OnLobbyMemberLeave += OnLobbyMemberLeaveCallback;
 		SteamMatchmaking.OnLobbyEntered += OnLobbyEnteredCallback;
 		SteamMatchmaking.OnLobbyDataChanged += OnLobbyDataChangedCallback;
+		
 	}
 
 	// Simplified unified vote (placed after initialization)
@@ -85,7 +101,7 @@ public partial class SteamManager : Node
 		{
 			lastPausedState = !lastPausedState;
 			lastPauseInitiator = lastPausedState ? PlayerName : "";
-			OnPauseStateChanged?.Invoke(lastPausedState, lastPauseInitiator, (lastPausedState?1:0), 1);
+			OnPauseStateChanged?.Invoke(lastPausedState, lastPauseInitiator, (lastPausedState ? 1 : 0), 1);
 			return;
 		}
 		bool paused = hostedLobby.GetData("game_paused") == "true";
@@ -94,21 +110,27 @@ public partial class SteamManager : Node
 		string myVote = hostedLobby.GetMemberData(self, "vote");
 		string newVote = (myVote == "1") ? "0" : "1";
 		hostedLobby.SetMemberData("vote", newVote);
-		GD.Print($"[PauseSystem] {PlayerName} vote -> {newVote} phase={(paused?"RESUME":"PAUSE")}");
-		if (IsLobbyOwner()) RecalculatePhase(paused); else {
+		GD.Print($"[PauseSystem] {PlayerName} vote -> {newVote} phase={(paused ? "RESUME" : "PAUSE")}");
+		if (IsLobbyOwner()) RecalculatePhase(paused);
+		else
+		{
 			string ping = hostedLobby.GetData("vote_ping");
 			hostedLobby.SetData("vote_ping", (ping == "1" ? "0" : "1"));
 		}
 	}
 
-	private void OnLobbyMemberLeaveCallback(Lobby lobby, Friend friend){
-		GD.Print($"User has left the lobby: {friend.Name}");
+	private void OnLobbyMemberLeaveCallback(Lobby lobby, Friend friend)
+	{
+		GD.Print("User Has left Disconnectd from lobby: " + friend.Name);
+        OnPlayerLeftLobby(friend);
 		OnLobbyMemberCountChanged?.Invoke(lobby.MemberCount);
 	}
-	private void OnLobbyGameCreatedCallback(Lobby lobby, uint id, ushort port, SteamId steamId){
+	private void OnLobbyGameCreatedCallback(Lobby lobby, uint id, ushort port, SteamId steamId)
+	{
 		GD.Print("Firing callback for lobby game created");
 	}
-	private void OnLobbyCreatedCallback(Result result, Lobby lobby){
+	private void OnLobbyCreatedCallback(Result result, Lobby lobby)
+	{
 		if (result != Result.OK)
 		{
 			GD.Print("lobby was not created");
@@ -119,21 +141,33 @@ public partial class SteamManager : Node
 			_sceneManager.GoToScene("res://UtilityScenes/lobby.tscn");
 		}
 	}
-	private void OnLobbyMemberJoinedCallback(Lobby lobby, Friend friend){
+	private void OnLobbyMemberJoinedCallback(Lobby lobby, Friend friend)
+	{
 		GD.Print($"User has joined the lobby: {friend.Name}");
 		GD.Print($"Current lobby members: {lobby.MemberCount}");
+		
+        OnPlayerJoinLobby(friend);
 		OnLobbyMemberCountChanged?.Invoke(lobby.MemberCount);
 	}
-	private void OnLobbyEnteredCallback(Lobby lobby){
+	private void OnLobbyEnteredCallback(Lobby lobby)
+	{
 		if (lobby.MemberCount > 0)
 		{
 			GD.Print($"You joined {lobby.Owner.Name}'s lobby");
 			GD.Print($"Current lobby members: {lobby.MemberCount}");
 			OnLobbyMemberCountChanged?.Invoke(lobby.MemberCount);
+			hostedLobby = lobby;
+			foreach (var item in lobby.Members)
+			{
+				OnPlayerJoinLobby(item);
+			}
+			lobby.SetGameServer(lobby.Owner.Id);
+			JoinSteamSocketServer(lobby.Owner.Id);
 			_sceneManager.GoToScene("res://UtilityScenes/lobby.tscn");
+			
 		}
 	}
-	
+
 	private void OnLobbyDataChangedCallback(Lobby lobby)
 	{
 		// Only print lobby data change message occasionally to reduce spam
@@ -143,7 +177,7 @@ public partial class SteamManager : Node
 			GD.Print("Lobby data changed");
 			lastLobbyDataChangeTime = currentTime;
 		}
-		
+
 		// Check if game start signal was set (only process once)
 		if (lobby.GetData("game_start") == "true" && !gameStartProcessed)
 		{
@@ -151,7 +185,7 @@ public partial class SteamManager : Node
 			gameStartProcessed = true;
 			OnGameStartSignaled?.Invoke();
 		}
-		
+
 		// Also refresh ready status when lobby data changes
 		RefreshAllPlayerReadyStatus();
 
@@ -173,7 +207,7 @@ public partial class SteamManager : Node
 		string initiator = lobby.GetData("pause_initiator");
 		int total = lobby.MemberCount;
 		int votes = 0;
-		int.TryParse(lobby.GetData(isPaused?"resume_vote_count":"pause_vote_count"), out votes);
+		int.TryParse(lobby.GetData(isPaused ? "resume_vote_count" : "pause_vote_count"), out votes);
 		if (isPaused != lastPausedState || initiator != lastPauseInitiator || votes != lastPhaseVotes)
 		{
 			lastPausedState = isPaused;
@@ -182,24 +216,31 @@ public partial class SteamManager : Node
 			OnPauseStateChanged?.Invoke(isPaused, initiator, votes, total);
 		}
 	}
-	
-	public override void _Process(double delta){
-		try{
-			if(IsSteamInitialized && SteamClient.IsValid){
+
+	public override void _Process(double delta)
+	{
+		try
+		{
+			if (IsSteamInitialized && SteamClient.IsValid)
+			{
 				SteamClient.RunCallbacks();
 			}
-		} catch(Exception e){
+		}
+		catch (Exception e)
+		{
 			GD.PrintErr($"Error running Steam callbacks: {e.Message}");
 		}
 	}
-	
-	public async Task<bool> CreateLobby(){
+
+	public async Task<bool> CreateLobby()
+	{
 		try
 		{
 			GD.Print("creating lobby");
 			Lobby? createLobbyOutput = await SteamMatchmaking.CreateLobbyAsync(16);
-			
-			if(!createLobbyOutput.HasValue){
+
+			if (!createLobbyOutput.HasValue)
+			{
 				GD.Print("lobby created but no instance correctly");
 				return false;
 			}
@@ -210,12 +251,14 @@ public partial class SteamManager : Node
 			hostedLobby.SetData("ownerNameString", PlayerName);
 			GD.Print($"Lobby created successfully! Lobby ID: {hostedLobby.Id}");
 			return true;
-		} catch(Exception e){
+		}
+		catch (Exception e)
+		{
 			GD.Print("Error creating the lobby " + e.Message);
 			return false;
 		}
 	}
-	
+
 	public string GetCurrentLobbyId()
 	{
 		if (hostedLobby.Id != 0)
@@ -224,11 +267,11 @@ public partial class SteamManager : Node
 		}
 		return string.Empty;
 	}
-	
+
 	public List<string> GetLobbyMemberNames()
 	{
 		List<string> memberNames = new List<string>();
-		
+
 		if (hostedLobby.Id != 0)
 		{
 			foreach (Friend member in hostedLobby.Members)
@@ -236,10 +279,10 @@ public partial class SteamManager : Node
 				memberNames.Add(member.Name);
 			}
 		}
-		
+
 		return memberNames;
 	}
-	
+
 	public void PrintLobbyInfo()
 	{
 		if (hostedLobby.Id != 0)
@@ -250,7 +293,7 @@ public partial class SteamManager : Node
 			GD.Print($"Member Count: {hostedLobby.MemberCount}");
 			GD.Print($"Max Members: {hostedLobby.MaxMembers}");
 			GD.Print($"Members:");
-			
+
 			foreach (Friend member in hostedLobby.Members)
 			{
 				GD.Print($"  - {member.Name} (ID: {member.Id})");
@@ -262,32 +305,40 @@ public partial class SteamManager : Node
 			GD.Print("Not currently in a lobby");
 		}
 	}
-	
-	public async Task<bool> GetMultiplayerLobbies(){
-		try{
+
+	public async Task<bool> GetMultiplayerLobbies()
+	{
+		try
+		{
+			availableLobbies.Clear(); // ensure fresh list each refresh
 			Lobby[] lobbies = await SteamMatchmaking.LobbyList.WithMaxResults(10).RequestAsync();
-			if(lobbies != null){
-				foreach(var lobby in lobbies){
+			if (lobbies != null)
+			{
+				foreach (var lobby in lobbies)
+				{
 					GD.Print("Lobby: " + lobby.Id);
 					availableLobbies.Add(lobby);
 				}
 			}
 
-			OnLobbiesRefreshCompleted?.Invoke(availableLobbies);
+			OnLobbyRefreshCompleted?.Invoke(availableLobbies);
 			return true;
-		} catch(Exception e){
-			GD.Print("Error fetching lobbies " +e.Message);
+		}
+		catch (Exception e)
+		{
+			GD.Print("Error fetching lobbies " + e.Message);
 			return false;
 		}
 	}
-	
-	public async Task<bool> JoinLobby(string lobbyIdString){
+
+	public async Task<bool> JoinLobby(string lobbyIdString)
+	{
 		if (!IsSteamInitialized)
 		{
 			GD.PrintErr("Steam is not initialized, cannot join lobby");
 			return false;
 		}
-		
+
 		try
 		{
 			// Parse the lobby ID from string to ulong
@@ -296,15 +347,15 @@ public partial class SteamManager : Node
 				GD.PrintErr($"Invalid lobby ID format: {lobbyIdString}");
 				return false;
 			}
-			
+
 			GD.Print($"Attempting to join lobby: {lobbyId}");
-			
+
 			// Create a SteamId from the lobby ID
 			SteamId steamLobbyId = lobbyId;
-			
+
 			// Join the lobby
 			Lobby? joinResult = await SteamMatchmaking.JoinLobbyAsync(steamLobbyId);
-			
+
 			if (joinResult.HasValue)
 			{
 				GD.Print("Successfully joined lobby!");
@@ -323,7 +374,7 @@ public partial class SteamManager : Node
 			return false;
 		}
 	}
-	
+
 	// Ready system methods
 	public void SetPlayerReady(bool ready)
 	{
@@ -332,49 +383,49 @@ public partial class SteamManager : Node
 			GD.PrintErr("Cannot set ready status - not in a lobby");
 			return;
 		}
-		
+
 		IsLocalPlayerReady = ready;
 		string readyData = ready ? "1" : "0";
-		
+
 		// Set player ready status in lobby data
 		hostedLobby.SetMemberData("ready", readyData);
 		GD.Print($"Set local player ready status to: {ready}");
-		
+
 		// Refresh ready status for all players
 		RefreshAllPlayerReadyStatus();
 	}
-	
+
 	public void RefreshAllPlayerReadyStatus()
 	{
 		if (hostedLobby.Id == 0) return;
-		
+
 		playerReadyStatus.Clear();
 		int readyCount = 0;
 		int totalPlayers = 0;
-		
+
 		foreach (Friend member in hostedLobby.Members)
 		{
 			totalPlayers++;
 			string readyData = hostedLobby.GetMemberData(member, "ready");
 			bool isReady = readyData == "1";
 			playerReadyStatus[member.Name] = isReady;
-			
+
 			if (isReady) readyCount++;
-			
+
 		}
-		
-		
+
+
 		// Notify UI of ready status changes
 		OnPlayerReadyStatusChanged?.Invoke(new Dictionary<string, bool>(playerReadyStatus));
-		
+
 		// Check if all players are ready
 		bool allPlayersReady = (totalPlayers > 0 && readyCount == totalPlayers);
-		
+
 		// Only print and trigger events if the state changed
 		if (allPlayersReady != lastAllPlayersReadyState)
 		{
 			lastAllPlayersReadyState = allPlayersReady;
-			
+
 			if (allPlayersReady)
 			{
 				GD.Print("All players are ready!");
@@ -387,12 +438,12 @@ public partial class SteamManager : Node
 			}
 		}
 	}
-	
+
 	public Dictionary<string, bool> GetPlayerReadyStatus()
 	{
 		return new Dictionary<string, bool>(playerReadyStatus);
 	}
-	
+
 	public bool IsLobbyOwner()
 	{
 		if (hostedLobby.Id != 0)
@@ -401,7 +452,7 @@ public partial class SteamManager : Node
 		}
 		return false;
 	}
-	
+
 	public void StartGameForAllPlayers()
 	{
 		if (hostedLobby.Id != 0 && IsLobbyOwner())
@@ -453,7 +504,7 @@ public partial class SteamManager : Node
 			return;
 		}
 		if (hostedLobby.GetData("game_paused") != "true") return; // only valid when paused
-		
+
 		// OLD SYSTEM - Use TogglePausePhaseVote instead
 		GD.PrintErr("SetResumeVote is deprecated. Use TogglePausePhaseVote instead.");
 	}
@@ -484,11 +535,11 @@ public partial class SteamManager : Node
 			bool newPaused = !pausedPhase; // if we were unpaused (pausedPhase==false) we now pause; else resume
 			hostedLobby.SetData("game_paused", newPaused ? "true" : "false");
 			hostedLobby.SetData("pause_initiator", newPaused ? PlayerName : "");
-			
+
 			// Clear all vote counts when state changes
 			hostedLobby.SetData("pause_vote_count", "0");
 			hostedLobby.SetData("resume_vote_count", "0");
-			
+
 			ClearAllMemberVotes();
 			lastPhaseVotes = 0;
 		}
@@ -498,71 +549,38 @@ public partial class SteamManager : Node
 		}
 	}
 	// Position synchronization methods
-	public void UpdatePlayerPosition(string playerName, Vector3 position, Vector3 rotation, bool isMoving)
+
+
+
+	public override void _Notification(int what)
 	{
-		if (hostedLobby.Id != 0)
-		{
-			var posData = $"{position.X},{position.Y},{position.Z}";
-			var rotData = $"{rotation.X},{rotation.Y},{rotation.Z}";
-			var movingData = isMoving ? "1" : "0";
-			
-			hostedLobby.SetData($"pos_{playerName}", posData);
-			hostedLobby.SetData($"rot_{playerName}", rotData);
-			hostedLobby.SetData($"mov_{playerName}", movingData);
-		}
-	}
-	
-	public (Vector3 position, Vector3 rotation, bool isMoving)? GetPlayerPosition(string playerName)
-	{
-		if (hostedLobby.Id != 0)
-		{
-			var posData = hostedLobby.GetData($"pos_{playerName}");
-			var rotData = hostedLobby.GetData($"rot_{playerName}");
-			var movData = hostedLobby.GetData($"mov_{playerName}");
-			
-			// Debug: Print what data we're getting
-			if (Engine.GetProcessFrames() % 60 == 0) // Print roughly once per second
-			{
-				GD.Print($"Getting position for {playerName}: pos={posData}, rot={rotData}, mov={movData}");
-			}
-			
-			if (!string.IsNullOrEmpty(posData) && !string.IsNullOrEmpty(rotData))
-			{
-				try
-				{
-					var posParts = posData.Split(',');
-					var rotParts = rotData.Split(',');
-					
-					var position = new Vector3(
-						float.Parse(posParts[0]),
-						float.Parse(posParts[1]),
-						float.Parse(posParts[2])
-					);
-					
-					var rotation = new Vector3(
-						float.Parse(rotParts[0]),
-						float.Parse(rotParts[1]),
-						float.Parse(rotParts[2])
-					);
-					
-					var isMoving = movData == "1";
-					
-					return (position, rotation, isMoving);
-				}
-				catch (Exception e)
-				{
-					GD.PrintErr($"Error parsing player position data: {e.Message}");
-				}
-			}
-		}
-		return null;
-	}
-	
-	public override void _Notification(int what){
 		base._Notification(what);
-		if(what == NotificationWMCloseRequest){
+		if (what == NotificationWMCloseRequest)
+		{
 			SteamClient.Shutdown();
 			GetTree().Quit();
 		}
 	}
+	public void CreateSteamSocketServer()
+	{
+		SteamSocketManager = SteamNetworkingSockets.CreateRelaySocket<SteamSocketManager>(0);
+		SteamConnectionManager = SteamNetworkingSockets.ConnectRelay<SteamConnectionManager>(PlayerSteamID, 0);
+
+		IsHost = true;
+		GD.Print("Steam socket server created successfully");
+
+	}
+	 public void JoinSteamSocketServer(SteamId host){
+        if(!IsHost){
+            GD.Print("Joining Socket Server!");
+            SteamConnectionManager = SteamNetworkingSockets.ConnectRelay<SteamConnectionManager>(host, 0);
+        }
+    }
+
+    public void Broadcast(string data){
+        foreach (var item in SteamSocketManager.Connected.Skip(1).ToArray())
+        {
+            item.SendMessage(data);
+        }
+    }
 }
