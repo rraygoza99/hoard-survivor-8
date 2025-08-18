@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Newtonsoft.Json;
+using Godot;
 
 public class DataParser
 {
@@ -12,10 +13,11 @@ public class DataParser
     public static event Action<Dictionary<string, string>> OnGameStartMessage;
     public static event Action<Dictionary<string, string>> OnPlayerUpdate;
     public static Dictionary<string, string> ParseData(IntPtr data, int size){
+        GD.Print("Parsing data of size: " + size);
         byte[] managedArray = new byte[size];
         Marshal.Copy(data, managedArray, 0, size);
         var str = System.Text.Encoding.Default.GetString(managedArray);
-        return JsonConvert.DeserializeObject<System.Collections.Generic.Dictionary<string, string>>(str);
+        return JsonConvert.DeserializeObject<Dictionary<string, string>>(str);
        
     }
 
@@ -25,6 +27,7 @@ public class DataParser
         switch (dict["DataType"])
         {
             case "ChatMessage":
+                GD.Print("Chat message received: " + dict["Message"]);
                 OnChatMessage.Invoke(dict);
                 break;
             case "Ready":

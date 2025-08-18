@@ -181,7 +181,7 @@ public partial class LobbyUI : Control
     private void OnReadyButtonPressed()
     {
         if (SteamManager.Manager == null) return;
-        
+        SteamManager.Manager.SteamConnectionManager.Connection.SendMessage("test");
         bool newReadyState = !SteamManager.Manager.IsLocalPlayerReady;
         SteamManager.Manager.SetPlayerReady(newReadyState);
         

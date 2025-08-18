@@ -63,11 +63,11 @@ public partial class SteamManager : Node
 			Manager = this;
 			try
 			{
-				GD.Print("Attempting to initialize Steam client...");
+				// GD.Print("Attempting to initialize Steam client...");
 				SteamClient.Init(gameAppId, enableTestMode);
 				if (!SteamClient.IsValid)
 				{
-					GD.PrintErr("SteamClient not valid");
+					// GD.PrintErr("SteamClient not valid");
 					return;
 				}
 				PlayerName = SteamClient.Name;
@@ -76,7 +76,7 @@ public partial class SteamManager : Node
 			}
 			catch (Exception e)
 			{
-				GD.PrintErr($"Steam init error: {e.Message}");
+				// GD.PrintErr($"Steam init error: {e.Message}");
 			}
 		}
 	}
@@ -110,7 +110,7 @@ public partial class SteamManager : Node
 		string myVote = hostedLobby.GetMemberData(self, "vote");
 		string newVote = (myVote == "1") ? "0" : "1";
 		hostedLobby.SetMemberData("vote", newVote);
-		GD.Print($"[PauseSystem] {PlayerName} vote -> {newVote} phase={(paused ? "RESUME" : "PAUSE")}");
+		// GD.Print($"[PauseSystem] {PlayerName} vote -> {newVote} phase={(paused ? "RESUME" : "PAUSE")}");
 		if (IsLobbyOwner()) RecalculatePhase(paused);
 		else
 		{
@@ -121,30 +121,32 @@ public partial class SteamManager : Node
 
 	private void OnLobbyMemberLeaveCallback(Lobby lobby, Friend friend)
 	{
-		GD.Print("User Has left Disconnectd from lobby: " + friend.Name);
+		// GD.Print("User Has left Disconnectd from lobby: " + friend.Name);
         OnPlayerLeftLobby(friend);
 		OnLobbyMemberCountChanged?.Invoke(lobby.MemberCount);
 	}
 	private void OnLobbyGameCreatedCallback(Lobby lobby, uint id, ushort port, SteamId steamId)
 	{
-		GD.Print("Firing callback for lobby game created");
+		// GD.Print("Firing callback for lobby game created");
 	}
 	private void OnLobbyCreatedCallback(Result result, Lobby lobby)
 	{
 		if (result != Result.OK)
 		{
-			GD.Print("lobby was not created");
+			// GD.Print("lobby was not created");
 		}
 		else
 		{
-			GD.Print("Lobby was created " + lobby.Id);
+			// GD.Print("Lobby was created " + lobby.Id);
+			CreateSteamSocketServer();
 			_sceneManager.GoToScene("res://UtilityScenes/lobby.tscn");
 		}
+		
 	}
 	private void OnLobbyMemberJoinedCallback(Lobby lobby, Friend friend)
 	{
-		GD.Print($"User has joined the lobby: {friend.Name}");
-		GD.Print($"Current lobby members: {lobby.MemberCount}");
+		// GD.Print($"User has joined the lobby: {friend.Name}");
+		// GD.Print($"Current lobby members: {lobby.MemberCount}");
 		
         OnPlayerJoinLobby(friend);
 		OnLobbyMemberCountChanged?.Invoke(lobby.MemberCount);
@@ -153,15 +155,14 @@ public partial class SteamManager : Node
 	{
 		if (lobby.MemberCount > 0)
 		{
-			GD.Print($"You joined {lobby.Owner.Name}'s lobby");
-			GD.Print($"Current lobby members: {lobby.MemberCount}");
+			// GD.Print($"You joined {lobby.Owner.Name}'s lobby");
+			// GD.Print($"Current lobby members: {lobby.MemberCount}");
 			OnLobbyMemberCountChanged?.Invoke(lobby.MemberCount);
 			hostedLobby = lobby;
 			foreach (var item in lobby.Members)
 			{
 				OnPlayerJoinLobby(item);
 			}
-			lobby.SetGameServer(lobby.Owner.Id);
 			JoinSteamSocketServer(lobby.Owner.Id);
 			_sceneManager.GoToScene("res://UtilityScenes/lobby.tscn");
 			
@@ -174,14 +175,14 @@ public partial class SteamManager : Node
 		float currentTime = Time.GetTicksMsec() / 1000.0f;
 		if (currentTime - lastLobbyDataChangeTime > 2.0f) // Print at most every 2 seconds
 		{
-			GD.Print("Lobby data changed");
+			// GD.Print("Lobby data changed");
 			lastLobbyDataChangeTime = currentTime;
 		}
 
 		// Check if game start signal was set (only process once)
 		if (lobby.GetData("game_start") == "true" && !gameStartProcessed)
 		{
-			GD.Print("Game start signal received from host!");
+			// GD.Print("Game start signal received from host!");
 			gameStartProcessed = true;
 			OnGameStartSignaled?.Invoke();
 		}
@@ -225,10 +226,18 @@ public partial class SteamManager : Node
 			{
 				SteamClient.RunCallbacks();
 			}
+			if (SteamSocketManager != null)
+			{
+				SteamSocketManager.Receive();
+			}
+			if (SteamConnectionManager != null && SteamConnectionManager.Connected)
+			{
+				SteamConnectionManager.Receive();
+			}
 		}
 		catch (Exception e)
 		{
-			GD.PrintErr($"Error running Steam callbacks: {e.Message}");
+				// GD.PrintErr($"Error running Steam callbacks: {e.Message}");
 		}
 	}
 
@@ -236,25 +245,25 @@ public partial class SteamManager : Node
 	{
 		try
 		{
-			GD.Print("creating lobby");
+			// GD.Print("creating lobby");
 			Lobby? createLobbyOutput = await SteamMatchmaking.CreateLobbyAsync(16);
 
 			if (!createLobbyOutput.HasValue)
 			{
-				GD.Print("lobby created but no instance correctly");
+				// GD.Print("lobby created but no instance correctly");
 				return false;
 			}
-			GD.Print("setting lobby");
+			// GD.Print("setting lobby");
 			hostedLobby = createLobbyOutput.Value;
 			hostedLobby.SetPublic();
 			hostedLobby.SetJoinable(true);
 			hostedLobby.SetData("ownerNameString", PlayerName);
-			GD.Print($"Lobby created successfully! Lobby ID: {hostedLobby.Id}");
+			// GD.Print($"Lobby created successfully! Lobby ID: {hostedLobby.Id}");
 			return true;
 		}
 		catch (Exception e)
 		{
-			GD.Print("Error creating the lobby " + e.Message);
+			// GD.Print("Error creating the lobby " + e.Message);
 			return false;
 		}
 	}
@@ -316,7 +325,7 @@ public partial class SteamManager : Node
 			{
 				foreach (var lobby in lobbies)
 				{
-					GD.Print("Lobby: " + lobby.Id);
+					// GD.Print("Lobby: " + lobby.Id);
 					availableLobbies.Add(lobby);
 				}
 			}
@@ -326,7 +335,7 @@ public partial class SteamManager : Node
 		}
 		catch (Exception e)
 		{
-			GD.Print("Error fetching lobbies " + e.Message);
+			// GD.Print("Error fetching lobbies " + e.Message);
 			return false;
 		}
 	}
@@ -335,7 +344,7 @@ public partial class SteamManager : Node
 	{
 		if (!IsSteamInitialized)
 		{
-			GD.PrintErr("Steam is not initialized, cannot join lobby");
+			// GD.PrintErr("Steam is not initialized, cannot join lobby");
 			return false;
 		}
 
@@ -344,11 +353,11 @@ public partial class SteamManager : Node
 			// Parse the lobby ID from string to ulong
 			if (!ulong.TryParse(lobbyIdString, out ulong lobbyId))
 			{
-				GD.PrintErr($"Invalid lobby ID format: {lobbyIdString}");
+				// GD.PrintErr($"Invalid lobby ID format: {lobbyIdString}");
 				return false;
 			}
 
-			GD.Print($"Attempting to join lobby: {lobbyId}");
+			// GD.Print($"Attempting to join lobby: {lobbyId}");
 
 			// Create a SteamId from the lobby ID
 			SteamId steamLobbyId = lobbyId;
@@ -358,19 +367,19 @@ public partial class SteamManager : Node
 
 			if (joinResult.HasValue)
 			{
-				GD.Print("Successfully joined lobby!");
+				// GD.Print("Successfully joined lobby!");
 				hostedLobby = joinResult.Value;
 				return true;
 			}
 			else
 			{
-				GD.PrintErr("Failed to join lobby - lobby not found or inaccessible");
+				// GD.PrintErr("Failed to join lobby - lobby not found or inaccessible");
 				return false;
 			}
 		}
 		catch (Exception e)
 		{
-			GD.PrintErr($"Error joining lobby: {e.Message}");
+			// GD.PrintErr($"Error joining lobby: {e.Message}");
 			return false;
 		}
 	}
@@ -578,9 +587,10 @@ public partial class SteamManager : Node
     }
 
     public void Broadcast(string data){
+		GD.Print(data);
         foreach (var item in SteamSocketManager.Connected.Skip(1).ToArray())
-        {
-            item.SendMessage(data);
-        }
+		{
+			item.SendMessage(data);
+		}
     }
 }

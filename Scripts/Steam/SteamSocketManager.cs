@@ -2,6 +2,8 @@ using Godot;
 using System;
 using Steamworks;
 using Steamworks.Data;
+using System.Runtime.InteropServices;
+using Newtonsoft.Json;
 
 public class SteamSocketManager : SocketManager
 {

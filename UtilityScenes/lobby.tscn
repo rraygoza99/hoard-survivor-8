@@ -1,9 +1,10 @@
-[gd_scene load_steps=7 format=3 uid="uid://beqyuykr5xpp1"]
+[gd_scene load_steps=8 format=3 uid="uid://beqyuykr5xpp1"]
 
 [ext_resource type="Script" uid="uid://d0v1qr77s73k4" path="res://Scripts/LobbyUI.cs" id="1_y6fhc"]
 [ext_resource type="PackedScene" uid="uid://cnnbodd1ccndn" path="res://UtilityScenes/player_list_item.tscn" id="2_v308k"]
 [ext_resource type="Texture2D" uid="uid://bapf6tjfs83ci" path="res://Assets/UI/Retro Pixel Ribbons, Banners and Frames 2/ready_button.png" id="3_ha1r6"]
 [ext_resource type="Texture2D" uid="uid://t45a30w0v3dq" path="res://Assets/UI/Retro Pixel Ribbons, Banners and Frames 2/banner2.png" id="4_iom3b"]
+[ext_resource type="Script" uid="uid://c1dbus85qfvvq" path="res://Scripts/Steam/ChatBox.cs" id="5_chat"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_th56o"]
 font_size = 24
@@ -89,4 +90,55 @@ offset_right = 57.0
 offset_bottom = 51.0
 text = "Back"
 
+[node name="ChatBox" type="Control" parent="."]
+anchors_preset = 0
+offset_left = 844.0
+offset_top = 47.0
+offset_right = 1221.0
+offset_bottom = 457.0
+script = ExtResource("5_chat")
+
+[node name="ColorRect" type="ColorRect" parent="ChatBox"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.223103, 0.223103, 0.223103, 1)
+
+[node name="RichTextLabel" type="RichTextLabel" parent="ChatBox"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_bottom = -58.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="LineEdit" type="LineEdit" parent="ChatBox"]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -31.0
+offset_right = 298.0
+grow_vertical = 0
+
+[node name="Button" type="Button" parent="ChatBox"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -62.0
+offset_top = -32.0
+offset_right = -9.0
+offset_bottom = -1.0
+grow_horizontal = 0
+grow_vertical = 0
+text = "Send"
+
 [connection signal="pressed" from="ReturnButton" to="." method="_on_return_button_pressed"]
+[connection signal="button_down" from="ChatBox/Button" to="ChatBox" method="_on_button_button_down"]
