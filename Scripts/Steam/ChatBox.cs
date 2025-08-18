@@ -10,7 +10,6 @@ public partial class ChatBox : Control
         DataParser.OnChatMessage += OnChatMessageCallback;
     }
     private void _on_button_button_down(){
-        GD.Print("Button pressed");
         Dictionary<string, string> dict = new Dictionary<string, string>();
         dict.Add("DataType","ChatMessage");
         dict.Add("UserID", SteamManager.Manager.PlayerName);
@@ -19,15 +18,19 @@ public partial class ChatBox : Control
         OnChatMessageCallback(dict);
         string json = JsonConvert.SerializeObject(dict);
         GD.Print("Is host? " + SteamManager.Manager.IsHost);
-        if(SteamManager.Manager.IsHost){
+        if (SteamManager.Manager.IsHost)
+        {
+            GD.Print("Broadcasting chat message: " + json);
             SteamManager.Manager.Broadcast(json);
-        }else{
+        }
+        else
+        {
+            GD.Print("Sending chat message: " + json);
             SteamManager.Manager.SteamConnectionManager.Connection.SendMessage(json);
         }
     }
 
     private void OnChatMessageCallback(Dictionary<string,string> data){
-        GD.Print("Chat message received: " + data["Message"]);
         var chatBox = GetNode<RichTextLabel>("RichTextLabel");
         string userID = data["UserID"];
         string message = data["Message"];

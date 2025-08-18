@@ -84,13 +84,13 @@ public partial class SteamManager : Node
 	public override void _Ready()
 	{
 		_sceneManager = GetNodeOrNull<SceneManager>("/root/SceneManager");
-		if (!IsSteamInitialized) return;
 		SteamMatchmaking.OnLobbyGameCreated += OnLobbyGameCreatedCallback;
-		SteamMatchmaking.OnLobbyCreated += OnLobbyCreatedCallback;
-		SteamMatchmaking.OnLobbyMemberJoined += OnLobbyMemberJoinedCallback;
-		SteamMatchmaking.OnLobbyMemberLeave += OnLobbyMemberLeaveCallback;
-		SteamMatchmaking.OnLobbyEntered += OnLobbyEnteredCallback;
-		SteamMatchmaking.OnLobbyDataChanged += OnLobbyDataChangedCallback;
+        SteamMatchmaking.OnLobbyCreated += OnLobbyCreatedCallback;
+        SteamMatchmaking.OnLobbyMemberJoined += OnLobbyMemberJoinedCallback;
+        SteamMatchmaking.OnLobbyMemberDisconnected += OnLobbyMemberDisconnectedCallback;
+        SteamMatchmaking.OnLobbyMemberLeave += OnLobbyMemberLeaveCallback;
+        SteamMatchmaking.OnLobbyEntered += OnLobbyEnteredCallback;
+        SteamFriends.OnGameLobbyJoinRequested += OnGameLobbyJoinRequestedCallback;
 		
 	}
 
@@ -125,6 +125,27 @@ public partial class SteamManager : Node
         OnPlayerLeftLobby(friend);
 		OnLobbyMemberCountChanged?.Invoke(lobby.MemberCount);
 	}
+	private async void OnGameLobbyJoinRequestedCallback(Lobby lobby, SteamId id){
+        RoomEnter joinSuccessful = await lobby.Join();
+        if(joinSuccessful != RoomEnter.Success){
+            GD.Print("Failed to Join Lobby");
+        }
+        else{
+            hostedLobby = lobby;
+
+            foreach (var item in lobby.Members)
+            {
+                OnPlayerJoinLobby(item);
+            }
+
+
+        }
+    }
+	private void OnLobbyMemberDisconnectedCallback(Lobby lobby, Friend friend)
+	{
+		GD.Print("User Has Disconnectd left lobby: " + friend.Name);
+		OnPlayerLeftLobby(friend);
+	}
 	private void OnLobbyGameCreatedCallback(Lobby lobby, uint id, ushort port, SteamId steamId)
 	{
 		// GD.Print("Firing callback for lobby game created");
@@ -153,6 +174,7 @@ public partial class SteamManager : Node
 	}
 	private void OnLobbyEnteredCallback(Lobby lobby)
 	{
+		GD.Print($"You joined {lobby.Owner.Name}'s lobby");
 		if (lobby.MemberCount > 0)
 		{
 			// GD.Print($"You joined {lobby.Owner.Name}'s lobby");
@@ -166,7 +188,7 @@ public partial class SteamManager : Node
 			lobby.SetGameServer(lobby.Owner.Id);
 			JoinSteamSocketServer(lobby.Owner.Id);
 			_sceneManager.GoToScene("res://UtilityScenes/lobby.tscn");
-			
+
 		}
 	}
 
@@ -246,12 +268,10 @@ public partial class SteamManager : Node
 	{
 		try
 		{
-			// GD.Print("creating lobby");
 			Lobby? createLobbyOutput = await SteamMatchmaking.CreateLobbyAsync(16);
 
 			if (!createLobbyOutput.HasValue)
 			{
-				// GD.Print("lobby created but no instance correctly");
 				return false;
 			}
 			// GD.Print("setting lobby");
@@ -259,7 +279,7 @@ public partial class SteamManager : Node
 			hostedLobby.SetPublic();
 			hostedLobby.SetJoinable(true);
 			hostedLobby.SetData("ownerNameDataString", PlayerName);
-			// GD.Print($"Lobby created successfully! Lobby ID: {hostedLobby.Id}");
+			GD.Print($"Lobby created successfully! Lobby ID: {hostedLobby.Id}");
 			return true;
 		}
 		catch (Exception e)
@@ -370,6 +390,7 @@ public partial class SteamManager : Node
 			{
 				// GD.Print("Successfully joined lobby!");
 				hostedLobby = joinResult.Value;
+				JoinSteamSocketServer(hostedLobby.Owner.Id);
 				return true;
 			}
 			else
@@ -558,7 +579,6 @@ public partial class SteamManager : Node
 			lastPhaseVotes = votes;
 		}
 	}
-	// Position synchronization methods
 
 
 

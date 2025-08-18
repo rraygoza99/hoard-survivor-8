@@ -64,7 +64,6 @@ public partial class ChaserEnemy : CharacterBody3D
 			{
 				_player.Call("TakeDamage", Damage);
 				_lastAttackTime = 0.0f; // Reset attack cooldown
-				GD.Print($"Enemy dealt {Damage} damage to player");
 			}
 		}
 	}
