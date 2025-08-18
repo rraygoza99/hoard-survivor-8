@@ -1,0 +1,69 @@
+[gd_scene load_steps=2 format=3 uid="uid://cit57en4rh033"]
+
+[ext_resource type="PackedScene" uid="uid://wrprlsmewbej" path="res://Assets/PlayerModel/dave/Dave.glb" id="1_bxjg6"]
+
+[node name="Dave" instance=ExtResource("1_bxjg6")]
+
+[node name="Skeleton3D" parent="Armature" index="0"]
+bones/0/position = Vector3(1.19432e-07, 3.11809, 0.580766)
+bones/0/rotation = Quaternion(0.317642, 1.13036e-07, -1.57708e-08, 0.948211)
+bones/1/position = Vector3(1.42525, 1.58777, 0.284013)
+bones/1/rotation = Quaternion(0.46376, -0.369288, -0.603014, 0.533786)
+bones/2/rotation = Quaternion(-2.87436e-08, -0.0378454, 0.119796, 0.992077)
+bones/4/rotation = Quaternion(0.695596, 1.0864e-07, 9.12346e-08, 0.718434)
+bones/5/rotation = Quaternion(0.647899, 8.81615e-08, 6.95278e-08, 0.761726)
+bones/6/rotation = Quaternion(0.177111, 3.29896e-08, 3.44067e-08, 0.984191)
+bones/8/rotation = Quaternion(0.658146, 0.230076, 0.282901, 0.658692)
+bones/9/rotation = Quaternion(0.657435, 0.0533236, 0.20596, 0.722853)
+bones/10/rotation = Quaternion(0.166305, 0.0609202, 0.0289105, 0.983766)
+bones/12/rotation = Quaternion(0.658402, -0.228888, -0.33284, 0.635087)
+bones/13/rotation = Quaternion(0.506254, -0.0723184, -0.0795617, 0.855656)
+bones/14/rotation = Quaternion(0.168543, -0.0544207, -0.009284, 0.984147)
+bones/16/rotation = Quaternion(0.447989, -0.0671035, -0.204828, 0.867669)
+bones/17/rotation = Quaternion(0.704009, 0.0707249, -0.012002, 0.706559)
+bones/18/position = Vector3(-2.15034e-07, 2.92581, -0.088335)
+bones/18/rotation = Quaternion(0.639021, 3.38681e-08, 1.26128e-07, -0.769189)
+bones/30/position = Vector3(0.52167, 0.489246, -0.430883)
+bones/30/rotation = Quaternion(0.634902, 0.311287, -0.634902, -0.311287)
+bones/31/rotation = Quaternion(5.0035e-09, -3.74031e-08, 0.827346, 0.561692)
+bones/32/position = Vector3(-1.42525, 1.91272, -0.924691)
+bones/32/rotation = Quaternion(0.680416, -0.0214644, 0.706781, 0.192443)
+bones/33/rotation = Quaternion(-2.38618e-08, 0.0478737, -0.15154, 0.987291)
+bones/35/rotation = Quaternion(0.695596, -1.02874e-07, -8.63149e-08, 0.718434)
+bones/36/rotation = Quaternion(0.647899, -9.46412e-08, -7.46747e-08, 0.761726)
+bones/37/rotation = Quaternion(0.177111, -3.25737e-08, -3.07339e-08, 0.984191)
+bones/39/rotation = Quaternion(0.658146, -0.230076, -0.282901, 0.658692)
+bones/40/rotation = Quaternion(0.657435, -0.0533236, -0.20596, 0.722853)
+bones/41/rotation = Quaternion(0.166305, -0.0609202, -0.0289105, 0.983766)
+bones/43/rotation = Quaternion(0.658402, 0.228888, 0.33284, 0.635087)
+bones/44/rotation = Quaternion(0.506254, 0.0723184, 0.0795617, 0.855656)
+bones/45/rotation = Quaternion(0.168543, 0.0544207, 0.00928399, 0.984147)
+bones/47/rotation = Quaternion(0.447989, 0.0671035, 0.204828, 0.867669)
+bones/48/rotation = Quaternion(0.704009, -0.0707249, 0.012002, 0.706559)
+bones/49/position = Vector3(-0.52167, 0.898133, 0.615506)
+bones/49/rotation = Quaternion(0.706423, 0.0310911, 0.706423, 0.0310911)
+bones/50/rotation = Quaternion(-2.6979e-15, 5.33851e-08, -0.707107, 0.707107)
+
+[node name="SpringBoneSimulator3D" type="SpringBoneSimulator3D" parent="Armature/Skeleton3D" index="1"]
+setting_count = 1
+settings/0/root_bone_name = "cape.001"
+settings/0/root_bone = 19
+settings/0/end_bone_name = "cape.011"
+settings/0/end_bone = 29
+settings/0/extend_end_bone = true
+settings/0/end_bone/direction = 6
+settings/0/end_bone/length = 0.0
+settings/0/center_from = 0
+settings/0/individual_config = false
+settings/0/rotation_axis = 3
+settings/0/radius/value = 0.0
+settings/0/radius/damping_curve = null
+settings/0/stiffness/value = 0.64
+settings/0/stiffness/damping_curve = null
+settings/0/drag/value = 0.34
+settings/0/drag/damping_curve = null
+settings/0/gravity/value = 0.0
+settings/0/gravity/damping_curve = null
+settings/0/gravity/direction = Vector3(0, -1, 0)
+settings/0/enable_all_child_collisions = true
+settings/0/exclude_collision_count = 0
