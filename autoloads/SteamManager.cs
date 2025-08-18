@@ -163,6 +163,7 @@ public partial class SteamManager : Node
 			{
 				OnPlayerJoinLobby(item);
 			}
+			lobby.SetGameServer(lobby.Owner.Id);
 			JoinSteamSocketServer(lobby.Owner.Id);
 			_sceneManager.GoToScene("res://UtilityScenes/lobby.tscn");
 			
@@ -257,7 +258,7 @@ public partial class SteamManager : Node
 			hostedLobby = createLobbyOutput.Value;
 			hostedLobby.SetPublic();
 			hostedLobby.SetJoinable(true);
-			hostedLobby.SetData("ownerNameString", PlayerName);
+			hostedLobby.SetData("ownerNameDataString", PlayerName);
 			// GD.Print($"Lobby created successfully! Lobby ID: {hostedLobby.Id}");
 			return true;
 		}

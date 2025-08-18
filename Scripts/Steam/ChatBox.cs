@@ -16,7 +16,7 @@ public partial class ChatBox : Control
         dict.Add("UserID", SteamManager.Manager.PlayerName);
         dict.Add("Message", GetNode<LineEdit>("LineEdit").Text);
         
-        //OnChatMessageCallback(dict);
+        OnChatMessageCallback(dict);
         string json = JsonConvert.SerializeObject(dict);
         GD.Print("Is host? " + SteamManager.Manager.IsHost);
         if(SteamManager.Manager.IsHost){
@@ -28,6 +28,9 @@ public partial class ChatBox : Control
 
     private void OnChatMessageCallback(Dictionary<string,string> data){
         GD.Print("Chat message received: " + data["Message"]);
-        GetNode<RichTextLabel>("ChatBox").Text = GetNode<RichTextLabel>("ChatBox").Text + System.Environment.NewLine + data["UserID"] + ": " + data["Message"];
+        var chatBox = GetNode<RichTextLabel>("RichTextLabel");
+        string userID = data["UserID"];
+        string message = data["Message"];
+        chatBox.Text = chatBox.Text + System.Environment.NewLine + userID + ": " + message;
     }
 }

@@ -29,7 +29,7 @@ public partial class SceneManager : Node
 		foreach (var lobby in lobbies)
 		{
 			var element = LobbyElementScene.Instantiate<LobbyItem>();
-			element.SetLabels(lobby.Id.ToString(), lobby.GetData("ownerNameString") + " lobby", lobby);
+			element.SetLabels(lobby.Id.ToString(), lobby.GetData("ownerNameDataString") + " lobby", lobby);
 			GetNode<VBoxContainer>("LobbyContainer").AddChild(element);
 		}
 	}
