@@ -9,7 +9,7 @@ using System.Linq;
 public partial class SteamManager : Node
 {
 	public static SteamManager Manager { get; set; }
-	private static uint gameAppId { get; set; } = 480;
+	private static uint gameAppId { get; set; } = 3965800;
 	public string PlayerName { get; set; }
 	public SteamId PlayerSteamID { get; set; }
 	private Lobby hostedLobby { get; set; }

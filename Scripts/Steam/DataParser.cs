@@ -13,7 +13,6 @@ public class DataParser
     public static event Action<Dictionary<string, string>> OnGameStartMessage;
     public static event Action<Dictionary<string, string>> OnPlayerUpdate;
     public static Dictionary<string, string> ParseData(IntPtr data, int size){
-        GD.Print("Parsing data of size: " + size);
         byte[] managedArray = new byte[size];
         Marshal.Copy(data, managedArray, 0, size);
         var str = System.Text.Encoding.Default.GetString(managedArray);
@@ -27,7 +26,6 @@ public class DataParser
         switch (dict["DataType"])
         {
             case "ChatMessage":
-                GD.Print("Chat message received: " + dict["Message"]);
                 OnChatMessage.Invoke(dict);
                 break;
             case "Ready":
@@ -35,7 +33,7 @@ public class DataParser
                 break;
             case "StartGame":
                 OnGameStartMessage.Invoke(dict);
-                break;  
+                break;
             case "UpdatePlayer":
                 OnPlayerUpdate.Invoke(dict);
                 break;
