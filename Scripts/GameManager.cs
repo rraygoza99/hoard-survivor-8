@@ -1,20 +1,16 @@
 using Godot;
-using Newtonsoft.Json;
-using Steamworks;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 public partial class GameManager : Node
 {
 	[Export] public PackedScene PlayerScene { get; set; }
 	[Export] public PackedScene PauseOverlayScene { get; set; }
+	[Export] public Marker3D spawnPos { get; set; }
 
 	private PauseOverlay _pauseOverlay;
 	
 	private List<Node3D> spawnedPlayers = new List<Node3D>();
-	public static List<Player> CurrentPlayers = new List<Player>();
-
 	public static SceneManager SceneManager { get; set; }
 	private Node3D localPlayer = null;
 	private StatsOverlay statsOverlay = null;
@@ -63,25 +59,9 @@ public partial class GameManager : Node
 			}
 		}
 		if (_pauseOverlay != null) _pauseOverlay.Hide();
-		SteamManager.OnPauseStateChanged += OnPauseStateChanged;
-		
-		if (GameData.IsMultiplayerGame())
-		{
-			SpawnLobbyPlayers();
-		}
-		else
-		{
-			SpawnSinglePlayer();
-		}
+		// Single player only now.
 	}
 
-	public static void OnPlayerJoinLobby(Friend player)
-	{
-		GD.Print("Adding new player");
-		Player p = new Player();
-		p.FriendData = player;
-		CurrentPlayers.Add(p);
-	}
 	public override void _Input(InputEvent @event)
 	{
 		// Handle TAB key for stats overlay
@@ -107,48 +87,18 @@ public partial class GameManager : Node
 			}
 			else if (keyEvent.Keycode == Key.Escape && keyEvent.Pressed && !keyEvent.Echo)
 			{
-				// ESC key toggles pause/resume vote using unified system
-				// - If game is running: votes to pause
-				// - If game is paused: votes to resume
-				bool currentlyPaused = GetTree().Paused;
-				SteamManager.Manager?.TogglePausePhaseVote();
-				GD.Print($"ESC pressed: Toggled {(currentlyPaused ? "resume" : "pause")} vote");
+				// Simple pause toggle (single-player)
+				bool paused = GetTree().Paused;
+				GetTree().Paused = !paused;
+				if (_pauseOverlay != null)
+				{
+					_pauseOverlay.UpdatePauseState(!paused, "Player", 1, 1);
+				}
 			}
 		}
 	}
 
-	private void OnPauseStateChanged(bool paused, string initiator, int votes, int total)
-	{
-		GD.Print($"Pause state changed. Paused={paused} Initiator={initiator} Votes={votes}/{total}");
-		if (_pauseOverlay != null)
-		{
-			_pauseOverlay.UpdatePauseState(paused, initiator, votes, total);
-		}
-		GetTree().Paused = paused; // Pause entire tree for everyone
-	}
-	
-	public static void OnPlayerReady(Dictionary<string, string> dict){
-        var players = CurrentPlayers;
-		GD.Print($"OnPlayerReady called for player {dict["PlayerName"]} with IsReady={dict["IsReady"]}");
-        Player player = CurrentPlayers.Where(x => x.FriendData.Id.AccountId.ToString() == dict["PlayerName"]).FirstOrDefault();
-        player.IsReady = bool.Parse(dict["IsReady"]);
-        if(SteamManager.Manager.IsHost){
-
-            SteamManager.Manager.Broadcast(JsonConvert.SerializeObject(dict));
-            if(CurrentPlayers.Count(x => x.IsReady) == CurrentPlayers.Count){
-                GD.Print("Everyone is Ready! Game Start!");
-
-                Dictionary<string, string> readyPacket = new Dictionary<string, string>(){
-                    {"DataType" , "StartGame"},
-                    {"SceneToLoad", "res://main.tscn"}
-                };
-
-                SteamManager.Manager.Broadcast(JsonConvert.SerializeObject(readyPacket));
-                SceneManager.OnStartGameCallback(readyPacket);
-            }
-        }
-   }
-	private void SpawnLobbyPlayers()
+	/*private void SpawnLobbyPlayers()
 	{
 		var playerNames = GameData.LobbyPlayerNames;
 		var localPlayerName = SteamManager.Manager?.PlayerName ?? "Player";
@@ -159,16 +109,16 @@ public partial class GameManager : Node
 			bool isLocalPlayer = playerNames[i] == localPlayerName;
 			SpawnPlayer(playerNames[i], spawnPositions[i], isLocalPlayer);
 		}
-	}
+	}*/
 	
-	private void SpawnSinglePlayer()
+	/*private void SpawnSinglePlayer()
 	{
 		// Get the local player name from Steam or use default
 		string playerName = SteamManager.Manager?.PlayerName ?? "Player";
 		SpawnPlayer(playerName, spawnPositions[0], true);
-	}
+	}*/
 	
-	private void SpawnPlayer(string playerName, Vector3 position, bool isLocalPlayer)
+	/*private void SpawnPlayer(string playerName, Vector3 position, bool isLocalPlayer)
 	{
 		Node3D player = null;
 		
@@ -235,7 +185,7 @@ public partial class GameManager : Node
 			SetupCameraForPlayer(player);
 			SetupUIForPlayer(player);
 		}
-	}
+	}*/
 	
 	private void SetupCameraForPlayer(Node3D player)
 	{
@@ -380,9 +330,6 @@ public partial class GameManager : Node
 		return new List<Node3D>(spawnedPlayers);
 	}
 
-	public override void _ExitTree()
-	{
-		SteamManager.OnPauseStateChanged -= OnPauseStateChanged;
-	}
+	public override void _ExitTree() { }
 	
 }

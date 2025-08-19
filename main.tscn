@@ -66,9 +66,10 @@ albedo_texture = ExtResource("7_2cqfq")
 
 [sub_resource type="BoxMesh" id="BoxMesh_drvgu"]
 
-[node name="Node3D" type="Node3D"]
+[node name="Node3D" type="Node3D" node_paths=PackedStringArray("spawnPos")]
 script = ExtResource("3_gamemanager")
 PlayerScene = ExtResource("2_player")
+spawnPos = NodePath("PlayersSpawnPositions")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.471705, 0.881757, 0, -0.881757, 0.471705, 0, 1.60195, 2.10283)

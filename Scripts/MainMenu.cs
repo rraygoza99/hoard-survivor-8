@@ -4,18 +4,19 @@ using System.Threading.Tasks;
 
 public partial class MainMenu : Control
 {
-    [Export] public PackedScene JoinLobbyPopupScene { get; set; }
+    [Export] public PackedScene JoinLobbyPopupScene { get; set; } // legacy, unused now
     
     public override void _Ready()
     {
+        SteamManager.InitializeSteam();
         // Add debug info to see what's happening
         GD.Print("=== MainMenu _Ready called ===");
         GD.Print($"Node name: {Name}");
         GD.Print($"Node path: {GetPath()}");
         
         // Check if buttons exist before connecting
-        var hostButton = GetNodeOrNull<Button>("VBoxContainer/HostButton");
-        var joinButton = GetNodeOrNull<Button>("VBoxContainer/JoinButton");
+    var hostButton = GetNodeOrNull<Button>("VBoxContainer/HostButton");
+    var joinButton = GetNodeOrNull<Button>("VBoxContainer/JoinButton"); // legacy
         var quitButton = GetNodeOrNull<Button>("VBoxContainer/QuitButton");
         
         if (hostButton != null)
@@ -76,74 +77,14 @@ public partial class MainMenu : Control
             FindButtonsRecursively(child, childPath);
         }
     }
-    private async void _on_host_button_pressed()
+    private void _on_host_button_pressed()
     {
-        GD.Print("=== HOST BUTTON PRESSED! ===");
-        
-        // Check if SteamManager.Manager exists
-        if (SteamManager.Manager == null)
-        {
-            GD.PrintErr("SteamManager.Manager is null! Steam may not be initialized.");
-            return;
-        }
-        
-        // Check if Steam is initialized
-        if (!SteamManager.Manager.IsSteamInitialized)
-        {
-            GD.PrintErr("Steam is not initialized!");
-            return;
-        }
-        
-        GD.Print("Creating lobby...");
-        try
-        {
-            bool success = await SteamManager.Manager.CreateLobby();
-            if (success)
-            {
-                GD.Print("Lobby created successfully!");
-                string lobbyId = SteamManager.Manager.GetCurrentLobbyId();
-                GD.Print($"Lobby ID: {lobbyId}");
-            }
-            else
-            {
-                GD.PrintErr("Failed to create lobby");
-            }
-        }
-        catch (Exception e)
-        {
-            GD.PrintErr($"Exception while creating lobby: {e.Message}");
-        }
-        
-        GD.Print("=== HOST BUTTON FINISHED ===");
+        GD.Print("Start Game (single-player) button pressed");
+        GetTree().ChangeSceneToFile("res://main.tscn");
     }
     private void OnJoinButtonPressed()
     {
-        GD.Print("Join button pressed - showing join lobby popup");
-        
-        // Load and show the join lobby popup
-        PackedScene popupScene = null;
-        
-        if (JoinLobbyPopupScene != null)
-        {
-            popupScene = JoinLobbyPopupScene;
-        }
-        else
-        {
-            // Try to load the popup scene directly
-            popupScene = GD.Load<PackedScene>("res://UtilityScenes/join_lobby_popup.tscn");
-        }
-        
-        if (popupScene != null)
-        {
-            var popup = popupScene.Instantiate<AcceptDialog>();
-            GetTree().CurrentScene.AddChild(popup);
-            popup.PopupCentered();
-            GD.Print("Join lobby popup shown");
-        }
-        else
-        {
-            GD.PrintErr("Could not load join lobby popup scene");
-        }
+        GD.Print("Join (legacy) pressed - disabled in single-player mode");
     }
     private void on_quit_button_pressed()
     {
