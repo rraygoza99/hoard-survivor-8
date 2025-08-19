@@ -22,6 +22,7 @@ public partial class Player : CharacterBody3D
 	public bool Controlled;
 	private int currentFrame = 0;
 	private int targetFrame = 10;
+	public Friend FriendData { get; set; }
 	private Vector3 targetPosition;
 
 
@@ -80,7 +81,7 @@ public partial class Player : CharacterBody3D
 	private Marker3D _spellSpawnPoint;
 	private AnimationTree _animationTree;
 	private UpgradeManager _upgradeManager;
-	public Friend FriendData { get; set; }
+	
 
 	public override void _Ready()
 	{

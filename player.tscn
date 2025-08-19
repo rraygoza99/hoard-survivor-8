@@ -76,20 +76,20 @@ transform = Transform3D(-0.65, 0, -5.68248e-08, 0, 0.65, 0, 5.68248e-08, 0, -0.6
 
 [node name="Skeleton3D" parent="Wizard2/CharacterArmature" index="1"]
 bones/1/rotation = Quaternion(5.88988e-06, 0.702952, 0.711237, 5.91896e-06)
-bones/2/position = Vector3(0.00215302, 1.10775, 0.0752293)
+bones/2/position = Vector3(0.00215302, 1.1163, 0.0752293)
 bones/2/rotation = Quaternion(-3.55269e-15, 1.19209e-07, -8.47034e-22, 1)
 bones/4/rotation = Quaternion(0.231188, 3.10151e-07, 1.70243e-07, 0.972909)
 bones/5/rotation = Quaternion(-0.026251, -8.32046e-07, -5.85557e-09, 0.999655)
 bones/6/rotation = Quaternion(-0.0362502, 6.77571e-07, -2.51757e-09, 0.999343)
-bones/7/rotation = Quaternion(-0.0175323, -0.000275433, 4.81661e-06, 0.999846)
-bones/10/rotation = Quaternion(0.706984, 0.54681, 0.330567, -0.303147)
-bones/11/rotation = Quaternion(-0.247953, 0.208974, -0.191608, 0.926356)
+bones/7/rotation = Quaternion(-0.0053532, -0.000275471, 1.47067e-06, 0.999986)
+bones/10/rotation = Quaternion(0.713604, 0.536867, 0.336943, -0.29835)
+bones/11/rotation = Quaternion(-0.247951, 0.213437, -0.191482, 0.925364)
 bones/12/rotation = Quaternion(0.0198003, 0.0174427, -0.00852202, 0.999615)
 bones/13/rotation = Quaternion(-0.0626413, -0.0188104, -0.00118083, 0.997858)
 bones/14/rotation = Quaternion(-0.14578, 2.64441e-08, 4.35855e-08, 0.989317)
 bones/15/rotation = Quaternion(-0.171058, 0.0837446, -0.432979, 0.881054)
 bones/16/rotation = Quaternion(-0.0789317, -0.297914, 0.141663, 0.940717)
-bones/19/rotation = Quaternion(0.68824, -0.542092, -0.361123, -0.319458)
+bones/19/rotation = Quaternion(0.693157, -0.534448, -0.365921, -0.316229)
 bones/20/rotation = Quaternion(-0.243611, -0.217944, 0.190492, 0.925671)
 bones/21/rotation = Quaternion(0.0198003, -0.0174426, 0.00852203, 0.999615)
 bones/22/rotation = Quaternion(-0.0626414, 0.0188104, 0.00118082, 0.997858)
@@ -97,28 +97,28 @@ bones/23/rotation = Quaternion(-0.740597, -0.0326894, 0.0585091, 0.668599)
 bones/24/rotation = Quaternion(1.03377e-07, -5.02914e-08, -7.45059e-09, 1)
 bones/26/rotation = Quaternion(-0.171058, -0.0837446, 0.432979, 0.881054)
 bones/27/rotation = Quaternion(-0.0789317, 0.297914, -0.141663, 0.940717)
-bones/30/rotation = Quaternion(0.992737, 0.00846611, -0.000740048, 0.12)
-bones/31/rotation = Quaternion(0.25023, 0.00247961, 0.00770109, 0.968153)
-bones/32/rotation = Quaternion(0.992737, -0.00846621, 0.00074074, 0.120001)
-bones/33/rotation = Quaternion(0.250225, -0.00247956, -0.0077011, 0.968154)
+bones/30/rotation = Quaternion(0.994529, 0.00852677, -0.000865648, 0.104111)
+bones/31/rotation = Quaternion(0.219896, 0.00223808, 0.00777471, 0.97549)
+bones/32/rotation = Quaternion(0.994543, -0.00852713, 0.000867504, 0.10397)
+bones/33/rotation = Quaternion(0.219877, -0.00223792, -0.00777476, 0.975494)
 bones/34/rotation = Quaternion(-3.55269e-15, 1.19209e-07, -8.47034e-22, 1)
 bones/35/rotation = Quaternion(-6.1438e-06, 0.702952, 0.711237, -5.58376e-06)
 bones/36/rotation = Quaternion(-3.55273e-15, -5.96046e-07, 3.38813e-21, 1)
 
 [node name="Face" parent="Wizard2/CharacterArmature/Skeleton3D" index="0"]
-transform = Transform3D(1, -4.73535e-12, 0, 1.81899e-11, 0.997017, -0.0771792, -1.74623e-10, 0.0771792, 0.997017, -3.43425e-09, 2.49613, 0.0622499)
+transform = Transform3D(1, 2.61432e-12, 0, 1.09139e-11, 0.994842, -0.101441, -1.16415e-10, 0.101441, 0.994842, -3.43425e-09, 2.50501, 0.0722323)
 
 [node name="ShoulderPad_L" parent="Wizard2/CharacterArmature/Skeleton3D" index="1"]
-transform = Transform3D(0.331905, 0.469345, 0.313979, -0.559612, 0.32209, 0.110093, -0.0755082, -0.32404, 0.564203, 0.491895, 1.72927, -0.0602959)
+transform = Transform3D(0.315828, 0.478837, 0.316221, -0.568981, 0.308143, 0.101669, -0.0744406, -0.323714, 0.564532, 0.489071, 1.73281, -0.0599431)
 
 [node name="Wizard_Staff" parent="Wizard2/CharacterArmature/Skeleton3D" index="2"]
-transform = Transform3D(0.150402, -0.987687, 0.0430571, 0.917036, 0.15565, 0.367175, -0.369356, -0.015739, 0.929155, -0.54273, 0.950819, 0.23779)
+transform = Transform3D(0.130256, -0.990821, 0.0361404, 0.920354, 0.134388, 0.367271, -0.368757, -0.0145771, 0.929411, -0.52356, 0.954618, 0.237299)
 
 [node name="ShoulderPad_R" parent="Wizard2/CharacterArmature/Skeleton3D" index="3"]
-transform = Transform3D(0.335746, -0.493319, -0.270072, 0.559041, 0.327105, 0.0974876, 0.0614494, -0.280476, 0.588715, -0.49912, 1.73084, -0.0488772)
+transform = Transform3D(0.323713, -0.500537, -0.27148, 0.566082, 0.316646, 0.0911854, 0.0615589, -0.27969, 0.589078, -0.497038, 1.73563, -0.0487712)
 
 [node name="Pouch" parent="Wizard2/CharacterArmature/Skeleton3D" index="4"]
-transform = Transform3D(1, -1.5774e-11, -4.3201e-12, 1.57172e-11, 1, 1.49012e-08, 4.66116e-12, 2.98023e-08, 1, 0.33063, 1.24467, 0.0927313)
+transform = Transform3D(1, -1.5774e-11, -4.3201e-12, 1.57172e-11, 1, 1.49012e-08, 4.66116e-12, 2.98023e-08, 1, 0.33063, 1.25323, 0.0927313)
 
 [node name="PickupArea" type="Area3D" parent="."]
 

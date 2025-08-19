@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 
 public partial class PlayerUi : Control
 {
@@ -118,9 +119,9 @@ public partial class PlayerUi : Control
 			if (memberNames.Count > 0)
 			{
 				GD.Print("Lobby Members:");
-				foreach (string name in memberNames)
+				foreach (KeyValuePair<string, string> kvp in memberNames)
 				{
-					GD.Print($"  - {name}");
+					GD.Print($"  - {kvp.Value} (ID: {kvp.Key})");
 				}
 			}
 			

@@ -14,7 +14,8 @@ public partial class GameManager : Node
 	
 	private List<Node3D> spawnedPlayers = new List<Node3D>();
 	public static List<Player> CurrentPlayers = new List<Player>();
-	public static SceneManager SceneManager {get; set;}
+
+	public static SceneManager SceneManager { get; set; }
 	private Node3D localPlayer = null;
 	private StatsOverlay statsOverlay = null;
 	private Vector3[] spawnPositions = {
@@ -73,7 +74,14 @@ public partial class GameManager : Node
 			SpawnSinglePlayer();
 		}
 	}
-	
+
+	public static void OnPlayerJoinLobby(Friend player)
+	{
+		GD.Print("Adding new player");
+		Player p = new Player();
+		p.FriendData = player;
+		CurrentPlayers.Add(p);
+	}
 	public override void _Input(InputEvent @event)
 	{
 		// Handle TAB key for stats overlay
@@ -118,17 +126,12 @@ public partial class GameManager : Node
 		}
 		GetTree().Paused = paused; // Pause entire tree for everyone
 	}
-
-	public static void OnPlayerJoinedLobby(Friend player){
-        Player p = new Player();
-        p.FriendData = player;
-        CurrentPlayers.Add(p);
-   }
+	
 	public static void OnPlayerReady(Dictionary<string, string> dict){
         var players = CurrentPlayers;
+		GD.Print($"OnPlayerReady called for player {dict["PlayerName"]} with IsReady={dict["IsReady"]}");
         Player player = CurrentPlayers.Where(x => x.FriendData.Id.AccountId.ToString() == dict["PlayerName"]).FirstOrDefault();
         player.IsReady = bool.Parse(dict["IsReady"]);
-
         if(SteamManager.Manager.IsHost){
 
             SteamManager.Manager.Broadcast(JsonConvert.SerializeObject(dict));
@@ -137,7 +140,7 @@ public partial class GameManager : Node
 
                 Dictionary<string, string> readyPacket = new Dictionary<string, string>(){
                     {"DataType" , "StartGame"},
-                    {"SceneToLoad", "res://GameScene"}
+                    {"SceneToLoad", "res://main.tscn"}
                 };
 
                 SteamManager.Manager.Broadcast(JsonConvert.SerializeObject(readyPacket));

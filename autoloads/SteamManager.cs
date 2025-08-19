@@ -183,6 +183,7 @@ public partial class SteamManager : Node
 			hostedLobby = lobby;
 			foreach (var item in lobby.Members)
 			{
+				GameManager.OnPlayerJoinLobby(item);
 				OnPlayerJoinLobby(item);
 			}
 			lobby.SetGameServer(lobby.Owner.Id);
@@ -298,15 +299,15 @@ public partial class SteamManager : Node
 		return string.Empty;
 	}
 
-	public List<string> GetLobbyMemberNames()
+	public Dictionary<string, string> GetLobbyMemberNames()
 	{
-		List<string> memberNames = new List<string>();
+		Dictionary<string, string> memberNames = new Dictionary<string, string>();
 
 		if (hostedLobby.Id != 0)
 		{
 			foreach (Friend member in hostedLobby.Members)
 			{
-				memberNames.Add(member.Name);
+				memberNames.Add(member.Id.AccountId.ToString(), member.Name); // Use AccountId as key, Name as value
 			}
 		}
 

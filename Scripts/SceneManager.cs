@@ -10,7 +10,6 @@ public partial class SceneManager : Node
 	[Export] public PackedScene LobbyElementScene { get; set; }
 	[Export]
     public PackedScene LobbyPlayer;
-    [Export]
     public PackedScene Player;
 
     private bool isPlayerReady;
@@ -34,15 +33,19 @@ public partial class SceneManager : Node
 		}
 	}
 	private void OnPlayerJoinLobbyCallback(Friend friend){
-        var element = LobbyPlayer.Instantiate() as PlayerListItem;
-        element.Name = friend.Id.AccountId.ToString(); 
+
+        var element = GD.Load<PackedScene>("res://UtilityScenes/player_list_item.tscn").Instantiate() as PlayerListItem;
+        element.Name = friend.Id.AccountId.ToString();
         element.SetPlayerName(friend.Name);
-        GetNode<VBoxContainer>("Lobby Users").AddChild(element);
-        GameManager.OnPlayerJoinedLobby(friend);
+        var lobbyUsersScene = GD.Load<PackedScene>("res://UtilityScenes/lobby.tscn");
+        var lobbyUsers = lobbyUsersScene.Instantiate();
+        lobbyUsers.GetNode<VBoxContainer>("PlayerListContainer").AddChild(element);
+        
+        GameManager.OnPlayerJoinLobby(friend);
     }
 
     private void OnPlayerLeftLobbyCallback(Friend friend){
-        GetNode<PlayerListItem>($"Lobby Users/{friend.Id.AccountId.ToString()}").QueueFree();
+        GetNode<PlayerListItem>($"PlayerListContainer/{friend.Id.AccountId.ToString()}").QueueFree();
     }
 
     private void OnLobbyRefreshCompletedCallback(List<Lobby> lobbies){
@@ -50,7 +53,7 @@ public partial class SceneManager : Node
         {
             var element = LobbyElementScene.Instantiate<LobbyItem>();
             element.SetLabels(item.Id.ToString(), item.GetData("ownerNameDataString") + " Lobby" , item);
-            GetNode<VBoxContainer>("Lobby Container").AddChild(element);
+            GetNode<VBoxContainer>("PlayerListContainer").AddChild(element);
         }
     }
 	 private void _on_LobbyButton_button_down(){
@@ -69,24 +72,32 @@ public partial class SceneManager : Node
     }
 
     private void OnPlayerReadyMessageCallback(Dictionary<string, string> dict){
+        GD.Print($"Player {dict["PlayerName"]} is ready: {dict["IsReady"]}");
         GetNode<PlayerListItem>($"Lobby Users/{dict["PlayerName"]}").SetReadyStatus(bool.Parse(dict["IsReady"]));
         GameManager.OnPlayerReady(dict);
     }
-
+    public void OnStartGame(Dictionary<string, string> dict)
+    {
+        
+    }
     public void OnStartGameCallback(Dictionary<string, string> dict){
        int i = 1;
-       foreach (var item in GameManager.CurrentPlayers)
-       {
-            var p = Player.Instantiate() as Player;
 
-            GetNode<Node2D>("../PlayersSpawnPositions/" + i.ToString()).AddChild(p);
-            i ++;
+       foreach (var item in GameManager.CurrentPlayers)
+        {
+            var p = GD.Load<PackedScene>("res://player.tscn").Instantiate<Player>();
+
+            var spawnPoint = GetNode<Marker3D>("PlayersSpawnPositions/" + i.ToString());
+            p.Position = spawnPoint.GlobalPosition;
+            GetTree().CurrentScene.AddChild(p);
+            i++;
             p.Name = item.FriendData.Id.AccountId.ToString();
             p.FriendData = item.FriendData;
-            if(p.Name == SteamManager.Manager.PlayerSteamID.AccountId.ToString()){
+            if (p.Name == SteamManager.Manager.PlayerSteamID.AccountId.ToString())
+            {
                 p.Controlled = true;
             }
-       }
+        }
     }
 
     

@@ -1,6 +1,9 @@
 using Godot;
+using Newtonsoft.Json;
+using Steamworks;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 public partial class LobbyUI : Control
 {
@@ -10,11 +13,14 @@ public partial class LobbyUI : Control
     private Label _readyStatusLabel;
     private Label _countdownLabel;
     private Timer _countdownTimer;
+    public List<Player> CurrentPlayers = new List<Player>();
     private Dictionary<string, bool> _currentReadyStatus = new Dictionary<string, bool>();
+	public bool IsPlayerReady { get; set; }
+
     public override void _Ready()
     {
         GD.Print("=== LobbyUI _Ready called ===");
-        
+
         _playerListContainer = GetNode<VBoxContainer>("PlayerListContainer");
         if (_playerListContainer == null)
         {
@@ -22,13 +28,12 @@ public partial class LobbyUI : Control
             return;
         }
         GD.Print("PlayerListContainer found successfully");
-        
+
         // Setup ready button
-        SetupReadyButton();
-        
+
         // Setup countdown label and timer
         SetupCountdown();
-        
+
         // Check if PlayerListItemScene is assigned
         if (PlayerListItemScene == null)
         {
@@ -38,15 +43,17 @@ public partial class LobbyUI : Control
         {
             GD.Print("PlayerListItemScene is assigned");
         }
-        
+
         // Subscribe to events
         SteamManager.OnLobbyMemberCountChanged += RefreshPlayerList;
         SteamManager.OnPlayerReadyStatusChanged += OnPlayerReadyStatusChanged;
+        SteamManager.OnPlayerJoinLobby += OnPlayerJoinLobbyCallback;
         SteamManager.OnAllPlayersReady += OnAllPlayersReady;
         SteamManager.OnNotAllPlayersReady += OnNotAllPlayersReady;
         SteamManager.OnGameStartSignaled += OnGameStartSignaled;
+        DataParser.OnReadyMessage += OnPlayerReadyMessageCallback;
         GD.Print("Subscribed to Steam events");
-        
+
         // Initial refresh
         if (SteamManager.Manager != null)
         {
@@ -58,7 +65,7 @@ public partial class LobbyUI : Control
         {
             GD.PrintErr("SteamManager.Manager is null in LobbyUI _Ready");
         }
-        
+
         GD.Print("=== LobbyUI _Ready finished ===");
     }
     public override void _ExitTree()
@@ -69,79 +76,29 @@ public partial class LobbyUI : Control
         SteamManager.OnAllPlayersReady -= OnAllPlayersReady;
         SteamManager.OnNotAllPlayersReady -= OnNotAllPlayersReady;
         SteamManager.OnGameStartSignaled -= OnGameStartSignaled;
-        
+
         if (_countdownTimer != null)
         {
             _countdownTimer.Timeout -= OnCountdownTimeout;
         }
     }
-    
-    private void SetupReadyButton()
-    {
-        // Try to find existing ready button or create one
-        _readyButton = GetNodeOrNull<Button>("ReadyButton");
-        _readyStatusLabel = GetNodeOrNull<Label>("ReadyButton/ReadyStatusLabel");
-        if (_readyButton == null)
-        {
-            GD.Print("ReadyButton not found, creating one programmatically");
-            _readyButton = new Button();
-            _readyButton.Name = "ReadyButton";
-            _readyButton.Text = ""; // We'll use internal label for precise centering
-            _readyButton.Size = new Vector2(140, 40); // Wider so both "Ready" and "Not Ready" stay centered
-            
-            // Position it in bottom right
-            _readyButton.AnchorLeft = 1.0f;
-            _readyButton.AnchorRight = 1.0f;
-            _readyButton.AnchorTop = 1.0f;
-            _readyButton.AnchorBottom = 1.0f;
-            _readyButton.OffsetLeft = -120;
-            _readyButton.OffsetRight = -20;
-            _readyButton.OffsetTop = -60;
-            _readyButton.OffsetBottom = -20;
-            
-            AddChild(_readyButton);
-        }
-        else
-        {
-            // Ensure consistent size if it already existed
-            _readyButton.CustomMinimumSize = new Vector2(140, 40);
-        }
-
-        // If we rely on an internal label for text, ensure it exists & centered
-        if (_readyStatusLabel == null)
-        {
-            _readyStatusLabel = new Label();
-            _readyStatusLabel.Name = "ReadyStatusLabel";
-            _readyStatusLabel.Text = "Ready";
-            // Fill the button area
-            _readyStatusLabel.AnchorLeft = 0; _readyStatusLabel.AnchorTop = 0; _readyStatusLabel.AnchorRight = 1; _readyStatusLabel.AnchorBottom = 1;
-            _readyStatusLabel.OffsetLeft = 0; _readyStatusLabel.OffsetTop = 0; _readyStatusLabel.OffsetRight = 0; _readyStatusLabel.OffsetBottom = 0;
-            _readyStatusLabel.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
-            _readyStatusLabel.SizeFlagsVertical = Control.SizeFlags.ExpandFill;
-            _readyStatusLabel.HorizontalAlignment = HorizontalAlignment.Center;
-            _readyStatusLabel.VerticalAlignment = VerticalAlignment.Center;
-            _readyButton.AddChild(_readyStatusLabel);
-        }
-        else
-        {
-            _readyStatusLabel.AnchorLeft = 0; _readyStatusLabel.AnchorTop = 0; _readyStatusLabel.AnchorRight = 1; _readyStatusLabel.AnchorBottom = 1;
-            _readyStatusLabel.OffsetLeft = 0; _readyStatusLabel.OffsetTop = 0; _readyStatusLabel.OffsetRight = 0; _readyStatusLabel.OffsetBottom = 0;
-            _readyStatusLabel.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
-            _readyStatusLabel.SizeFlagsVertical = Control.SizeFlags.ExpandFill;
-            _readyStatusLabel.HorizontalAlignment = HorizontalAlignment.Center;
-            _readyStatusLabel.VerticalAlignment = VerticalAlignment.Center;
-            _readyStatusLabel.Text = "Ready";
-        }
-        
-        _readyButton.Pressed += OnReadyButtonPressed;
-        GD.Print("Ready button setup complete");
+    private void OnPlayerJoinLobbyCallback(Friend friend){
+        GD.Print($"Player joined lobby: {friend.Name} (ID: {friend.Id.AccountId})");
+        Player p = new Player();
+        p.FriendData = friend;
+        CurrentPlayers.Add(p);
+        var element = PlayerListItemScene.Instantiate() as PlayerListItem;
+        element.Name = friend.Id.AccountId.ToString(); 
+        element.SetPlayerName(friend.Name);
+        GetNode<VBoxContainer>("Lobby Users").AddChild(element);
+        GameManager.OnPlayerJoinLobby(friend);
     }
-    
+
     private void SetupCountdown()
     {
         // Try to find existing countdown label or create one
         _countdownLabel = GetNodeOrNull<Label>("CountdownLabel");
-        
+
         if (_countdownLabel == null)
         {
             GD.Print("CountdownLabel not found, creating one programmatically");
@@ -150,7 +107,7 @@ public partial class LobbyUI : Control
             _countdownLabel.Text = "";
             _countdownLabel.HorizontalAlignment = HorizontalAlignment.Center;
             _countdownLabel.VerticalAlignment = VerticalAlignment.Center;
-            
+
             // Position it in center
             _countdownLabel.AnchorLeft = 0.5f;
             _countdownLabel.AnchorRight = 0.5f;
@@ -160,44 +117,31 @@ public partial class LobbyUI : Control
             _countdownLabel.OffsetRight = 100;
             _countdownLabel.OffsetTop = -50;
             _countdownLabel.OffsetBottom = 50;
-            
+
             // Style the countdown label
             _countdownLabel.AddThemeColorOverride("font_color", Colors.Yellow);
             _countdownLabel.AddThemeStyleboxOverride("normal", new StyleBoxFlat());
-            
+
             AddChild(_countdownLabel);
         }
-        
+
         // Setup countdown timer
         _countdownTimer = new Timer();
         _countdownTimer.WaitTime = 1.0f;
         _countdownTimer.Timeout += OnCountdownTimeout;
         AddChild(_countdownTimer);
-        
+
         _countdownLabel.Visible = false;
         GD.Print("Countdown setup complete");
     }
+
     
-    private void OnReadyButtonPressed()
-    {
-        if (SteamManager.Manager == null) return;
-        SteamManager.Manager.SteamConnectionManager.Connection.SendMessage("test");
-        bool newReadyState = !SteamManager.Manager.IsLocalPlayerReady;
-        SteamManager.Manager.SetPlayerReady(newReadyState);
-        
-        _readyStatusLabel.Text = newReadyState ? "Not Ready" : "Ready";
-        
-        _readyButton.Modulate = newReadyState ? Colors.Green : Colors.White;
-        
-        
-        GD.Print($"Local player ready status changed to: {newReadyState}");
-    }
-    
+
     private void OnPlayerReadyStatusChanged(Dictionary<string, bool> readyStatus)
     {
         _currentReadyStatus = readyStatus;
         GD.Print("Player ready status updated, refreshing player list");
-        
+
         // Refresh the player list to show checkmarks
         if (SteamManager.Manager != null)
         {
@@ -218,20 +162,44 @@ public partial class LobbyUI : Control
     {
         ReturnToMainMenu();
     }
+
+    private void _on_ready_button_pressed()
+    {
+        GD.Print("Ready button pressed, toggling player ready state");
+        IsPlayerReady = !IsPlayerReady;
+        Dictionary<string, string> playerDict = new Dictionary<string, string>();
+        playerDict.Add("DataType", "Ready");
+        playerDict.Add("PlayerName", SteamManager.Manager.PlayerSteamID.AccountId.ToString());
+        playerDict.Add("IsReady", IsPlayerReady.ToString());
+        string str = JsonConvert.SerializeObject(playerDict);
+        OnPlayerReadyMessageCallback(playerDict);
+        
+        _readyStatusLabel.Text = IsPlayerReady ? "Not Ready" : "Ready";
+
+        _readyButton.Modulate = IsPlayerReady ? Colors.Green : Colors.White;
+        if (SteamManager.Manager.IsHost)
+        {
+            SteamManager.Manager.Broadcast(str);
+        }
+        else
+        {
+            SteamManager.Manager.SteamConnectionManager.Connection.SendMessage(str);
+        }
+    }
     private void OnAllPlayersReady()
     {
         GD.Print("All players ready - starting countdown!");
         StartCountdown();
     }
-    
+
     private void OnNotAllPlayersReady()
     {
         GD.Print("Not all players are ready - stopping countdown!");
         StopCountdown();
     }
-    
+
     private int _countdownValue = 3;
-    
+
     private void StartCountdown()
     {
         _countdownValue = 5;
@@ -239,7 +207,7 @@ public partial class LobbyUI : Control
         _countdownLabel.Visible = true;
         _countdownTimer.Start();
     }
-    
+
     private void StopCountdown()
     {
         if (_countdownTimer.IsStopped() == false)
@@ -249,11 +217,11 @@ public partial class LobbyUI : Control
             GD.Print("Countdown stopped - not all players are ready");
         }
     }
-    
+
     private void OnCountdownTimeout()
     {
         _countdownValue--;
-        
+
         if (_countdownValue > 0)
         {
             _countdownLabel.Text = $"Starting in {_countdownValue}...";
@@ -262,14 +230,14 @@ public partial class LobbyUI : Control
         {
             _countdownLabel.Text = "Starting now!";
             _countdownTimer.Stop();
-            
+
             // Only the host should signal game start to all players
             if (SteamManager.Manager != null && SteamManager.Manager.IsLobbyOwner())
             {
                 GD.Print("Host triggering game start for all players");
                 SteamManager.Manager.StartGameForAllPlayers();
             }
-            
+
             // Hide countdown after a moment and start the game (for host)
             GetTree().CreateTimer(1.0).Timeout += () => {
                 _countdownLabel.Visible = false;
@@ -280,7 +248,7 @@ public partial class LobbyUI : Control
             };
         }
     }
-    
+
     private void OnGameStartSignaled()
     {
         GD.Print("Received game start signal from host!");
@@ -289,30 +257,30 @@ public partial class LobbyUI : Control
         {
             _countdownTimer.Stop();
         }
-        
+
         // Hide countdown label
         if (_countdownLabel != null)
         {
             _countdownLabel.Visible = false;
         }
-        
+
         // Start the game for this client
         StartGame();
     }
-    
+
     private void StartGame()
     {
         GD.Print("Starting the game!");
-        
+
         // Get all lobby members before transitioning
         if (SteamManager.Manager != null)
         {
             var memberNames = SteamManager.Manager.GetLobbyMemberNames();
             GD.Print($"Starting game with {memberNames.Count} players: {string.Join(", ", memberNames)}");
-            
+
             // Store player data for the game scene
-            GameData.SetLobbyPlayers(memberNames);
-            
+            GameData.SetLobbyPlayers(memberNames.Values.ToList());
+
             // Additional debug
             GD.Print($"GameData after setting: {GameData.LobbyPlayerNames.Count} players");
         }
@@ -320,7 +288,7 @@ public partial class LobbyUI : Control
         {
             GD.Print("SteamManager.Manager is null, cannot get lobby members");
         }
-        
+
         // Transition to the main game scene
         GetTree().ChangeSceneToFile("res://main.tscn");
     }
@@ -336,109 +304,70 @@ public partial class LobbyUI : Control
         }
         GetTree().ChangeSceneToFile("res://UtilityScenes/main_menu.tscn");
     }
+    private void OnPlayerReadyMessageCallback(Dictionary<string, string> dict)
+    {
+        GD.Print($"Player ready message received: {dict["PlayerName"]} is ready: {dict["IsReady"]}");
+        GetNode<PlayerListItem>("PlayerListContainer/" + dict["PlayerName"]).SetReadyStatus(bool.Parse(dict["IsReady"]));
+        GameManager.OnPlayerReady(dict);
+    }
     private void RefreshPlayerList(int memberCount)
     {
         GD.Print($"=== RefreshPlayerList called with memberCount: {memberCount} ===");
-        
+
         // Clear existing items
         foreach (Node child in _playerListContainer.GetChildren())
         {
             child.QueueFree();
         }
-        
+
         // Check if SteamManager exists
         if (SteamManager.Manager == null)
         {
             GD.PrintErr("SteamManager.Manager is null in RefreshPlayerList");
             return;
         }
-        
+
         // Get member names
-        List<string> memberNames = SteamManager.Manager.GetLobbyMemberNames();
+        Dictionary<string, string> memberNames = SteamManager.Manager.GetLobbyMemberNames();
         GD.Print($"Retrieved {memberNames.Count} member names");
-        
+
         // Check if PlayerListItemScene is assigned
         if (PlayerListItemScene == null)
         {
             GD.PrintErr("PlayerListItemScene is null! Make sure to assign it in the inspector");
             return;
         }
-        
+
         // Create player list items
-        foreach (string memberName in memberNames)
+        foreach (KeyValuePair<string, string> kvp in memberNames)
         {
+            string memberId = kvp.Key;
+            string memberName = kvp.Value;
+
             GD.Print($"Creating PlayerListItem for: {memberName}");
-            
+
             try
             {
                 PlayerListItem playerListItem = null;
-                
-                if (PlayerListItemScene != null)
-                {
-                    GD.Print("Step 1: About to instantiate PlayerListItemScene");
-                    playerListItem = PlayerListItemScene.Instantiate<PlayerListItem>();
-                    GD.Print("Step 2: PlayerListItem instantiated from scene");
-                }
-                else
-                {
-                    GD.Print("PlayerListItemScene is null, creating enhanced fallback");
-                    // Create a nicer fallback PlayerListItem with ready status
-                    var container = new PanelContainer();
-                    var styleBox = new StyleBoxFlat();
-                    styleBox.BgColor = new Color(0.2f, 0.2f, 0.3f, 0.8f);
-                    styleBox.CornerRadiusTopLeft = 5;
-                    styleBox.CornerRadiusTopRight = 5;
-                    styleBox.CornerRadiusBottomLeft = 5;
-                    styleBox.CornerRadiusBottomRight = 5;
-                    container.AddThemeStyleboxOverride("panel", styleBox);
-                    
-                    // Create horizontal container for name and checkmark
-                    var hContainer = new HBoxContainer();
-                    
-                    var label = new Label();
-                    label.Text = memberName;
-                    label.Name = "PlayerNameLabel";
-                    label.AddThemeColorOverride("font_color", Colors.White);
-                    label.VerticalAlignment = VerticalAlignment.Center;
-                    label.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
-                    
-                    var checkmark = new Label();
-                    checkmark.Name = "ReadyCheckmark";
-                    checkmark.Text = _currentReadyStatus.ContainsKey(memberName) && _currentReadyStatus[memberName] ? "✓" : "";
-                    checkmark.AddThemeColorOverride("font_color", Colors.Green);
-                    checkmark.HorizontalAlignment = HorizontalAlignment.Center;
-                    checkmark.VerticalAlignment = VerticalAlignment.Center;
-                    checkmark.CustomMinimumSize = new Vector2(30, 0);
-                    
-                    hContainer.AddChild(label);
-                    hContainer.AddChild(checkmark);
-                    
-                    // Add some padding
-                    var margin = new MarginContainer();
-                    margin.AddThemeConstantOverride("margin_left", 10);
-                    margin.AddThemeConstantOverride("margin_right", 10);
-                    margin.AddThemeConstantOverride("margin_top", 5);
-                    margin.AddThemeConstantOverride("margin_bottom", 5);
-                    
-                    margin.AddChild(hContainer);
-                    container.AddChild(margin);
-                    _playerListContainer.AddChild(container);
-                    GD.Print($"Created enhanced fallback item for: {memberName} (Ready: {(_currentReadyStatus.ContainsKey(memberName) && _currentReadyStatus[memberName])})");
-                    continue;
-                }
-                
+
+
+                GD.Print("Step 1: About to instantiate PlayerListItemScene");
+                playerListItem = PlayerListItemScene.Instantiate<PlayerListItem>();
+                GD.Print("Step 2: PlayerListItem instantiated from scene");
+
                 if (playerListItem == null)
                 {
                     GD.PrintErr("PlayerListItem is null after instantiation");
                     continue;
                 }
-                
+
                 GD.Print("Step 3: About to call SetPlayerName");
                 playerListItem.SetPlayerName(memberName);
-                
+                playerListItem.Name = memberId;
+
                 GD.Print("Step 4: About to add to container");
                 _playerListContainer.AddChild(playerListItem);
-                
+
                 GD.Print($"Successfully added PlayerListItem for: {memberName}");
             }
             catch (Exception e)
@@ -447,7 +376,7 @@ public partial class LobbyUI : Control
                 GD.PrintErr($"Stack trace: {e.StackTrace}");
             }
         }
-        
+
         GD.Print($"=== RefreshPlayerList finished. Total children in container: {_playerListContainer.GetChildCount()} ===");
     }
 }
