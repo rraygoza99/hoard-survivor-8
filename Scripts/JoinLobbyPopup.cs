@@ -45,13 +45,51 @@ public partial class JoinLobbyPopup : AcceptDialog
 			return;
 		}
 		
+		GD.Print($"Attempting to join lobby: {lobbyId}");
+		
+		// Check if SteamManager exists
+		if (SteamManager.Manager == null)
+		{
+			GD.PrintErr("SteamManager.Manager is null!");
+			ShowError("Steam is not initialized");
+			return;
+		}
+		
+		if (!SteamManager.Manager.IsSteamInitialized)
+		{
+			GD.PrintErr("Steam is not initialized!");
+			ShowError("Steam is not initialized");
+			return;
+		}
+		
 		// Disable the join button while attempting to join
 		_joinButton.Disabled = true;
 		_joinButton.Text = "Joining...";
 		
 		try
 		{
-
+			// Attempt to join the lobby
+			bool success = await SteamManager.Manager.JoinLobby(lobbyId);
+			
+			if (success)
+			{
+				GD.Print($"Successfully joined lobby: {lobbyId}");
+				
+				// Close the popup
+				Hide();
+				
+				// Transition to lobby scene (you might need to adjust this path)
+				GetTree().ChangeSceneToFile("res://UtilityScenes/lobby.tscn");
+			}
+			else
+			{
+				GD.PrintErr($"Failed to join lobby: {lobbyId}");
+				ShowError("Failed to join lobby. Check the lobby ID and try again.");
+				
+				// Re-enable the button
+				_joinButton.Disabled = false;
+				_joinButton.Text = "Join";
+			}
 		}
 		catch (Exception e)
 		{

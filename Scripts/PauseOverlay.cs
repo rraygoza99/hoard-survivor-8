@@ -96,6 +96,7 @@ public partial class PauseOverlay : Control
         if (!GetTree().Paused) return;
         
         // Use unified vote system - this will toggle the current vote
+        SteamManager.Manager?.TogglePausePhaseVote();
         
         // Update button text - since we're using unified system, we can't track individual resume vote state
         if (_resumeButton != null)
@@ -156,7 +157,10 @@ public partial class PauseOverlay : Control
             GD.Print("Quitting to main menu...");
             
             // Clear any Steam lobby data if in multiplayer
-
+            if (SteamManager.Manager != null)
+            {
+                SteamManager.Manager.SetPlayerReady(false);
+            }
             
             // Unpause the game before changing scenes
             GetTree().Paused = false;

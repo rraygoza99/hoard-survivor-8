@@ -18,8 +18,9 @@ config/icon="res://icon.svg"
 [autoload]
 
 SimpleGrass="*res://addons/simplegrasstextured/singleton.tscn"
-GameData="*res://Scripts/GameData.cs"
 SteamManager="*res://autoloads/SteamManager.cs"
+SceneManager="*res://Scripts/SceneManager.cs"
+GameData="*res://Scripts/GameData.cs"
 
 [display]
 

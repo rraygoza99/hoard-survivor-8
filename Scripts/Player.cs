@@ -1,4 +1,6 @@
 using Godot;
+using Newtonsoft.Json;
+using Steamworks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,7 +22,7 @@ public partial class Player : CharacterBody3D
 	public bool Controlled;
 	private int currentFrame = 0;
 	private int targetFrame = 10;
-	// Multiplayer FriendData removed.
+	public Friend FriendData { get; set; }
 	private Vector3 targetPosition;
 
 
@@ -84,6 +86,7 @@ public partial class Player : CharacterBody3D
 	public override void _Ready()
 	{
 		GD.Print($"Player _Ready() called - MaxHealth: {MaxHealth}");
+		DataParser.OnPlayerUpdate += OnPlayerUpdateCallback;
 		_upgradeManager = GetNode<UpgradeManager>("/root/Node3D/UpgradeManager");
 		_animationTree = GetNode<AnimationTree>("AnimationTree");
 		_spellSpawnPoint = GetNode<Marker3D>("SpellSpawnPoint");
@@ -497,16 +500,30 @@ public partial class Player : CharacterBody3D
 			currentFrame += 1;
 			if (currentFrame == targetFrame)
 			{
-				// Multiplayer position broadcast removed.
+				updateRemoteLocation(Position, Rotation.Y);
 				currentFrame = 0;
 			}
 		}
 		else
 		{
-			// Remote interpolation removed. Single player only.
+			Position = Position.Lerp(targetPosition, (float)delta * 15);
 		}
 	}
-
+	private void updateRemoteLocation(Vector3 position, float rotation){
+		var dict = new Dictionary<string, string>(){
+			{"DataType", "UpdatePlayer"},
+			{"PlayerID", SteamManager.Manager.PlayerSteamID.AccountId.ToString()},
+			{"positionx", position.X.ToString(System.Globalization.CultureInfo.InvariantCulture)},
+			// Use Z for forward/back (Y is vertical in 3D world)
+			{"positiony", position.Z.ToString(System.Globalization.CultureInfo.InvariantCulture)},
+			{"rotation", rotation.ToString(System.Globalization.CultureInfo.InvariantCulture)}
+		};
+        if(SteamManager.Manager.IsHost){
+            SteamManager.Manager.Broadcast(JsonConvert.SerializeObject(dict));
+        }else{
+            SteamManager.Manager.SteamConnectionManager.Connection.SendMessage(JsonConvert.SerializeObject(dict));
+        }
+    }
 
 	// Methods called by GameManager to set player properties
 	public void SetIsLocalPlayer(bool isLocal)
@@ -543,5 +560,21 @@ public partial class Player : CharacterBody3D
 		GD.Print($"CurrentHealth set to: {CurrentHealth}");
 		UpdateHealthBar();
 	}
-	// Multiplayer update callback removed.
+	private void OnPlayerUpdateCallback(Dictionary<string, string> dict){
+		if(!dict.TryGetValue("PlayerID", out var pid)) return;
+		if(pid == SteamManager.Manager.PlayerSteamID.AccountId.ToString()) return; // ignore own
+		// Friend is a struct; validate via Id
+		if(FriendData.Id == 0) return;
+		if(pid == FriendData.Id.AccountId.ToString()){
+			float px, pz, ry;
+			var ci = System.Globalization.CultureInfo.InvariantCulture;
+			if(float.TryParse(dict.GetValueOrDefault("positionx"), System.Globalization.NumberStyles.Float, ci, out px) &&
+			   float.TryParse(dict.GetValueOrDefault("positiony"), System.Globalization.NumberStyles.Float, ci, out pz) &&
+			   float.TryParse(dict.GetValueOrDefault("rotation"), System.Globalization.NumberStyles.Float, ci, out ry))
+			{
+				targetPosition = new Vector3(px, 0, pz);
+				Rotation = new Vector3(Rotation.X, ry, Rotation.Z);
+			}
+		}
+	}
 }

@@ -4,7 +4,11 @@
     <EnableDynamicLoading>true</EnableDynamicLoading>
     <RootNamespace>HoardSurvivor8</RootNamespace>
   </PropertyGroup>
-  <!-- Removed SteamWorks reference for single-player version -->
+  <ItemGroup>
+    <Reference Include="Facepunch.SteamWorks.Win64">
+      <HintPath>./DLL/Facepunch.SteamWorks.Win64.dll</HintPath>
+    </Reference>
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>

@@ -1,9 +1,10 @@
-[gd_scene load_steps=7 format=3 uid="uid://beqyuykr5xpp1"]
+[gd_scene load_steps=8 format=3 uid="uid://beqyuykr5xpp1"]
 
 [ext_resource type="Script" uid="uid://d0v1qr77s73k4" path="res://Scripts/LobbyUI.cs" id="1_y6fhc"]
+[ext_resource type="PackedScene" uid="uid://cnnbodd1ccndn" path="res://UtilityScenes/player_list_item.tscn" id="2_v308k"]
 [ext_resource type="Texture2D" uid="uid://bapf6tjfs83ci" path="res://Assets/UI/Retro Pixel Ribbons, Banners and Frames 2/ready_button.png" id="3_ha1r6"]
 [ext_resource type="Texture2D" uid="uid://t45a30w0v3dq" path="res://Assets/UI/Retro Pixel Ribbons, Banners and Frames 2/banner2.png" id="4_iom3b"]
-[ext_resource type="Script" path="res://Scripts/Steam/ChatBox.cs" id="5_chat"]
+[ext_resource type="Script" uid="uid://c1dbus85qfvvq" path="res://Scripts/Steam/ChatBox.cs" id="5_chat"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_th56o"]
 font_size = 24
@@ -19,6 +20,7 @@ anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 script = ExtResource("1_y6fhc")
+PlayerListItemScene = ExtResource("2_v308k")
 
 [node name="PlayerListContainer" type="VBoxContainer" parent="."]
 layout_mode = 0
@@ -58,10 +60,10 @@ anchor_left = 28.661
 anchor_top = 16.139
 anchor_right = 28.661
 anchor_bottom = 16.139
-offset_left = -100.44
-offset_top = -131.56
-offset_right = 5.56006
-offset_bottom = -89.56
+offset_left = -241.44
+offset_top = -206.56
+offset_right = -135.44
+offset_bottom = -164.56
 grow_horizontal = 0
 grow_vertical = 0
 
